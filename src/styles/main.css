@@ -1,0 +1,189 @@
+/* --- ú,¹¿¤ë (®¿t) --- */
+body { 
+    font-family: sans-serif; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    padding: 20px; 
+}
+
+#container { 
+    display: flex; 
+    width: 95%; 
+    max-width: 1400px; 
+    gap: 20px; 
+    flex-wrap: wrap; 
+}
+
+#inputArea { 
+    flex: 1; 
+    min-width: 300px; 
+    display: flex; 
+    flex-direction: column; 
+    margin-bottom: 15px; 
+}
+
+#outputArea { 
+    flex: 2; 
+    min-width: 400px; 
+    display: flex; 
+    flex-direction: column; 
+}
+
+#layoutArea { 
+    flex: 2; 
+    min-width: 400px; 
+    display: flex; 
+    flex-direction: column; 
+}
+
+textarea { 
+    width: 100%; 
+    height: 200px;
+    margin-bottom: 10px; 
+    box-sizing: border-box; 
+}
+
+button { 
+    padding: 10px 15px; 
+    cursor: pointer; 
+    margin: 0 5px; 
+}
+
+h1, h2, h3 { 
+    margin-top: 0; 
+    margin-bottom: 10px; 
+}
+
+#locationOutput, #logOutput, #errorOutput { 
+    border: 1px solid #ccc; 
+    padding: 15px; 
+    margin-bottom: 15px; 
+    min-height: 60px; 
+    background-color: #f9f9f9; 
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
+    font-size: 0.9em; 
+}
+
+#errorOutput { 
+    color: red; 
+    border-color: red; 
+}
+
+#controls { 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+    margin-bottom: 15px; 
+    flex-wrap: wrap; 
+}
+
+#timeline { 
+    flex-grow: 1; 
+    height: 20px; 
+    cursor: pointer; 
+    min-width: 200px; 
+}
+
+#currentTimeDisplay { 
+    font-weight: bold; 
+    min-width: 50px; 
+    text-align: center; 
+}
+
+#speedControl { 
+    padding: 5px; 
+}
+
+.control-group { 
+    display: flex; 
+    align-items: center; 
+    gap: 5px;
+}
+
+#logOutput { 
+    max-height: 250px; 
+    overflow-y: auto; 
+}
+
+/* --- Location Layout Styles --- */
+#locationLayout { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    gap: 15px; 
+    padding: 10px; 
+    border: 1px solid #ccc; 
+    background-color: #f0f0f0; 
+    min-height: 400px; 
+}
+
+.location-box { 
+    border: 2px solid #aaa; 
+    border-radius: 5px; 
+    padding: 10px; 
+    background-color: #fff; 
+    height: 160px; 
+    display: flex; 
+    flex-direction: column; 
+    transition: background-color 0.3s ease; 
+    overflow: hidden; 
+}
+
+.location-box h4 { 
+    margin: 0 0 8px 0; 
+    padding-bottom: 5px; 
+    border-bottom: 1px solid #eee; 
+    font-size: 1.1em; 
+    text-align: center; 
+    flex-shrink: 0; 
+}
+
+.location-box .person-list { 
+    list-style: none; 
+    padding: 0 5px 0 0; 
+    margin: 0; 
+    font-size: 0.85em; 
+    overflow-y: auto; 
+    flex: 1; 
+}
+
+.location-box .person-list li { 
+    margin-bottom: 4px; 
+    line-height: 1.3; 
+    word-break: break-word; 
+}
+
+.location-box.occupied { 
+    border-color: #007bff; 
+    background-color: #e7f3ff; 
+}
+
+.person-action { 
+    color: #333; 
+}
+
+.person-idle { 
+    color: #888; 
+    font-style: italic; 
+}
+
+/* --- Input Area Details/Summary Style --- */
+#jsonDataDetails summary {
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 5px;
+    outline: none;
+}
+
+/* Style when details is open */
+#jsonDataDetails[open] summary {
+    margin-bottom: 10px;
+}
+
+#jsonDataDetails[open] {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+}
