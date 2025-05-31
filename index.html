@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SceneFlow - イマーシブシアターシミュレーター</title> {/* Title Updated */}
+    <style>
+        /* --- 基本スタイル (微調整) --- */
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        #container { display: flex; width: 95%; max-width: 1400px; gap: 20px; flex-wrap: wrap; }
+        #inputArea { flex: 1; min-width: 300px; display: flex; flex-direction: column; margin-bottom: 15px; } /* Input area separation */
+        #outputArea { flex: 2; min-width: 400px; display: flex; flex-direction: column; }
+        #layoutArea { flex: 2; min-width: 400px; display: flex; flex-direction: column; }
+        textarea { width: 100%; height: 200px; /* Slightly smaller */ margin-bottom: 10px; box-sizing: border-box; }
+        button { padding: 10px 15px; cursor: pointer; margin: 0 5px; }
+        h1, h2, h3 { margin-top: 0; margin-bottom: 10px; }
+        #locationOutput, #logOutput, #errorOutput { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; min-height: 60px; background-color: #f9f9f9; white-space: pre-wrap; word-wrap: break-word; font-size: 0.9em; }
+        #errorOutput { color: red; border-color: red; }
+        #controls { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        #timeline { flex-grow: 1; height: 20px; cursor: pointer; min-width: 200px; }
+        #currentTimeDisplay { font-weight: bold; min-width: 50px; text-align: center; }
+        #speedControl { padding: 5px; }
+        .control-group { display: flex; align-items: center; gap: 5px;}
+        #logOutput { max-height: 250px; overflow-y: auto; }
+
+        /* --- Location Layout Styles (変更なし) --- */
+        #locationLayout { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 10px; border: 1px solid #ccc; background-color: #f0f0f0; min-height: 400px; }
+        .location-box { border: 2px solid #aaa; border-radius: 5px; padding: 10px; background-color: #fff; height: 160px; display: flex; flex-direction: column; transition: background-color 0.3s ease; overflow: hidden; }
+        .location-box h4 { margin: 0 0 8px 0; padding-bottom: 5px; border-bottom: 1px solid #eee; font-size: 1.1em; text-align: center; flex-shrink: 0; }
+        .location-box .person-list { list-style: none; padding: 0 5px 0 0; margin: 0; font-size: 0.85em; overflow-y: auto; flex: 1; }
+        .location-box .person-list li { margin-bottom: 4px; line-height: 1.3; word-break: break-word; }
+        .location-box.occupied { border-color: #007bff; background-color: #e7f3ff; }
+        .person-action { color: #333; }
+        .person-idle { color: #888; font-style: italic; }
+
+        /* --- Input Area Details/Summary Style --- */
+        #jsonDataDetails summary {
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 5px; /* Add some space below summary */
+            outline: none; /* Remove focus outline if desired */
+        }
+        /* Style when details is open */
+        #jsonDataDetails[open] summary {
+             margin-bottom: 10px;
+        }
+        #jsonDataDetails[open] {
+             border: 1px solid #ccc; /* Optional border when open */
+             padding: 15px;
+             margin-bottom: 15px;
+             background-color: #f9f9f9;
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <h1>SceneFlow</h1>
+
+    <div id="container">
+         <div id="inputArea">
+             <details id="jsonDataDetails" open>
+                 <summary><h2>物語データ (JSON)</h2></summary>
+                 <textarea id="jsonDataInput" placeholder="ここにJSON形式の物語データを入力してください...">{
+  "persons": [
+    { "id": 1, "name": "アリス", "color": "#e6194b" },
+    { "id": 2, "name": "ボブ",   "color": "#3cb44b" },
+    { "id": 3, "name": "キャロル", "color": "#4363d8" }
+  ],
+  "locations": [ { "id": 101, "name": "ロビー", "connections": [102, 103] }, { "id": 102, "name": "書斎", "connections": [101] }, { "id": 103, "name": "庭園", "connections": [101, 104] }, { "id": 104, "name": "秘密の部屋", "connections": [103] } ],
+  "props": [ { "id": 201, "name": "古い鍵" }, { "id": 202, "name": "日記帳" } ],
+  "informations": [ { "id": 301, "content": "秘密の部屋の存在" }, { "id": 302, "content": "鍵の隠し場所" } ],
+  "initialStates": [ { "personId": 1, "locationId": 101, "time": "09:00" }, { "personId": 2, "locationId": 102, "time": "09:00" }, { "personId": 3, "locationId": 103, "time": "09:00" } ],
+  "acts": [ { "id": 1001, "personId": 1, "locationId": 101, "time": "09:05", "description": "ロビーを見回す" }, { "id": 1002, "personId": 2, "locationId": 102, "time": "09:10", "description": "机の引き出しを調べる", "propId": 201, "informationId": 302 }, { "id": 1003, "personId": 3, "locationId": 103, "time": "09:15", "description": "アリスと庭園で会話する", "interactedPersonId": 1 }, { "id": 1004, "personId": 1, "locationId": 103, "time": "09:15", "description": "キャロルと庭園で会話する", "interactedPersonId": 3, "informationId": 301 }, { "id": 1005, "personId": 2, "locationId": 101, "time": "09:20", "description": "ロビーでアリスに鍵について尋ねる", "interactedPersonId": 1, "propId": 201 }, { "id": 1006, "personId": 1, "locationId": 101, "time": "09:20", "description": "ボブから鍵について尋ねられる", "interactedPersonId": 2, "propId": 201 }, { "id": 1007, "personId": 1, "locationId": 103, "time": "09:30", "description": "庭園の隠し通路を探す", "informationId": 301}, { "id": 1008, "personId": 1, "locationId": 104, "time": "09:35", "description": "秘密の部屋に入る"}, { "id": 1009, "personId": 3, "locationId": 103, "time": "09:16", "description": "庭園を散策する" }, { "id": 1010, "personId": 2, "locationId": 101, "time": "09:21", "description": "ロビーで考え事をしている" } ],
+  "moves": [], "stays": [],
+  "events": [ { "id": 1, "triggerType": "時刻", "triggerValue": "09:05", "eventTime": "09:05", "personId": 1, "actId": 1001 }, { "id": 2, "triggerType": "時刻", "triggerValue": "09:10", "eventTime": "09:10", "personId": 2, "actId": 1002 }, { "id": 3, "triggerType": "時刻", "triggerValue": "09:15", "eventTime": "09:15", "personId": 3, "actId": 1003 }, { "id": 4, "triggerType": "時刻", "triggerValue": "09:15", "eventTime": "09:15", "personId": 1, "actId": 1004 }, { "id": 5, "triggerType": "時刻", "triggerValue": "09:20", "eventTime": "09:20", "personId": 2, "actId": 1005 }, { "id": 6, "triggerType": "時刻", "triggerValue": "09:20", "eventTime": "09:20", "personId": 1, "actId": 1006 }, { "id": 7, "triggerType": "行動", "triggerValue": "1004", "eventTime": "09:30", "personId": 1, "actId": 1007 }, { "id": 8, "triggerType": "行動", "triggerValue": "1007", "eventTime": "09:35", "personId": 1, "actId": 1008 }, { "id": 9, "triggerType": "時刻", "triggerValue": "09:16", "eventTime": "09:16", "personId": 3, "actId": 1009 }, { "id": 10, "triggerType": "時刻", "triggerValue": "09:21", "eventTime": "09:21", "personId": 2, "actId": 1010 } ]
+}</textarea>
+                 <button id="loadDataButton">物語データをロード</button>
+             </details>
+             <div id="errorOutput" style="display: none;"></div>
+         </div>
+
+         <div id="outputArea">
+             <h2>シミュレーション制御</h2>
+              <div id="controls">
+                  <div class="control-group"><button id="playPauseButton" disabled>▶ Play</button><label for="speedControl">速度:</label><select id="speedControl"><option value="1">1x</option><option value="2">2x</option><option value="5">5x</option><option value="10">10x</option></select></div>
+                  <div class="control-group"><input type="range" id="timeline" value="0" min="0" max="100" step="1" disabled><span id="currentTimeDisplay">--:--</span></div>
+             </div>
+             <h3>登場人物の現在位置 (<span id="locationTimeDisplay">--:--</span>)</h3>
+             <div id="locationOutput">ロード後に表示されます。</div>
+             <h3>実行ログ (<span id="logTimeDisplay">--:--</span>まで)</h3>
+             <div id="logOutput">ロード後に表示されます。</div>
+         </div>
+
+          <div id="layoutArea">
+             <h2>場所のレイアウト表示 (<span id="layoutTimeDisplay">--:--</span>)</h2>
+             <div id="locationLayout"> {/* Location boxes generated here */} </div>
+          </div>
+     </div>
+
+    <script>
+        // --- Constants & State ---
+        const MINUTES_PER_SECOND = 1;
+        let simState = { /* ... state variables ... */
+            currentTimeMinutes: 0, minTimeMinutes: 0, maxTimeMinutes: 0,
+            isPlaying: false, speed: 1, timerId: null, lastTimestamp: null,
+            indexedData: null, sortedEvents: null, eventLogEntries: [],
+            locationElements: {}
+        };
+        let domElements = {};
+
+        // --- Utility Functions ---
+        function timeToMinutes(timeStr) { if (!timeStr || !/^\d{2}:\d{2}$/.test(timeStr)) return 0; const [h, m] = timeStr.split(':').map(Number); return h * 60 + m; }
+        function minutesToTime(totalMinutes) { if (totalMinutes < 0) totalMinutes = 0; const h = Math.floor(totalMinutes / 60).toString().padStart(2, '0'); const m = Math.floor(totalMinutes % 60).toString().padStart(2, '0'); return `${h}:${m}`; }
+        function getDOMElements() {
+            return {
+                jsonDataInput: document.getElementById('jsonDataInput'),
+                loadButton: document.getElementById('loadDataButton'),
+                playPauseButton: document.getElementById('playPauseButton'),
+                speedControl: document.getElementById('speedControl'),
+                timeline: document.getElementById('timeline'),
+                currentTimeDisplay: document.getElementById('currentTimeDisplay'),
+                locationOutput: document.getElementById('locationOutput'),
+                logOutput: document.getElementById('logOutput'),
+                errorOutput: document.getElementById('errorOutput'),
+                locationTimeDisplay: document.getElementById('locationTimeDisplay'),
+                logTimeDisplay: document.getElementById('logTimeDisplay'),
+                locationLayoutContainer: document.getElementById('locationLayout'),
+                layoutTimeDisplay: document.getElementById('layoutTimeDisplay'),
+                jsonDataDetails: document.getElementById('jsonDataDetails') // Get details element
+            };
+        }
+        function displayError(message) { /* ... */ domElements.errorOutput.textContent = message; domElements.errorOutput.style.display = 'block'; setControlsDisabled(true); resetUI(); }
+        function clearError() { /* ... */ domElements.errorOutput.textContent = ''; domElements.errorOutput.style.display = 'none'; }
+        function setControlsDisabled(disabled) { /* ... */ domElements.playPauseButton.disabled = disabled; domElements.timeline.disabled = disabled; }
+        function resetUI() { /* ... */ domElements.locationOutput.textContent = 'ロード後に表示されます。'; domElements.logOutput.textContent = 'ロード後に表示されます。'; domElements.currentTimeDisplay.textContent = '--:--'; domElements.locationTimeDisplay.textContent = '--:--'; domElements.logTimeDisplay.textContent = '--:--'; domElements.layoutTimeDisplay.textContent = '--:--'; if (simState.timerId) { clearInterval(simState.timerId); simState.timerId = null; } simState.isPlaying = false; domElements.playPauseButton.textContent = '▶ Play'; domElements.locationLayoutContainer.innerHTML = ''; simState.locationElements = {}; if (domElements.jsonDataDetails) domElements.jsonDataDetails.open = true; } // Re-open details on reset
+
+        // --- Data Handling ---
+        function parseJsonData(inputElement) { /* ... */ let d; try { d = JSON.parse(inputElement.value); } catch (e) { throw new Error(`JSON解析エラー: ${e.message}`); } const req = ['persons', 'locations', 'acts', 'events', 'initialStates']; for (const k of req) { if (!d[k]) throw new Error(`必須キーなし: ${k}`); } const opt = ['props', 'informations', 'moves', 'stays']; opt.forEach(k => { if (d[k] && !Array.isArray(d[k])) throw new Error(`キー "${k}" は配列必須`); if (!d[k]) d[k] = []; }); return d; }
+        function indexStoryData(storyData) { /* ... */ const map = (a) => new Map((a || []).map(i => [i.id, i])); return { personMap: map(storyData.persons), locationMap: map(storyData.locations), actMap: map(storyData.acts), propMap: map(storyData.props), infoMap: map(storyData.informations), persons: storyData.persons || [], locations: storyData.locations || [], acts: storyData.acts || [], events: storyData.events || [], initialStates: storyData.initialStates || [] }; }
+        function sortEvents(events) { /* ... */ return [...events].sort((a, b) => { const tA = timeToMinutes(a.eventTime); const tB = timeToMinutes(b.eventTime); if (tA !== tB) return tA - tB; return a.id - b.id; }); }
+
+        // --- Fixed Layout Initialization ---
+        function initializeLocationLayout(container, indexedData) { /* ... */ container.innerHTML = ''; const locationElements = {}; indexedData.locations.forEach(loc => { const box = document.createElement('div'); box.classList.add('location-box'); box.dataset.locationId = loc.id; const nameHeader = document.createElement('h4'); nameHeader.textContent = loc.name; const personList = document.createElement('ul'); personList.classList.add('person-list'); box.appendChild(nameHeader); box.appendChild(personList); container.appendChild(box); locationElements[loc.id] = { box: box, personList: personList }; }); return locationElements; }
+
+        // --- Simulation Core ---
+        function getStateAtTime(targetMinutes, indexedData, sortedEvents, initialStates) { /* ... returns { locationId, lastAction } ... */ const worldState = {}; const { personMap, actMap } = indexedData; personMap.forEach(person => { let lastKnownLocationId = null; let lastAction = null; let lastEventTime = -1; const initialState = initialStates.find(s => s.personId === person.id); if (initialState) { const initialTimeMinutes = timeToMinutes(initialState.time); if (initialTimeMinutes <= targetMinutes) { lastKnownLocationId = initialState.locationId; lastEventTime = initialTimeMinutes; } } for (const event of sortedEvents) { if (event.personId === person.id) { const eventTimeMinutes = timeToMinutes(event.eventTime); if (eventTimeMinutes <= targetMinutes) { if (eventTimeMinutes >= lastEventTime) { const act = actMap.get(event.actId); if (act) { lastKnownLocationId = act.locationId; lastAction = act; lastEventTime = eventTimeMinutes; } } } else { break; } } } worldState[person.id] = { locationId: lastKnownLocationId, lastAction: lastAction }; }); return worldState; }
+        function generateLogEntries(sortedEvents, indexedData) {
+    const entries = [];
+    const { personMap, locationMap, actMap, propMap, infoMap } = indexedData;
+
+    // Format initial states log entry with color
+    indexedData.initialStates.forEach(initState => {
+        const person = personMap.get(initState.personId);
+        const location = locationMap.get(initState.locationId);
+        if (person && location) {
+           const personColor = person.color || '#000000';
+           // *** Add styled strong tag for person name ***
+           const initialText = `[${initState.time}] <strong style="color: ${personColor};">${person.name}</strong> は ${location.name} にいます (初期状態)`;
+           entries.push({
+               timeMinutes: timeToMinutes(initState.time),
+               text: initialText // Store HTML string
+           });
+        }
+   });
+
+
+    // Format event log entry with color
+    sortedEvents.forEach(event => {
+         const timeMinutes = timeToMinutes(event.eventTime);
+         const person = personMap.get(event.personId);
+         const act = actMap.get(event.actId);
+         if (!person || !act) return;
+
+         const location = locationMap.get(act.locationId);
+         if (!location) return;
+
+         const personColor = person.color || '#000000';
+         // *** Build log string with styled strong tag for person name ***
+         let logText = `[${event.eventTime}] <strong style="color: ${personColor};">${person.name}</strong> @ ${location.name}: ${act.description}`;
+
+         // Add optional details (no changes needed here as they don't contain person names directly)
+         if (act.interactedPersonId) { const ip = personMap.get(act.interactedPersonId); logText += ` (対象: ${ip ? ip.name : '不明 ' + act.interactedPersonId})`; } // Note: interactedPerson could also be colored if desired
+         if (act.propId) { const pp = propMap.get(act.propId); logText += ` (小道具: ${pp ? pp.name : '不明 ' + act.propId})`; }
+         if (act.informationId) { const i = infoMap.get(act.informationId); logText += ` (情報: ${i ? i.content : '不明 ' + a.informationId})`; }
+         if (event.triggerType === '行動') { logText += ` (トリガー: 行動 ${event.triggerValue})`; }
+
+         entries.push({ timeMinutes: timeMinutes, text: logText }); // Store HTML string
+    });
+
+    entries.sort((a, b) => a.timeMinutes - b.timeMinutes);
+    return entries;
+}
+
+        // --- UI Update ---
+        /** Updates the fixed location layout visualization with actions and colors */
+        function updateLocationVisualization(worldState, indexedData) {
+            if (!simState.locationElements) return;
+
+            const { personMap } = indexedData;
+            const locationOccupancy = {}; // { locationId: [{ id: number, name: string, color: string|null, action: Act | null }] }
+
+            // Aggregate people and their last action by location
+            Object.entries(worldState).forEach(([personIdStr, personState]) => {
+                 const personId = parseInt(personIdStr); // Use numeric ID
+                 if (personState.locationId !== null) {
+                    if (!locationOccupancy[personState.locationId]) {
+                        locationOccupancy[personState.locationId] = [];
+                    }
+                    const person = personMap.get(personId);
+                    if (person) {
+                        locationOccupancy[personState.locationId].push({
+                             id: person.id, // Store ID for potential future use
+                             name: person.name,
+                             color: person.color || null, // Get color from person data
+                             action: personState.lastAction
+                         });
+                    }
+                 }
+            });
+
+            // Update each location box in the DOM
+            Object.entries(simState.locationElements).forEach(([locationId, elements]) => {
+                const { box, personList } = elements;
+                const occupants = locationOccupancy[locationId] || [];
+
+                personList.innerHTML = ''; // Clear previous list
+
+                if (occupants.length > 0) {
+                     // Sort occupants by name for consistent order? Optional.
+                     // occupants.sort((a, b) => a.name.localeCompare(b.name));
+
+                     occupants.forEach(occupant => {
+                        const li = document.createElement('li');
+                        const actionDescription = occupant.action ? occupant.action.description : '(滞在中/待機中)';
+                        const actionClass = occupant.action ? 'person-action' : 'person-idle';
+                        const personColor = occupant.color || '#000000'; // Default to black if no color defined
+
+                        // Display as "Name: ActionDescription" with colored name
+                        li.innerHTML = `<strong style="color: ${personColor};">${occupant.name}</strong>: <span class="${actionClass}">${actionDescription}</span>`;
+                        personList.appendChild(li);
+                    });
+                    box.classList.add('occupied');
+                } else {
+                    box.classList.remove('occupied');
+                }
+            });
+        }
+
+
+        function updateUI(currentMinutes) {
+    if (!simState.indexedData || !simState.sortedEvents) return;
+
+    currentMinutes = Math.max(simState.minTimeMinutes, Math.min(currentMinutes, simState.maxTimeMinutes));
+    simState.currentTimeMinutes = currentMinutes;
+    const currentTimeStr = minutesToTime(currentMinutes);
+
+    // 1. Update Time Displays & Timeline Slider
+    domElements.currentTimeDisplay.textContent = currentTimeStr;
+    domElements.locationTimeDisplay.textContent = currentTimeStr;
+    domElements.logTimeDisplay.textContent = currentTimeStr;
+    domElements.layoutTimeDisplay.textContent = currentTimeStr;
+    domElements.timeline.value = currentMinutes;
+
+    // 2. Calculate World State
+    const worldState = getStateAtTime(currentMinutes, simState.indexedData, simState.sortedEvents, simState.indexedData.initialStates);
+
+    // 3. Display Character Locations (Text - with Colors)
+    let locationText = "";
+    simState.indexedData.persons.forEach(p => {
+        const personColor = p.color || '#000000'; // Get person's color or default black
+        const state = worldState[p.id];
+        const locationId = state ? state.locationId : null;
+        const location = locationId ? simState.indexedData.locationMap.get(locationId) : null;
+        const locationName = location ? location.name : '不明/未登場';
+        // *** Wrap name in styled strong tag ***
+        locationText += `- <strong style="color: ${personColor};">${p.name}</strong>: ${locationName}<br>`; // Use <br> for HTML
+    });
+    // *** Use innerHTML to render the styled text ***
+    domElements.locationOutput.innerHTML = locationText || "登場人物がいません";
+
+    // 4. Filter and Display Logs (with Colors)
+    const logToShow = simState.eventLogEntries
+        .filter(entry => entry.timeMinutes <= currentMinutes)
+        .map(entry => entry.text) // entry.text now contains HTML
+        .join('\n'); // Join with newline, but display as HTML
+    // *** Use innerHTML to render the styled log ***
+    domElements.logOutput.innerHTML = logToShow.replace(/\n/g, '<br>') || "ログはありません"; // Replace newline with <br> for HTML display
+    domElements.logOutput.scrollTop = domElements.logOutput.scrollHeight;
+
+    // 5. Update Fixed Layout Visualization
+    updateLocationVisualization(worldState, simState.indexedData);
+}
+
+
+        // --- Simulation Control --- (playSimulation, pauseSimulation, seekSimulation, changeSpeed are the same)
+        function playSimulation() { /* ... */ if(simState.isPlaying||!simState.indexedData)return; if(simState.currentTimeMinutes>=simState.maxTimeMinutes){simState.currentTimeMinutes=simState.minTimeMinutes;} simState.isPlaying=true; domElements.playPauseButton.textContent='❚❚ Pause'; simState.lastTimestamp=performance.now(); simState.timerId=setInterval(()=>{const n=performance.now();const d=(n-simState.lastTimestamp)/1000;simState.lastTimestamp=n;const t=d*MINUTES_PER_SECOND*simState.speed;let next=simState.currentTimeMinutes+t;if(next>=simState.maxTimeMinutes){next=simState.maxTimeMinutes;pauseSimulation();} updateUI(next);},1000/30); }
+        function pauseSimulation() { /* ... */ if(!simState.isPlaying)return; clearInterval(simState.timerId);simState.timerId=null;simState.isPlaying=false;domElements.playPauseButton.textContent='▶ Play'; }
+        function seekSimulation(event) { /* ... */ if(simState.isPlaying){pauseSimulation();} const targetMinutes=parseInt(event.target.value,10); updateUI(targetMinutes); }
+        function changeSpeed(event) { /* ... */ simState.speed=parseFloat(event.target.value); }
+
+        // --- Initialization ---
+        function loadData() {
+             clearError(); pauseSimulation(); resetUI();
+             try {
+                 const storyData = parseJsonData(domElements.jsonDataInput);
+                 simState.indexedData = indexStoryData(storyData);
+                 simState.sortedEvents = sortEvents(simState.indexedData.events);
+                 simState.eventLogEntries = generateLogEntries(simState.sortedEvents, simState.indexedData);
+                 simState.locationElements = initializeLocationLayout(domElements.locationLayoutContainer, simState.indexedData);
+                 let minTime = Infinity, maxTime = -Infinity; /* ... Determine time range ... */ simState.indexedData.initialStates.forEach(s => { minTime = Math.min(minTime, timeToMinutes(s.time)); maxTime = Math.max(maxTime, timeToMinutes(s.time)); }); if (simState.sortedEvents.length > 0) { if (minTime === Infinity) minTime = timeToMinutes(simState.sortedEvents[0].eventTime); maxTime = Math.max(maxTime, timeToMinutes(simState.sortedEvents[simState.sortedEvents.length - 1].eventTime)); } else if (minTime === Infinity) { minTime = 0; maxTime = 0; }
+                 simState.minTimeMinutes = minTime; simState.maxTimeMinutes = maxTime; simState.currentTimeMinutes = minTime;
+                 domElements.timeline.min = simState.minTimeMinutes; domElements.timeline.max = simState.maxTimeMinutes; domElements.timeline.value = simState.currentTimeMinutes;
+                 updateUI(simState.currentTimeMinutes);
+                 setControlsDisabled(false);
+                 console.log(`データロード完了 & レイアウト初期化: 時間範囲 ${minutesToTime(simState.minTimeMinutes)} - ${minutesToTime(simState.maxTimeMinutes)}`);
+
+                 // --- Collapse the details section ---
+                 if(domElements.jsonDataDetails) {
+                    domElements.jsonDataDetails.open = false;
+                 }
+
+             } catch (e) { console.error("ロード/初期化エラー:", e); displayError(`ロードエラー: ${e.message}`); }
+         }
+        function initializeApp() {
+             domElements = getDOMElements();
+             domElements.loadButton.addEventListener('click', loadData);
+             domElements.playPauseButton.addEventListener('click', () => { if (simState.isPlaying) pauseSimulation(); else playSimulation(); });
+             domElements.timeline.addEventListener('input', seekSimulation);
+             domElements.speedControl.addEventListener('change', changeSpeed);
+             setControlsDisabled(true);
+         }
+
+        // --- Run ---
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+    </script>
+
+</body>
+</html>
