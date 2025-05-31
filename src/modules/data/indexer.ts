@@ -6,6 +6,9 @@ export function indexStoryData(storyData: StoryData): IndexedData {
     return new Map((array || []).map(item => [item.id, item]));
   };
   
+  const events = storyData.events || [];
+  const sortedEvents = sortEvents(events);
+  
   return {
     personMap: mapArray(storyData.persons),
     locationMap: mapArray(storyData.locations),
@@ -15,8 +18,9 @@ export function indexStoryData(storyData: StoryData): IndexedData {
     persons: storyData.persons || [],
     locations: storyData.locations || [],
     acts: storyData.acts || [],
-    events: storyData.events || [],
-    initialStates: storyData.initialStates || []
+    events: events,
+    initialStates: storyData.initialStates || [],
+    sortedEvents: sortedEvents
   };
 }
 

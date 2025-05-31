@@ -26,23 +26,31 @@ export function updateUI(currentMinutes: number): void {
   );
   
   // 3. Display Character Locations (Text - with Colors)
-  let locationText = "";
-  simState.indexedData.persons.forEach(person => {
-    const personColor = person.color || '#000000';
-    const state = worldState[person.id];
-    const locationId = state ? state.locationId : null;
-    const location = locationId ? simState.indexedData!.locationMap.get(locationId) : null;
-    const locationName = location ? location.name : '不明/未登場';
-    locationText += `- <strong style="color: ${personColor};">${person.name}</strong>: ${locationName}<br>`;
-  });
-  domElements.locationOutput.innerHTML = locationText || "登場人物がいません";
+  domElements.locationOutput.innerHTML = ''; // Clear first
+  if (simState.indexedData.persons.length === 0) {
+    domElements.locationOutput.textContent = "登場人物がいません";
+  } else {
+    simState.indexedData.persons.forEach(person => {
+      const personColor = person.color || '#000000';
+      const state = worldState[person.id];
+      const locationId = state ? state.locationId : null;
+      const location = locationId ? simState.indexedData!.locationMap.get(locationId) : null;
+      const locationName = location ? location.name : '不明/未登場';
+      
+      const div = document.createElement('div');
+      div.textContent = `- ${person.name}: ${locationName}`;
+      div.style.color = personColor;
+      div.style.fontWeight = 'bold';
+      domElements.locationOutput.appendChild(div);
+    });
+  }
   
-  // 4. Filter and Display Logs (with Colors)
+  // 4. Filter and Display Logs (Text only for security)
   const logToShow = simState.eventLogEntries
     .filter(entry => entry.timeMinutes <= currentMinutes)
     .map(entry => entry.text)
     .join('\n');
-  domElements.logOutput.innerHTML = logToShow.replace(/\n/g, '<br>') || "ログはありません";
+  domElements.logOutput.textContent = logToShow || "ログはありません";
   domElements.logOutput.scrollTop = domElements.logOutput.scrollHeight;
   
   // 5. Update Fixed Layout Visualization

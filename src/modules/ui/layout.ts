@@ -76,10 +76,20 @@ export function updateLocationVisualization(
       occupants.forEach(occupant => {
         const li = document.createElement('li');
         const actionDescription = occupant.action ? occupant.action.description : '(滞在中/待機中)';
-        const actionClass = occupant.action ? 'person-action' : 'person-idle';
         const personColor = occupant.color || '#000000';
         
-        li.innerHTML = `<strong style="color: ${personColor};">${occupant.name}</strong>: <span class="${actionClass}">${actionDescription}</span>`;
+        // Create elements separately for security
+        const nameSpan = document.createElement('strong');
+        nameSpan.textContent = occupant.name;
+        nameSpan.style.color = personColor;
+        
+        const actionSpan = document.createElement('span');
+        actionSpan.textContent = actionDescription;
+        actionSpan.className = occupant.action ? 'person-action' : 'person-idle';
+        
+        li.appendChild(nameSpan);
+        li.appendChild(document.createTextNode(': '));
+        li.appendChild(actionSpan);
         personList.appendChild(li);
       });
       box.classList.add('occupied');

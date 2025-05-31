@@ -2,9 +2,23 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   root: 'src',
+  base: './',
   build: {
     outDir: '../dist',
     emptyOutDir: true,
+    sourcemap: true,
+    minify: 'esbuild',
+    target: 'es2020',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+      treeshake: {
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false
+      }
+    },
   },
   server: {
     port: 3000,
