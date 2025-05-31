@@ -1,20 +1,29 @@
 # SceneFlow モダン化チェックリスト
 
+## 📊 進捗状況
+- ✅ Phase 1: Vite環境のセットアップ - 完了
+- ✅ Phase 2: コードの分割とモジュール化 - 完了  
+- ✅ Phase 4: TypeScriptの導入 - 完了（Phase 2と同時に実施）
+- ⏳ Phase 3: テスト環境の構築 - 未着手
+- ⏳ Phase 5: 開発ツールの設定 - 未着手
+- ⏳ Phase 6: ビルドとデプロイ - 未着手
+- ⏳ Phase 7: セキュリティとパフォーマンス - 未着手
+
 ## 🎯 目標
 単一HTMLファイルで構成されたSceneFlowを、Viteベースのモダンな開発環境に移行し、テスト可能で保守性の高いアプリケーションにする。
 
 ---
 
-## Phase 1: Vite環境のセットアップ
+## Phase 1: Vite環境のセットアップ ✅
 
 ### 1.1 プロジェクト初期化
-- [ ] `npm init -y` でpackage.jsonを作成
-- [ ] `.gitignore`ファイルを作成（node_modules, dist等を追加）
-- [ ] `npm install --save-dev vite` でViteをインストール
+- [x] `npm init -y` でpackage.jsonを作成
+- [x] `.gitignore`ファイルを作成（node_modules, dist等を追加）
+- [x] `npm install --save-dev vite` でViteをインストール
 
 ### 1.2 Vite設定
-- [ ] `vite.config.js`を作成
-- [ ] package.jsonにスクリプトを追加:
+- [x] `vite.config.ts`を作成（TypeScriptで作成）
+- [x] package.jsonにスクリプトを追加:
   ```json
   "scripts": {
     "dev": "vite",
@@ -24,12 +33,12 @@
   ```
 
 ### 1.3 ディレクトリ構造の作成
-- [ ] 以下のディレクトリ構造を作成:
+- [x] 以下のディレクトリ構造を作成:
   ```
   scene-flow/
   ├── src/
   │   ├── index.html
-  │   ├── main.js
+  │   ├── main.ts
   │   ├── styles/
   │   │   └── main.css
   │   └── modules/
@@ -39,50 +48,50 @@
 
 ---
 
-## Phase 2: コードの分割とモジュール化
+## Phase 2: コードの分割とモジュール化 ✅
 
 ### 2.1 HTMLファイルの整理
-- [ ] 現在の`index.html`を`src/index.html`にコピー
-- [ ] `<script>`タグの内容を削除
-- [ ] `<script type="module" src="/main.js"></script>`を追加
-- [ ] `<style>`タグの内容を削除
-- [ ] `<link rel="stylesheet" href="/styles/main.css">`を追加
+- [x] 現在の`index.html`を`src/index.html`にコピー
+- [x] `<script>`タグの内容を削除
+- [x] `<script type="module" src="/main.ts"></script>`を追加（TypeScriptに変更）
+- [x] `<style>`タグの内容を削除
+- [x] `<link rel="stylesheet" href="/styles/main.css">`を追加
 
 ### 2.2 CSSの分離
-- [ ] `src/styles/main.css`を作成
-- [ ] 元のHTMLから全てのスタイルをコピー
+- [x] `src/styles/main.css`を作成
+- [x] 元のHTMLから全てのスタイルをコピー
 
-### 2.3 JavaScriptのモジュール分割
-- [ ] `src/main.js`を作成（エントリーポイント）
-- [ ] `src/modules/`に以下のファイルを作成:
-  - [ ] `constants.js` - 定数（MINUTES_PER_SECOND等）
-  - [ ] `state.js` - グローバル状態管理
-  - [ ] `utils/timeUtils.js` - 時間関連のユーティリティ関数
-  - [ ] `utils/domUtils.js` - DOM操作のユーティリティ
-  - [ ] `data/parser.js` - JSONデータのパース処理
-  - [ ] `data/indexer.js` - データのインデックス化
-  - [ ] `simulation/core.js` - シミュレーションのコアロジック
-  - [ ] `simulation/events.js` - イベント処理
-  - [ ] `ui/controls.js` - 再生コントロール
-  - [ ] `ui/locationDisplay.js` - 場所表示
-  - [ ] `ui/logDisplay.js` - ログ表示
-  - [ ] `ui/layout.js` - レイアウト表示
+### 2.3 TypeScriptのモジュール分割
+- [x] `src/main.ts`を作成（エントリーポイント）
+- [x] `src/types/index.ts`を作成（型定義）
+- [x] `src/modules/`に以下のファイルを作成:
+  - [x] `constants.ts` - 定数（MINUTES_PER_SECOND等）
+  - [x] `state.ts` - グローバル状態管理
+  - [x] `utils/timeUtils.ts` - 時間関連のユーティリティ関数
+  - [x] `utils/domUtils.ts` - DOM操作のユーティリティ
+  - [x] `data/parser.ts` - JSONデータのパース処理
+  - [x] `data/indexer.ts` - データのインデックス化
+  - [x] `simulation/core.ts` - シミュレーションのコアロジック
+  - [x] `simulation/events.ts` - イベント処理
+  - [x] `ui/controls.ts` - 再生コントロール
+  - [x] `ui/layout.ts` - レイアウト表示
+  - [x] `ui/display.ts` - UI更新処理
 
 ### 2.4 各モジュールへの関数移動
-- [ ] `timeToMinutes`, `minutesToTime` → `utils/timeUtils.js`
-- [ ] `getDOMElements`, `displayError`, `clearError` → `utils/domUtils.js`
-- [ ] `parseJsonData` → `data/parser.js`
-- [ ] `indexStoryData`, `sortEvents` → `data/indexer.js`
-- [ ] `getStateAtTime` → `simulation/core.js`
-- [ ] `generateLogEntries` → `simulation/events.js`
-- [ ] `playSimulation`, `pauseSimulation`, `seekSimulation`, `changeSpeed` → `ui/controls.js`
-- [ ] `updateLocationVisualization`, `initializeLocationLayout` → `ui/layout.js`
-- [ ] `updateUI` → 適切なモジュールに分割
+- [x] `timeToMinutes`, `minutesToTime` → `utils/timeUtils.ts`
+- [x] `getDOMElements` → `utils/domUtils.ts`
+- [x] `parseJsonData` → `data/parser.ts`
+- [x] `indexStoryData`, `sortEvents` → `data/indexer.ts`
+- [x] `getStateAtTime` → `simulation/core.ts`
+- [x] `generateLogEntries` → `simulation/events.ts`
+- [x] `playSimulation`, `pauseSimulation`, `seekSimulation`, `changeSpeed` → `ui/controls.ts`
+- [x] `updateLocationVisualization`, `initializeLocationLayout` → `ui/layout.ts`
+- [x] `updateUI` → `ui/display.ts`
 
 ### 2.5 import/export の設定
-- [ ] 各モジュールでexport文を追加
-- [ ] main.jsで必要なモジュールをimport
-- [ ] 動作確認（`npm run dev`）
+- [x] 各モジュールでexport文を追加
+- [x] main.tsで必要なモジュールをimport
+- [x] 動作確認（`npm run dev`）
 
 ---
 
@@ -112,27 +121,28 @@
 
 ---
 
-## Phase 4: TypeScriptの導入
+## Phase 4: TypeScriptの導入 ✅
 
 ### 4.1 TypeScript環境のセットアップ
-- [ ] `npm install --save-dev typescript @types/node`
-- [ ] `npx tsc --init` でtsconfig.jsonを生成
-- [ ] tsconfig.jsonの設定調整（target: ES2020, module: ESNext等）
+- [x] `npm install --save-dev typescript @types/node`
+- [x] `tsconfig.json`を作成（手動で作成）
+- [x] tsconfig.jsonの設定調整（target: ES2020, module: ESNext等）
 
 ### 4.2 型定義ファイルの作成
-- [ ] `src/types/index.ts` を作成
-- [ ] 基本的な型定義を追加:
+- [x] `src/types/index.ts` を作成
+- [x] 基本的な型定義を追加:
   ```typescript
   interface Person { id: number; name: string; color: string; }
   interface Location { id: number; name: string; connections: number[]; }
   interface Act { id: number; personId: number; locationId: number; time: string; description: string; }
   interface Event { id: number; triggerType: string; triggerValue: string; eventTime: string; personId: number; actId: number; }
   ```
+- [x] 追加の型定義（StoryData, IndexedData, SimState, DOMElements等）
 
 ### 4.3 段階的な型付け
-- [ ] `.js`ファイルを`.ts`に順次リネーム
-- [ ] 各関数に型注釈を追加
-- [ ] 型エラーの修正
+- [x] 最初からTypeScriptで実装（`.ts`ファイル）
+- [x] 各関数に型注釈を追加
+- [x] 型エラーの修正
 
 ---
 
