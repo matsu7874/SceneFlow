@@ -1,258 +1,231 @@
-# SceneFlow モダン化チェックリスト
+# SceneFlow 次世代機能開発計画
+
+## 🎉 モダン化完了
+
+SceneFlowの基盤となるモダン化が完了しました：
+
+- ✅ Vite + TypeScript環境への完全移行
+- ✅ 包括的なテストスイート（80%以上のカバレッジ）
+- ✅ CI/CD パイプライン構築
+- ✅ セキュリティとパフォーマンスの最適化
+
+---
+
+# 開発計画書：物語作成支援機能 "Causal Story Weaver"
 
 ## 📊 進捗状況
 
-- ✅ Phase 1: Vite環境のセットアップ - 完了
-- ✅ Phase 2: コードの分割とモジュール化 - 完了
-- ✅ Phase 3: テスト環境の構築 - 完了
-- ✅ Phase 4: TypeScriptの導入 - 完了（Phase 2と同時に実施）
-- ✅ Phase 5: 開発ツールの設定 - 完了
-- ✅ Phase 6: ビルドとデプロイ - 完了
-- ✅ Phase 7: セキュリティとパフォーマンス - 完了
+- ⬜ Phase 1: 因果律エンジンの基盤構築
+- ⬜ Phase 2: 高度なデータ構造とAct定義
+- ⬜ Phase 3: インタラクティブUI機能の実装
+- ⬜ Phase 4: 因果ビューと自動検証機能
+- ⬜ Phase 5: エンティティ編集とJSONエディタ
+- ⬜ Phase 6: 場所の接続関係可視化
+- ⬜ Phase 7: 統合テストとリリース準備
 
 ## 🎯 目標
 
-単一HTMLファイルで構成されたSceneFlowを、Viteベースのモダンな開発環境に移行し、テスト可能で保守性の高いアプリケーションにする。
+既存のSceneFlowに、登場人物の行動（Act）が持つ因果関係を自動検証できる機能を追加し、整合性の取れた複雑な物語の構築を支援する高度なツールに進化させる。
 
 ---
 
-## Phase 1: Vite環境のセットアップ ✅
+## Phase 1: 因果律エンジンの基盤構築 ⬜
 
-### 1.1 プロジェクト初期化
+### 1.1 拡張型定義の作成
 
-- [x] `npm init -y` でpackage.jsonを作成
-- [x] `.gitignore`ファイルを作成（node_modules, dist等を追加）
-- [x] `npm install --save-dev vite` でViteをインストール
+- [ ] `src/types/causality.ts` を作成
+  - [ ] 事前条件・事後条件を持つActインターフェース
+  - [ ] WorldState型（人物の位置、所有物、知識状態）
+  - [ ] CausalLink型（因果関係の表現）
 
-### 1.2 Vite設定
+### 1.2 Act実装の基本構造
 
-- [x] `vite.config.ts`を作成（TypeScriptで作成）
-- [x] package.jsonにスクリプトを追加:
-  ```json
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  }
-  ```
-
-### 1.3 ディレクトリ構造の作成
-
-- [x] 以下のディレクトリ構造を作成:
-  ```
-  scene-flow/
-  ├── src/
-  │   ├── index.html
-  │   ├── main.ts
-  │   ├── styles/
-  │   │   └── main.css
-  │   └── modules/
-  ├── public/
-  └── tests/
-  ```
-
----
-
-## Phase 2: コードの分割とモジュール化 ✅
-
-### 2.1 HTMLファイルの整理
-
-- [x] 現在の`index.html`を`src/index.html`にコピー
-- [x] `<script>`タグの内容を削除
-- [x] `<script type="module" src="/main.ts"></script>`を追加（TypeScriptに変更）
-- [x] `<style>`タグの内容を削除
-- [x] `<link rel="stylesheet" href="/styles/main.css">`を追加
-
-### 2.2 CSSの分離
-
-- [x] `src/styles/main.css`を作成
-- [x] 元のHTMLから全てのスタイルをコピー
-
-### 2.3 TypeScriptのモジュール分割
-
-- [x] `src/main.ts`を作成（エントリーポイント）
-- [x] `src/types/index.ts`を作成（型定義）
-- [x] `src/modules/`に以下のファイルを作成:
-  - [x] `constants.ts` - 定数（MINUTES_PER_SECOND等）
-  - [x] `state.ts` - グローバル状態管理
-  - [x] `utils/timeUtils.ts` - 時間関連のユーティリティ関数
-  - [x] `utils/domUtils.ts` - DOM操作のユーティリティ
-  - [x] `data/parser.ts` - JSONデータのパース処理
-  - [x] `data/indexer.ts` - データのインデックス化
-  - [x] `simulation/core.ts` - シミュレーションのコアロジック
-  - [x] `simulation/events.ts` - イベント処理
-  - [x] `ui/controls.ts` - 再生コントロール
-  - [x] `ui/layout.ts` - レイアウト表示
-  - [x] `ui/display.ts` - UI更新処理
-
-### 2.4 各モジュールへの関数移動
-
-- [x] `timeToMinutes`, `minutesToTime` → `utils/timeUtils.ts`
-- [x] `getDOMElements` → `utils/domUtils.ts`
-- [x] `parseJsonData` → `data/parser.ts`
-- [x] `indexStoryData`, `sortEvents` → `data/indexer.ts`
-- [x] `getStateAtTime` → `simulation/core.ts`
-- [x] `generateLogEntries` → `simulation/events.ts`
-- [x] `playSimulation`, `pauseSimulation`, `seekSimulation`, `changeSpeed` → `ui/controls.ts`
-- [x] `updateLocationVisualization`, `initializeLocationLayout` → `ui/layout.ts`
-- [x] `updateUI` → `ui/display.ts`
-
-### 2.5 import/export の設定
-
-- [x] 各モジュールでexport文を追加
-- [x] main.tsで必要なモジュールをimport
-- [x] 動作確認（`npm run dev`）
-
----
-
-## Phase 3: テスト環境の構築 ✅
-
-### 3.1 Vitestのセットアップ
-
-- [x] `npm install --save-dev vitest @vitest/ui` をインストール
-- [x] `vite.config.ts`にテスト設定を追加（jsdom環境設定）
-- [x] package.jsonにテストスクリプトを追加:
-  ```json
-  "scripts": {
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "coverage": "vitest run --coverage"
-  }
-  ```
-
-### 3.2 基本的なテストの作成
-
-- [x] `tests/utils/timeUtils.test.ts` - 時間変換関数のテスト
-- [x] `tests/data/parser.test.ts` - JSONパーサーのテスト
-- [x] `tests/data/indexer.test.ts` - データインデックスのテスト
-- [x] `tests/simulation/core.test.ts` - シミュレーションロジックのテスト
-
-### 3.3 テストカバレッジの設定
-
-- [x] `npm install --save-dev @vitest/coverage-v8`
-- [x] カバレッジレポートの生成確認
-
----
-
-## Phase 4: TypeScriptの導入 ✅
-
-### 4.1 TypeScript環境のセットアップ
-
-- [x] `npm install --save-dev typescript @types/node`
-- [x] `tsconfig.json`を作成（手動で作成）
-- [x] tsconfig.jsonの設定調整（target: ES2020, module: ESNext等）
-
-### 4.2 型定義ファイルの作成
-
-- [x] `src/types/index.ts` を作成
-- [x] 基本的な型定義を追加:
+- [ ] `src/modules/causality/acts/` ディレクトリを作成
+- [ ] BaseActクラスの実装
   ```typescript
-  interface Person {
-    id: number
-    name: string
-    color: string
-  }
-  interface Location {
-    id: number
-    name: string
-    connections: number[]
-  }
-  interface Act {
-    id: number
-    personId: number
-    locationId: number
-    time: string
-    description: string
-  }
-  interface Event {
-    id: number
-    triggerType: string
-    triggerValue: string
-    eventTime: string
-    personId: number
-    actId: number
+  abstract class BaseAct {
+    abstract checkPreconditions(state: WorldState): boolean
+    abstract applyPostconditions(state: WorldState): WorldState
+    abstract getDescription(): string
   }
   ```
-- [x] 追加の型定義（StoryData, IndexedData, SimState, DOMElements等）
+- [ ] 基本的なActの実装
+  - [ ] MoveAct（移動）
+  - [ ] GiveItemAct（アイテム受け渡し）
+  - [ ] TakeItemAct（アイテム取得）
+  - [ ] PlaceItemAct（アイテム配置）
 
-### 4.3 段階的な型付け
+### 1.3 因果律エンジンのコア実装
 
-- [x] 最初からTypeScriptで実装（`.ts`ファイル）
-- [x] 各関数に型注釈を追加
-- [x] 型エラーの修正
-
----
-
-## Phase 5: 開発ツールの設定 ✅
-
-### 5.1 ESLintの設定
-
-- [x] `npm install --save-dev eslint @eslint/js @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-plugin-vitest`
-- [x] `.eslintrc.json` で設定ファイル作成（TypeScript対応）
-- [x] package.jsonにlintスクリプトを追加
-
-### 5.2 Prettierの設定
-
-- [x] `npm install --save-dev prettier eslint-config-prettier`
-- [x] `.prettierrc`ファイルを作成
-- [x] package.jsonにformatスクリプトを追加
-
-### 5.3 Git Hooksの設定
-
-- [x] `npm install --save-dev husky lint-staged`
-- [x] pre-commitフックの設定（.husky/pre-commit）
-- [x] コミット時の自動フォーマット設定（lint-staged設定）
+- [ ] `src/modules/causality/engine.ts` を作成
+- [ ] タイムライン整合性チェック機能
+- [ ] 状態のロールバック・ロールフォワード機能
+- [ ] 因果関係の追跡機能
 
 ---
 
-## Phase 6: ビルドとデプロイ
+## Phase 2: 高度なデータ構造とAct定義 ⬜
 
-### 6.1 ビルド設定の最適化
+### 2.1 拡張エンティティの実装
 
-- [x] vite.config.jsでビルド設定を調整
-- [x] 本番ビルドの動作確認（`npm run build`）
+- [ ] `src/types/extendedEntities.ts` を作成
+  - [ ] 大道具・小道具の区別
+  - [ ] 情報（Information）エンティティ
+  - [ ] 人物の知識状態管理
 
-### 6.2 GitHub Actionsの設定
+### 2.2 複雑なActの実装
 
-- [x] `.github/workflows/ci.yml`を作成
-- [x] テスト自動実行の設定
-- [x] ビルド自動実行の設定
+- [ ] SpeakAct（情報の共有）
+- [ ] UseItemAct（アイテムの使用）
+- [ ] CombineItemsAct（アイテムの合成）
+- [ ] 条件付きAct（特定の状態でのみ実行可能）
 
-### 6.3 デプロイ設定
+### 2.3 状態管理の拡張
 
-- [x] GitHub Pagesへの自動デプロイ設定
-- [x] または他のホスティングサービスの設定
+- [ ] `src/modules/state/extendedState.ts` を作成
+- [ ] 既存のstateと新しい因果律状態の統合
+- [ ] 状態の永続化（LocalStorage/IndexedDB）
 
 ---
 
-## Phase 7: セキュリティとパフォーマンス
+## Phase 3: インタラクティブUI機能の実装 ⬜
 
-### 7.1 セキュリティ対策
+### 3.1 ドラッグ&ドロップ機能
 
-- [x] innerHTML使用箇所をtextContentに置き換え（可能な場合）
-- [x] 入力検証の強化
-- [x] CSP（Content Security Policy）の設定
+- [ ] `src/modules/ui/dragDrop.ts` を作成
+- [ ] 人物の移動をドラッグ&ドロップで実現
+- [ ] アイテムの受け渡しUI
+- [ ] リアルタイム整合性チェック
+
+### 3.2 ビジュアルフィードバック
+
+- [ ] 実行可能なActのハイライト表示
+- [ ] 実行不可能な理由の表示
+- [ ] アニメーション付き状態遷移
+
+### 3.3 タイムライン編集UI
+
+- [ ] Act の追加・削除・並び替え
+- [ ] 時間軸上での Act 配置
+- [ ] 複数の Act の一括編集
+
+---
+
+## Phase 4: 因果ビューと自動検証機能 ⬜
+
+### 4.1 因果関係の可視化
+
+- [ ] `src/modules/ui/causalityView.tsx` を作成
+- [ ] グラフベースの因果関係表示
+- [ ] 「なぜこの状態になったか」の逆引き追跡
+- [ ] 影響範囲の可視化
+
+### 4.2 自動検証機能
+
+- [ ] 物語の論理的整合性チェック
+- [ ] 到達不可能な状態の検出
+- [ ] デッドロックの検出
+- [ ] 推奨される Act の提案
+
+### 4.3 検証結果レポート
+
+- [ ] 問題箇所のハイライト
+- [ ] 修正提案の表示
+- [ ] 検証結果のエクスポート
+
+---
+
+## Phase 5: エンティティ編集とJSONエディタ ⬜
+
+### 5.1 高度なエンティティエディタ
+
+- [ ] `src/modules/ui/entityEditor/` を作成
+- [ ] フォームベースの編集UI
+- [ ] リレーション編集（接続関係など）
+- [ ] バリデーション機能
+
+### 5.2 JSONエディタの強化
+
+- [ ] シンタックスハイライト
+- [ ] スキーマ検証
+- [ ] オートコンプリート
+- [ ] Diff表示機能
+
+### 5.3 インポート/エクスポート機能
+
+- [ ] 複数フォーマット対応（JSON, YAML, CSV）
+- [ ] 部分的なインポート/エクスポート
+- [ ] バージョン管理対応
+
+---
+
+## Phase 6: 場所の接続関係可視化 ⬜
+
+### 6.1 ノードベースのマップエディタ
+
+- [ ] `src/modules/ui/mapEditor.tsx` を作成
+- [ ] ドラッグ可能なノード（場所）
+- [ ] 接続関係の視覚的編集
+- [ ] 自動レイアウト機能
+
+### 6.2 3D/2.5D表示オプション
+
+- [ ] 立体的な場所配置
+- [ ] 階層構造の表現
+- [ ] ミニマップ機能
+
+### 6.3 経路探索と分析
+
+- [ ] 最短経路の計算・表示
+- [ ] 到達可能性の分析
+- [ ] ボトルネックの検出
+
+---
+
+## Phase 7: 統合テストとリリース準備 ⬜
+
+### 7.1 E2Eテストの実装
+
+- [ ] Playwright または Cypress の導入
+- [ ] 主要なユーザーフローのテスト
+- [ ] ビジュアルリグレッションテスト
 
 ### 7.2 パフォーマンス最適化
 
-- [x] 大量データ時のパフォーマンステスト
-- [x] 必要に応じて仮想スクロールの実装
-- [x] バンドルサイズの最適化
+- [ ] 大規模データ（1000+ Acts）での動作検証
+- [ ] メモリ使用量の最適化
+- [ ] レンダリングパフォーマンスの改善
+
+### 7.3 ドキュメントとチュートリアル
+
+- [ ] ユーザーガイドの作成
+- [ ] API ドキュメント
+- [ ] サンプルストーリーの提供
+- [ ] インタラクティブチュートリアル
 
 ---
 
-## 完了基準
+## ✅ 完了基準
 
-- [x] すべてのチェックリストが完了
-- [x] テストカバレッジが80%以上
-- [x] 本番ビルドが正常に動作
-- [x] CI/CDパイプラインが機能
-- [x] ドキュメント（README.md）の更新
+- [ ] すべての新機能が実装され、テスト済み
+- [ ] 既存機能との完全な互換性
+- [ ] パフォーマンステストに合格（1000+ Acts で 60fps）
+- [ ] ドキュメントが完備
+- [ ] アクセシビリティ基準を満たす
+
+## ⚠️ 技術的考慮事項
+
+- 既存のコードベースを最大限活用し、破壊的変更を避ける
+- 新機能は段階的に有効化できるようフィーチャーフラグを使用
+- モバイル対応を考慮した設計
+- 国際化（i18n）の準備
+
+## 🔄 段階的リリース計画
+
+1. **v2.0-alpha**: Phase 1-2 完了時点でアルファ版リリース
+2. **v2.0-beta**: Phase 3-4 完了時点でベータ版リリース
+3. **v2.0**: Phase 7 完了後に正式リリース
 
 ---
 
-## 注意事項
-
-- 各フェーズは順番に実行することを推奨
-- 各ステップ完了後は必ず動作確認を行う
-- コミットは細かく行い、問題があれば巻き戻せるようにする
+_このドキュメントは開発の進行に応じて更新されます。_
