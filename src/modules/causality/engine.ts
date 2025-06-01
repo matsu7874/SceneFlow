@@ -21,11 +21,19 @@ export class CausalityEngine {
   private acts: Map<EntityId, Act>
   private causalLinks: Map<EntityId, CausalLink>
   private stateHistory: StateTransition[]
+  private initialState: WorldState
 
-  constructor() {
+  constructor(initialState?: WorldState) {
     this.acts = new Map()
     this.causalLinks = new Map()
     this.stateHistory = []
+    this.initialState = initialState || {
+      timestamp: 0,
+      personPositions: {},
+      itemOwnership: {},
+      knowledge: {},
+      itemLocations: {},
+    }
   }
 
   /**
@@ -109,7 +117,8 @@ export class CausalityEngine {
   /**
    * Validate the entire timeline for consistency
    */
-  validateTimeline(initialState: WorldState): TimelineValidation {
+  validateTimeline(initialState?: WorldState): TimelineValidation {
+    const startState = initialState || this.initialState
     const conflicts: ConflictInfo[] = []
     const suggestions: SuggestionInfo[] = []
 
@@ -117,7 +126,7 @@ export class CausalityEngine {
     const sortedActs = this.getSortedActs()
 
     // Simulate timeline execution
-    let currentState = this.cloneWorldState(initialState)
+    let currentState = this.cloneWorldState(startState)
 
     for (const act of sortedActs) {
       const validation = act.checkPreconditions(currentState)
@@ -205,10 +214,12 @@ export class CausalityEngine {
    * Private helper methods
    */
 
-  private validateActInsertion(_act: Act): ValidationResult {
-    // For now, just return valid
-    // TODO: Implement full validation logic
-    return { valid: true, errors: [] }
+  private validateActInsertion(act: Act): ValidationResult {
+    // Get world state at the time just before this act
+    const stateAtTime = this.getStateAt(act.timestamp - 1, this.initialState)
+
+    // Check preconditions
+    return act.checkPreconditions(stateAtTime)
   }
 
   private validateActRemoval(actId: EntityId): ValidationResult {
