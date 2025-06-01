@@ -1,4 +1,4 @@
-import type { SimState, DOMElements } from '../types';
+import type { SimState, DOMElements } from '../types'
 
 export const simState: SimState = {
   currentTimeMinutes: 0,
@@ -11,11 +11,11 @@ export const simState: SimState = {
   indexedData: null,
   sortedEvents: null,
   eventLogEntries: [],
-  locationElements: {}
-};
+  locationElements: {},
+}
 
-export let domElements: DOMElements;
+export let domElements: DOMElements
 
 export function setDOMElements(elements: DOMElements): void {
-  domElements = elements;
+  domElements = elements
 }

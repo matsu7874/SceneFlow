@@ -1,4 +1,4 @@
-import type { DOMElements } from '../../types';
+import type { DOMElements } from '../../types'
 
 export function getDOMElements(): DOMElements {
   return {
@@ -15,6 +15,6 @@ export function getDOMElements(): DOMElements {
     logTimeDisplay: document.getElementById('logTimeDisplay') as HTMLElement,
     locationLayoutContainer: document.getElementById('locationLayout') as HTMLElement,
     layoutTimeDisplay: document.getElementById('layoutTimeDisplay') as HTMLElement,
-    jsonDataDetails: document.getElementById('jsonDataDetails') as HTMLDetailsElement
-  };
+    jsonDataDetails: document.getElementById('jsonDataDetails') as HTMLDetailsElement,
+  }
 }

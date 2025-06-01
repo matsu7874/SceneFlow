@@ -10,20 +10,20 @@ describe('parseJsonData', () => {
 
   const validJsonData = {
     persons: [
-      { id: 1, name: 'Alice', color: '#ff0000' }
+      { id: 1, name: 'Alice', color: '#ff0000' },
     ],
     locations: [
-      { id: 101, name: 'Room 1', connections: [102] }
+      { id: 101, name: 'Room 1', connections: [102] },
     ],
     acts: [
-      { id: 1001, personId: 1, locationId: 101, time: '09:00', description: 'Test act' }
+      { id: 1001, personId: 1, locationId: 101, time: '09:00', description: 'Test act' },
     ],
     events: [
-      { id: 1, triggerType: '時刻', triggerValue: '09:00', eventTime: '09:00', personId: 1, actId: 1001 }
+      { id: 1, triggerType: '時刻', triggerValue: '09:00', eventTime: '09:00', personId: 1, actId: 1001 },
     ],
     initialStates: [
-      { personId: 1, locationId: 101, time: '09:00' }
-    ]
+      { personId: 1, locationId: 101, time: '09:00' },
+    ],
   }
 
   it('should parse valid JSON data', () => {
@@ -34,7 +34,7 @@ describe('parseJsonData', () => {
       props: [],
       informations: [],
       moves: [],
-      stays: []
+      stays: [],
     })
   })
 
@@ -45,7 +45,7 @@ describe('parseJsonData', () => {
 
   it('should throw error for missing required keys', () => {
     const requiredKeys = ['persons', 'locations', 'acts', 'events', 'initialStates']
-    
+
     requiredKeys.forEach(keyToRemove => {
       const incompleteData = { ...validJsonData }
       delete (incompleteData as any)[keyToRemove]
@@ -60,12 +60,12 @@ describe('parseJsonData', () => {
       locations: validJsonData.locations,
       acts: validJsonData.acts,
       events: validJsonData.events,
-      initialStates: validJsonData.initialStates
+      initialStates: validJsonData.initialStates,
     }
-    
+
     const textarea = createMockTextArea(JSON.stringify(minimalData))
     const result = parseJsonData(textarea)
-    
+
     expect(result.props).toEqual([])
     expect(result.informations).toEqual([])
     expect(result.moves).toEqual([])
@@ -75,9 +75,9 @@ describe('parseJsonData', () => {
   it('should throw error if optional keys are not arrays', () => {
     const invalidData = {
       ...validJsonData,
-      props: 'not an array'
+      props: 'not an array',
     }
-    
+
     const textarea = createMockTextArea(JSON.stringify(invalidData))
     expect(() => parseJsonData(textarea)).toThrow('キー "props" は配列必須')
   })
@@ -88,9 +88,9 @@ describe('parseJsonData', () => {
       props: [{ id: 201, name: 'Key' }],
       informations: [{ id: 301, content: 'Secret info' }],
       moves: [],
-      stays: []
+      stays: [],
     }
-    
+
     const textarea = createMockTextArea(JSON.stringify(completeData))
     const result = parseJsonData(textarea)
     expect(result).toEqual(completeData)

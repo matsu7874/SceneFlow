@@ -53,8 +53,8 @@ export interface StoryData {
   informations: Information[];
   initialStates: InitialState[];
   acts: Act[];
-  moves: any[];
-  stays: any[];
+  moves: unknown[];
+  stays: unknown[];
   events: Event[];
 }
 
@@ -69,6 +69,7 @@ export interface IndexedData {
   acts: Act[];
   events: Event[];
   initialStates: InitialState[];
+  sortedEvents: Event[];
 }
 
 export interface PersonState {

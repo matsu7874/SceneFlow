@@ -16,7 +16,7 @@ describe('timeUtils', () => {
       expect(timeToMinutes('12')).toBe(0)
       expect(timeToMinutes('12:5')).toBe(0) // Missing leading zero
     })
-    
+
     it('should calculate minutes even for invalid hour/minute values', () => {
       expect(timeToMinutes('25:00')).toBe(1500) // 25 * 60
       expect(timeToMinutes('12:60')).toBe(780) // 12 * 60 + 60
