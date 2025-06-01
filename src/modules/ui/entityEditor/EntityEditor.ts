@@ -170,12 +170,18 @@ export class EntityEditor {
       fieldGroups: [
         {
           name: 'Basic Information',
-          fields: ['id', 'name', 'description'],
+          fields: ['id', 'name', 'description', 'capacity', 'category'],
           defaultOpen: true,
         },
         {
+          name: 'Content',
+          fields: ['content', 'source', 'reliability'],
+          collapsible: true,
+          defaultOpen: false,
+        },
+        {
           name: 'Attributes',
-          fields: ['attributes'],
+          fields: ['attributes', 'currentLocation'],
           collapsible: true,
           defaultOpen: false,
         },

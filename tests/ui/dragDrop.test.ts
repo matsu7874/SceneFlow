@@ -157,15 +157,16 @@ describe('HTML5 Drag & Drop helpers', () => {
 
     expect(element.draggable).toBe(true)
 
-    // Simulate dragstart with mock event
-    const dragStartEvent = {
-      type: 'dragstart',
-      dataTransfer: {
+    // Simulate dragstart event
+    const dragStartEvent = new Event('dragstart')
+    Object.defineProperty(dragStartEvent, 'dataTransfer', {
+      value: {
         effectAllowed: '',
         setData: vi.fn(),
       },
-    } as DragEvent
-    element.dispatchEvent(dragStartEvent as Event)
+      writable: true,
+    })
+    element.dispatchEvent(dragStartEvent)
 
     expect(manager.getDragData()).toEqual(dragData)
     expect(element.classList.contains('dragging')).toBe(true)
@@ -198,14 +199,18 @@ describe('HTML5 Drag & Drop helpers', () => {
 
     // Simulate dragover
     const preventDefault = vi.fn()
-    const dragOverEvent = {
-      type: 'dragover',
-      dataTransfer: {
+    const dragOverEvent = new Event('dragover')
+    Object.defineProperty(dragOverEvent, 'dataTransfer', {
+      value: {
         dropEffect: '',
       },
-      preventDefault,
-    } as DragEvent
-    element.dispatchEvent(dragOverEvent as Event)
+      writable: true,
+    })
+    Object.defineProperty(dragOverEvent, 'preventDefault', {
+      value: preventDefault,
+      writable: true,
+    })
+    element.dispatchEvent(dragOverEvent)
 
     expect(preventDefault).toHaveBeenCalled()
     expect(element.classList.contains('drop-target-valid')).toBe(true)
@@ -216,11 +221,12 @@ describe('HTML5 Drag & Drop helpers', () => {
 
     // Simulate drop
     const dropPreventDefault = vi.fn()
-    const dropEvent = {
-      type: 'drop',
-      preventDefault: dropPreventDefault,
-    } as DragEvent
-    element.dispatchEvent(dropEvent as Event)
+    const dropEvent = new Event('drop')
+    Object.defineProperty(dropEvent, 'preventDefault', {
+      value: dropPreventDefault,
+      writable: true,
+    })
+    element.dispatchEvent(dropEvent)
 
     expect(dropPreventDefault).toHaveBeenCalled()
     expect(element.classList.contains('drop-success')).toBe(true)
