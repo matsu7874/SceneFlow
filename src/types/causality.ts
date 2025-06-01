@@ -107,6 +107,17 @@ export interface SpeakPayload {
   informationId: EntityId
 }
 
+export interface UseItemPayload {
+  itemId: EntityId
+  targetId?: EntityId
+  targetType?: 'person' | 'item' | 'location'
+}
+
+export interface CombineItemsPayload {
+  itemIds: EntityId[]
+  resultItemId?: EntityId
+}
+
 // Timeline validation result
 export interface TimelineValidation {
   valid: boolean

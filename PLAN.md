@@ -16,7 +16,7 @@ SceneFlowの基盤となるモダン化が完了しました：
 ## 📊 進捗状況
 
 - ✅ Phase 1: 因果律エンジンの基盤構築
-- ⬜ Phase 2: 高度なデータ構造とAct定義
+- ✅ Phase 2: 高度なデータ構造とAct定義
 - ⬜ Phase 3: インタラクティブUI機能の実装
 - ⬜ Phase 4: 因果ビューと自動検証機能
 - ⬜ Phase 5: エンティティ編集とJSONエディタ
@@ -64,27 +64,27 @@ SceneFlowの基盤となるモダン化が完了しました：
 
 ---
 
-## Phase 2: 高度なデータ構造とAct定義 ⬜
+## Phase 2: 高度なデータ構造とAct定義 ✅
 
 ### 2.1 拡張エンティティの実装
 
-- [ ] `src/types/extendedEntities.ts` を作成
-  - [ ] 大道具・小道具の区別
-  - [ ] 情報（Information）エンティティ
-  - [ ] 人物の知識状態管理
+- [x] `src/types/extendedEntities.ts` を作成
+  - [x] 大道具・小道具の区別
+  - [x] 情報（Information）エンティティ
+  - [x] 人物の知識状態管理
 
 ### 2.2 複雑なActの実装
 
-- [ ] SpeakAct（情報の共有）
-- [ ] UseItemAct（アイテムの使用）
-- [ ] CombineItemsAct（アイテムの合成）
+- [x] SpeakAct（情報の共有）
+- [x] UseItemAct（アイテムの使用）
+- [x] CombineItemsAct（アイテムの合成）
 - [ ] 条件付きAct（特定の状態でのみ実行可能）
 
 ### 2.3 状態管理の拡張
 
-- [ ] `src/modules/state/extendedState.ts` を作成
-- [ ] 既存のstateと新しい因果律状態の統合
-- [ ] 状態の永続化（LocalStorage/IndexedDB）
+- [x] `src/modules/state/extendedState.ts` を作成
+- [x] 既存のstateと新しい因果律状態の統合
+- [x] 状態の永続化（LocalStorage/IndexedDB）
 
 ---
 
