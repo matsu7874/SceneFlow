@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  plugins: [react()],
   root: 'src',
-  base: './',
+  base: process.env.NODE_ENV === 'production' ? '/scene-flow/' : '/',
   build: {
     outDir: '../dist',
     emptyOutDir: true,
@@ -16,8 +18,8 @@ export default defineConfig({
       treeshake: {
         moduleSideEffects: false,
         propertyReadSideEffects: false,
-        tryCatchDeoptimization: false
-      }
+        tryCatchDeoptimization: false,
+      },
     },
   },
   server: {
