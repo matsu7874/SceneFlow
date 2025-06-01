@@ -1,6 +1,6 @@
 import { simState, setDOMElements, domElements } from './modules/state'
 import { getDOMElements } from './modules/utils/domUtils'
-import { timeToMinutes, minutesToTime } from './modules/utils/timeUtils'
+import { timeToMinutes } from './modules/utils/timeUtils'
 import { parseJsonData } from './modules/data/parser'
 import { indexStoryData, sortEvents } from './modules/data/indexer'
 import { generateLogEntries } from './modules/simulation/events'
@@ -75,17 +75,13 @@ function loadData(): void {
     updateUI(simState.currentTimeMinutes)
     setControlsDisabled(false)
 
-    console.log(
-      `�����Ɍ� & 줢��: B��� ${minutesToTime(simState.minTimeMinutes)} - ${minutesToTime(simState.maxTimeMinutes)}`,
-    )
-
     // Collapse the details section
     if (domElements.jsonDataDetails) {
       domElements.jsonDataDetails.open = false
     }
-  } catch (e: any) {
-    console.error('���/���:', e)
-    displayError(`��ɨ��: ${e.message}`)
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(String(e))
+    displayError(`エラー: ${err.message}`)
   }
 }
 

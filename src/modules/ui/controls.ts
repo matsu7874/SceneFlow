@@ -43,7 +43,8 @@ export function playSimulation(): void {
 
   simState.timerId = setInterval(() => {
     const now = performance.now()
-    const deltaSeconds = (now - simState.lastTimestamp!) / 1000
+    if (simState.lastTimestamp === undefined) return
+    const deltaSeconds = (now - simState.lastTimestamp) / 1000
     simState.lastTimestamp = now
 
     const deltaMinutes = deltaSeconds * MINUTES_PER_SECOND * simState.speed
@@ -61,8 +62,10 @@ export function playSimulation(): void {
 export function pauseSimulation(): void {
   if (!simState.isPlaying) return
 
-  clearInterval(simState.timerId!)
-  simState.timerId = null
+  if (simState.timerId !== null && simState.timerId !== undefined) {
+    clearInterval(simState.timerId)
+    simState.timerId = null
+  }
   simState.isPlaying = false
   domElements.playPauseButton.textContent = '▶ Play'
 }

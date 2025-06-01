@@ -109,11 +109,11 @@ export class ImportExportManager {
       name: 'name',
       description: 'description',
       currentLocation: 'currentLocation',
-      personality: (entity) => {
+      personality: entity => {
         const person = entity as EditableEntity & { attributes?: { personality?: string[] } }
         return person.attributes?.personality?.join(';') || ''
       },
-      skills: (entity) => {
+      skills: entity => {
         const person = entity as EditableEntity & { attributes?: { skills?: string[] } }
         return person.attributes?.skills?.join(';') || ''
       },
@@ -123,7 +123,7 @@ export class ImportExportManager {
       name: 'name',
       description: 'description',
       capacity: 'capacity',
-      connections: (entity) => {
+      connections: entity => {
         const location = entity as EditableEntity & { connections?: string[] }
         return location.connections?.join(';') || ''
       },
@@ -153,12 +153,12 @@ export class ImportExportManager {
   /**
    * Export data in specified format
    */
-  async exportData(
+  exportData(
     entities: EditableEntity[],
     relationships: Relationship[],
     connections: Connection[],
     options: ExportOptions,
-  ): Promise<ExportResult> {
+  ): ExportResult {
     try {
       const dataPackage: DataPackage = {
         version: '1.0.0',
@@ -178,37 +178,37 @@ export class ImportExportManager {
       let filename: string
 
       switch (options.format) {
-      case ExportFormat.JSON:
-        exportData = this.exportToJSON(dataPackage, options)
-        mimeType = 'application/json'
-        filename = options.filename || `sceneflow-export-${Date.now()}.json`
-        break
+        case ExportFormat.JSON:
+          exportData = this.exportToJSON(dataPackage, options)
+          mimeType = 'application/json'
+          filename = options.filename || `sceneflow-export-${Date.now()}.json`
+          break
 
-      case ExportFormat.YAML:
-        exportData = this.exportToYAML(dataPackage, options)
-        mimeType = 'application/x-yaml'
-        filename = options.filename || `sceneflow-export-${Date.now()}.yaml`
-        break
+        case ExportFormat.YAML:
+          exportData = this.exportToYAML(dataPackage, options)
+          mimeType = 'application/x-yaml'
+          filename = options.filename || `sceneflow-export-${Date.now()}.yaml`
+          break
 
-      case ExportFormat.CSV:
-        exportData = this.exportToCSV(entities, options)
-        mimeType = 'text/csv'
-        filename = options.filename || `sceneflow-export-${Date.now()}.csv`
-        break
+        case ExportFormat.CSV:
+          exportData = this.exportToCSV(entities, options)
+          mimeType = 'text/csv'
+          filename = options.filename || `sceneflow-export-${Date.now()}.csv`
+          break
 
-      case ExportFormat.XML:
-        exportData = this.exportToXML(dataPackage, options)
-        mimeType = 'application/xml'
-        filename = options.filename || `sceneflow-export-${Date.now()}.xml`
-        break
+        case ExportFormat.XML:
+          exportData = this.exportToXML(dataPackage, options)
+          mimeType = 'application/xml'
+          filename = options.filename || `sceneflow-export-${Date.now()}.xml`
+          break
 
-      default:
-        throw new Error(`Unsupported export format: ${options.format}`)
+        default:
+          throw new Error(`Unsupported export format: ${String(options.format)}`)
       }
 
       // Handle compression if requested
       if (options.compression && typeof exportData === 'string') {
-        exportData = await this.compressData(exportData)
+        exportData = this.compressData(exportData)
         mimeType = 'application/gzip'
         filename = filename.replace(/\.[^.]+$/, '.gz')
       }
@@ -227,10 +227,7 @@ export class ImportExportManager {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown export error'
 
-      this.feedbackManager?.showNotification(
-        `Export failed: ${errorMessage}`,
-        FeedbackType.ERROR,
-      )
+      this.feedbackManager?.showNotification(`Export failed: ${errorMessage}`, FeedbackType.ERROR)
 
       return {
         success: false,
@@ -242,10 +239,7 @@ export class ImportExportManager {
   /**
    * Import data from file or string
    */
-  async importData(
-    input: string | File,
-    options: ImportOptions = {},
-  ): Promise<ImportResult> {
+  async importData(input: string | File, options: ImportOptions = {}): Promise<ImportResult> {
     try {
       let content: string
       let detectedFormat: ExportFormat
@@ -261,32 +255,33 @@ export class ImportExportManager {
       let dataPackage: DataPackage
 
       switch (detectedFormat) {
-      case ExportFormat.JSON:
-        dataPackage = this.importFromJSON(content)
-        break
+        case ExportFormat.JSON:
+          dataPackage = this.importFromJSON(content)
+          break
 
-      case ExportFormat.YAML:
-        dataPackage = this.importFromYAML(content)
-        break
+        case ExportFormat.YAML:
+          dataPackage = this.importFromYAML(content)
+          break
 
-      case ExportFormat.CSV:
-        const entities = this.importFromCSV(content)
-        dataPackage = {
-          version: '1.0.0',
-          timestamp: Date.now(),
-          metadata: { exportedBy: 'CSV Import' },
-          entities,
-          relationships: [],
-          connections: [],
+        case ExportFormat.CSV: {
+          const entities = this.importFromCSV(content)
+          dataPackage = {
+            version: '1.0.0',
+            timestamp: Date.now(),
+            metadata: { exportedBy: 'CSV Import' },
+            entities,
+            relationships: [],
+            connections: [],
+          }
+          break
         }
-        break
 
-      case ExportFormat.XML:
-        dataPackage = this.importFromXML(content)
-        break
+        case ExportFormat.XML:
+          dataPackage = this.importFromXML(content)
+          break
 
-      default:
-        throw new Error(`Unsupported import format: ${detectedFormat}`)
+        default:
+          throw new Error(`Unsupported import format: ${String(detectedFormat)}`)
       }
 
       // Apply data transformation if provided
@@ -317,10 +312,7 @@ export class ImportExportManager {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown import error'
 
-      this.feedbackManager?.showNotification(
-        `Import failed: ${errorMessage}`,
-        FeedbackType.ERROR,
-      )
+      this.feedbackManager?.showNotification(`Import failed: ${errorMessage}`, FeedbackType.ERROR)
 
       return {
         success: false,
@@ -342,7 +334,7 @@ export class ImportExportManager {
   /**
    * Export to YAML format
    */
-  private exportToYAML(dataPackage: DataPackage, options: ExportOptions): string {
+  private exportToYAML(dataPackage: DataPackage, _options: ExportOptions): string {
     // Simple YAML serialization - in a real implementation, you'd use a YAML library
     const yamlLines: string[] = []
 
@@ -355,10 +347,10 @@ export class ImportExportManager {
         yamlLines.push(`${prefix}${key}: ${value}`)
       } else if (Array.isArray(value)) {
         yamlLines.push(`${prefix}${key}:`)
-        value.forEach((item, index) => {
+        value.forEach((item, _index) => {
           if (typeof item === 'object' && item !== null) {
             yamlLines.push(`${prefix}  - `)
-            Object.entries(item).forEach(([k, v]) => {
+            Object.entries(item as Record<string, unknown>).forEach(([k, v]) => {
               addYamlValue(k, v, indent + 2)
             })
           } else {
@@ -371,7 +363,7 @@ export class ImportExportManager {
           addYamlValue(k, v, indent + 1)
         })
       } else {
-        yamlLines.push(`${prefix}${key}: ${value}`)
+        yamlLines.push(`${prefix}${key}: ${String(value)}`)
       }
     }
 
@@ -385,19 +377,22 @@ export class ImportExportManager {
   /**
    * Export to CSV format
    */
-  private exportToCSV(entities: EditableEntity[], options: ExportOptions): string {
+  private exportToCSV(entities: EditableEntity[], _options: ExportOptions): string {
     if (entities.length === 0) {
       return 'No entities to export'
     }
 
     // Group entities by type
-    const entitiesByType = entities.reduce((acc, entity) => {
-      if (!acc[entity.type]) {
-        acc[entity.type] = []
-      }
-      acc[entity.type].push(entity)
-      return acc
-    }, {} as Record<string, EditableEntity[]>)
+    const entitiesByType = entities.reduce(
+      (acc, entity) => {
+        if (!acc[entity.type]) {
+          acc[entity.type] = []
+        }
+        acc[entity.type].push(entity)
+        return acc
+      },
+      {} as Record<string, EditableEntity[]>,
+    )
 
     const csvSections: string[] = []
 
@@ -409,23 +404,31 @@ export class ImportExportManager {
       const headerLine = `# ${type.toUpperCase()} ENTITIES\n${headers.join(',')}`
 
       const dataLines = typeEntities.map(entity => {
-        return headers.map(header => {
-          const mapper = mapping[header]
-          let value: string
+        return headers
+          .map(header => {
+            const mapper = mapping[header]
+            let value: string
 
-          if (typeof mapper === 'function') {
-            value = mapper(entity)
-          } else {
-            value = String((entity as Record<string, unknown>)[mapper] || '')
-          }
+            if (typeof mapper === 'function') {
+              value = mapper(entity)
+            } else {
+              const raw = (entity as unknown as Record<string, unknown>)[mapper]
+              value =
+                typeof raw === 'object' && raw !== null
+                  ? JSON.stringify(raw)
+                  : typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean'
+                    ? String(raw)
+                    : ''
+            }
 
-          // Escape CSV value
-          if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-            value = `"${value.replace(/"/g, '""')}"`
-          }
+            // Escape CSV value
+            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+              value = `"${value.replace(/"/g, '""')}"`
+            }
 
-          return value
-        }).join(',')
+            return value
+          })
+          .join(',')
       })
 
       csvSections.push([headerLine, ...dataLines].join('\n'))
@@ -437,7 +440,7 @@ export class ImportExportManager {
   /**
    * Export to XML format
    */
-  private exportToXML(dataPackage: DataPackage, options: ExportOptions): string {
+  private exportToXML(dataPackage: DataPackage, _options: ExportOptions): string {
     const xmlLines: string[] = ['<?xml version="1.0" encoding="UTF-8"?>']
 
     const escapeXml = (text: string): string => {
@@ -456,10 +459,10 @@ export class ImportExportManager {
         xmlLines.push(`${prefix}<${name}>${escapeXml(String(value))}</${name}>`)
       } else if (Array.isArray(value)) {
         xmlLines.push(`${prefix}<${name}>`)
-        value.forEach((item, index) => {
+        value.forEach((item, _index) => {
           if (typeof item === 'object' && item !== null) {
             xmlLines.push(`${prefix}  <item>`)
-            Object.entries(item).forEach(([k, v]) => {
+            Object.entries(item as Record<string, unknown>).forEach(([k, v]) => {
               addXmlElement(k, v, indent + 2)
             })
             xmlLines.push(`${prefix}  </item>`)
@@ -485,27 +488,32 @@ export class ImportExportManager {
     })
     xmlLines.push('</sceneflow-data>')
 
-    return options.prettify ? xmlLines.join('\n') : xmlLines.join('')
+    return xmlLines.join('\n')
   }
 
   /**
    * Import from JSON format
    */
   private importFromJSON(content: string): DataPackage {
-    const parsed = JSON.parse(content)
+    const parsed: unknown = JSON.parse(content)
 
-    // Handle both full data package and legacy formats
-    if (parsed.version && parsed.entities) {
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'version' in parsed &&
+      'entities' in parsed
+    ) {
       return parsed as DataPackage
     }
 
-    // Legacy format - assume it's just entities
     if (Array.isArray(parsed)) {
       return {
         version: '1.0.0',
         timestamp: Date.now(),
         metadata: { exportedBy: 'Legacy Import' },
-        entities: parsed,
+        entities: Array.isArray(parsed)
+          ? parsed.filter((e): e is EditableEntity => typeof e === 'object' && e !== null)
+          : [],
         relationships: [],
         connections: [],
       }
@@ -533,7 +541,10 @@ export class ImportExportManager {
    */
   private importFromCSV(content: string): EditableEntity[] {
     const entities: EditableEntity[] = []
-    const lines = content.split('\n').map(line => line.trim()).filter(line => line)
+    const lines = content
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line)
 
     let currentType: string | null = null
     let headers: string[] = []
@@ -612,59 +623,90 @@ export class ImportExportManager {
   private convertCSVToEntity(data: Record<string, unknown>, type: string): EditableEntity | null {
     try {
       const baseEntity = {
-        id: String(data.id || ''),
-        name: String(data.name || ''),
-        description: String(data.description || ''),
+        id: typeof data.id === 'string' || typeof data.id === 'number' ? String(data.id) : '',
+        name:
+          typeof data.name === 'string' || typeof data.name === 'number' ? String(data.name) : '',
+        description:
+          typeof data.description === 'string' || typeof data.description === 'number'
+            ? String(data.description)
+            : '',
         tags: [],
         metadata: {},
         type: type as EditableEntity['type'],
       }
 
       switch (type) {
-      case 'person':
-        return {
-          ...baseEntity,
-          type: 'person',
-          currentLocation: data.currentLocation ? String(data.currentLocation) : undefined,
-          attributes: {
-            personality: data.personality ? String(data.personality).split(';') : [],
-            skills: data.skills ? String(data.skills).split(';') : [],
-            relationships: {},
-          },
-        }
+        case 'person':
+          return {
+            ...baseEntity,
+            type: 'person',
+            currentLocation:
+              typeof data.currentLocation === 'string' || typeof data.currentLocation === 'number'
+                ? String(data.currentLocation)
+                : undefined,
+            attributes: {
+              personality: typeof data.personality === 'string' ? data.personality.split(';') : [],
+              skills: typeof data.skills === 'string' ? data.skills.split(';') : [],
+              relationships: {},
+            },
+          }
 
-      case 'location':
-        return {
-          ...baseEntity,
-          type: 'location',
-          connections: data.connections ? String(data.connections).split(';') : [],
-          capacity: data.capacity ? Number(data.capacity) : 10,
-          attributes: {},
-        }
+        case 'location':
+          return {
+            ...baseEntity,
+            type: 'location',
+            connections: typeof data.connections === 'string' ? data.connections.split(';') : [],
+            capacity:
+              typeof data.capacity === 'number'
+                ? data.capacity
+                : typeof data.capacity === 'string'
+                  ? Number(data.capacity)
+                  : 10,
+            attributes: {},
+          }
 
-      case 'item':
-        return {
-          ...baseEntity,
-          type: 'item',
-          category: data.category ? String(data.category) : undefined,
-          owner: data.owner ? String(data.owner) : undefined,
-          location: data.location ? String(data.location) : undefined,
-          attributes: {},
-        }
+        case 'item':
+          return {
+            ...baseEntity,
+            type: 'item',
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            category: typeof data.category === 'string' ? (data.category as any) : undefined,
+            owner:
+              typeof data.owner === 'string' || typeof data.owner === 'number'
+                ? String(data.owner)
+                : undefined,
+            location:
+              typeof data.location === 'string' || typeof data.location === 'number'
+                ? String(data.location)
+                : undefined,
+            attributes: {},
+          }
 
-      case 'information':
-        return {
-          ...baseEntity,
-          type: 'information',
-          content: String(data.content || ''),
-          category: data.category ? String(data.category) : undefined,
-          source: data.source ? String(data.source) : undefined,
-          reliability: data.reliability ? Number(data.reliability) : 1.0,
-          attributes: {},
-        }
+        case 'information':
+          return {
+            ...baseEntity,
+            type: 'information',
+            content:
+              typeof data.content === 'string' || typeof data.content === 'number'
+                ? String(data.content)
+                : '',
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            category: typeof data.category === 'string' ? (data.category as any) : undefined,
+            source:
+              typeof data.source === 'string' || typeof data.source === 'number'
+                ? String(data.source)
+                : undefined,
+            reliability:
+              typeof data.reliability === 'number'
+                ? data.reliability
+                : typeof data.reliability === 'string'
+                  ? Number(data.reliability)
+                  : 1.0,
+            attributes: {},
+          }
 
-      default:
-        return null
+        default:
+          return null
       }
     } catch {
       return null
@@ -674,7 +716,7 @@ export class ImportExportManager {
   /**
    * Import from XML format
    */
-  private importFromXML(content: string): DataPackage {
+  private importFromXML(_content: string): DataPackage {
     // Simple XML parsing - in a real implementation, you'd use a proper XML parser
     throw new Error('XML import not implemented - please use JSON format')
   }
@@ -687,15 +729,15 @@ export class ImportExportManager {
     const ext = filename.toLowerCase().split('.').pop()
 
     switch (ext) {
-    case 'json':
-      return ExportFormat.JSON
-    case 'yaml':
-    case 'yml':
-      return ExportFormat.YAML
-    case 'csv':
-      return ExportFormat.CSV
-    case 'xml':
-      return ExportFormat.XML
+      case 'json':
+        return ExportFormat.JSON
+      case 'yaml':
+      case 'yml':
+        return ExportFormat.YAML
+      case 'csv':
+        return ExportFormat.CSV
+      case 'xml':
+        return ExportFormat.XML
     }
 
     // Try to detect from content
@@ -723,7 +765,7 @@ export class ImportExportManager {
   private async readFile(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
-      reader.onload = (e) => resolve(e.target?.result as string)
+      reader.onload = e => resolve(e.target?.result as string)
       reader.onerror = () => reject(new Error('Failed to read file'))
       reader.readAsText(file)
     })
@@ -732,7 +774,7 @@ export class ImportExportManager {
   /**
    * Compress data using gzip
    */
-  private async compressData(data: string): Promise<Blob> {
+  private compressData(data: string): Blob {
     // Simple compression simulation - in a real implementation, you'd use actual compression
     const encoder = new TextEncoder()
     const compressed = encoder.encode(data)
@@ -780,7 +822,7 @@ export class ImportExportManager {
   /**
    * Process import data according to options
    */
-  private processImportData(dataPackage: DataPackage, options: ImportOptions): ImportResult {
+  private processImportData(dataPackage: DataPackage, _options: ImportOptions): ImportResult {
     const summary = {
       entitiesImported: 0,
       relationshipsImported: 0,

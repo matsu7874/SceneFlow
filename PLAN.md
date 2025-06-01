@@ -1,231 +1,366 @@
-# SceneFlow 次世代機能開発計画
+# Scene-Flow React移行計画
 
-## 🎉 モダン化完了
+## プロジェクト概要
 
-SceneFlowの基盤となるモダン化が完了しました：
+Scene-Flowは、イマーシブシアターシミュレーターであり、現在はVanilla JavaScript + TypeScriptで実装されている。これをReactで書き換え、GitHub Pagesで公開する。
 
-- ✅ Vite + TypeScript環境への完全移行
-- ✅ 包括的なテストスイート（80%以上のカバレッジ）
-- ✅ CI/CD パイプライン構築
-- ✅ セキュリティとパフォーマンスの最適化
+## 現在の技術スタックとファイル構成
 
----
+### 技術スタック
 
-# 開発計画書：物語作成支援機能 "Causal Story Weaver"
+- **フロントエンド**:
+  - Vanilla JavaScript版 (ルート/index.html内のscriptタグ - 参考実装)
+  - TypeScript版 (src/main.ts - 現在のメイン実装)
+- **ビルドツール**: Vite
+- **テストツール**: Vitest
+- **コード品質**: ESLint, Prettier, Husky
 
-## 📊 進捗状況
+### 現在のファイル構成
 
-- ✅ Phase 1: 因果律エンジンの基盤構築
-- ✅ Phase 2: 高度なデータ構造とAct定義
-- ✅ Phase 3: インタラクティブUI機能の実装
-- ✅ Phase 4: 因果ビューと自動検証機能
-- ✅ Phase 5: エンティティ編集とJSONエディタ
-- ✅ Phase 6: 場所の接続関係可視化
-- ⬜ Phase 7: 統合テストとリリース準備
+```
+scene-flow/
+├── index.html          # Vanilla JS参考実装（インラインscript）
+├── src/
+│   ├── index.html      # TypeScript版エントリーポイント
+│   ├── main.ts         # メインロジック
+│   └── modules/        # モジュール化されたコード
+├── dist/               # ビルド出力（GitHub Pagesで公開）
+└── package.json
+```
+
+## 移行後の技術スタックと構成
+
+### 技術スタック
+
+- **フロントエンド**: React 18 + TypeScript
+- **状態管理**: React Context API または Zustand（グローバル状態管理が必要な場合）
+- **ビルドツール**: Vite（既存を流用）
+- **テストツール**: Vitest + React Testing Library
+- **コード品質**: 既存の設定を維持
+- **デプロイ**: GitHub Actions → GitHub Pages
+
+### 移行後のファイル構成
+
+```
+scene-flow/
+├── docs/                    # ドキュメント・参考実装
+│   └── vanilla-example.html # 現在のルートindex.htmlを移動
+├── src/
+│   ├── index.html          # Reactアプリのエントリー
+│   ├── main.tsx            # React起動ポイント
+│   ├── App.tsx             # ルートコンポーネント
+│   └── components/         # Reactコンポーネント
+├── dist/                   # ビルド出力（.gitignore）
+└── .github/
+    └── workflows/
+        └── deploy.yml      # 自動デプロイ設定
+```
+
+## 作業フェーズ
+
+### フェーズ0: ファイル構成の整理（0.5日）
+
+1. **現在の参考実装の移動**
+
+   ```bash
+   mkdir -p docs
+   mv index.html docs/vanilla-example.html
+   ```
+
+2. **README.mdの更新**
+
+   - Vanilla JS版の参考実装の場所を明記
+   - 開発方法とビルド方法の説明
 
-## 🎯 目標
+3. **.gitignoreの更新**
+   - dist/フォルダを追加（ビルド成果物）
 
-既存のSceneFlowに、登場人物の行動（Act）が持つ因果関係を自動検証できる機能を追加し、整合性の取れた複雑な物語の構築を支援する高度なツールに進化させる。
+### フェーズ1: React環境のセットアップとGitHub Pages準備（1日）
 
----
+1. **必要なパッケージのインストール**
 
-## Phase 1: 因果律エンジンの基盤構築 ✅
+   ```bash
+   npm install react react-dom @types/react @types/react-dom
+   npm install -D @vitejs/plugin-react @testing-library/react @testing-library/jest-dom
+   ```
 
-### 1.1 拡張型定義の作成
+2. **Vite設定の更新**
 
-- [x] `src/types/causality.ts` を作成
-  - [x] 事前条件・事後条件を持つActインターフェース
-  - [x] WorldState型（人物の位置、所有物、知識状態）
-  - [x] CausalLink型（因果関係の表現）
+   - vite.config.tsにReactプラグインを追加
+   - TypeScript設定でJSX対応を追加
+   - GitHub Pages用のbase設定追加
 
-### 1.2 Act実装の基本構造
+   ```typescript
+   export default defineConfig({
+     base: '/scene-flow/', // リポジトリ名
+     plugins: [react()],
+     // ...
+   })
+   ```
 
-- [x] `src/modules/causality/acts/` ディレクトリを作成
-- [x] BaseActクラスの実装
-  ```typescript
-  abstract class BaseAct {
-    abstract checkPreconditions(state: WorldState): boolean
-    abstract applyPostconditions(state: WorldState): WorldState
-    abstract getDescription(): string
-  }
-  ```
-- [x] 基本的なActの実装
-  - [x] MoveAct（移動）
-  - [x] GiveItemAct（アイテム受け渡し）
-  - [x] TakeItemAct（アイテム取得）
-  - [x] PlaceItemAct（アイテム配置）
+3. **基本的なReactアプリケーション構造の作成**
 
-### 1.3 因果律エンジンのコア実装
+   - src/App.tsx
+   - src/main.tsx（エントリーポイント）
+   - src/index.htmlの更新
 
-- [x] `src/modules/causality/engine.ts` を作成
-- [x] タイムライン整合性チェック機能
-- [x] 状態のロールバック・ロールフォワード機能
-- [x] 因果関係の追跡機能
+4. **GitHub Actions設定**
+   - .github/workflows/deploy.ymlの作成
+   - 自動ビルド・デプロイの設定
 
----
+### フェーズ2: コンポーネント設計と実装（3-4日）
 
-## Phase 2: 高度なデータ構造とAct定義 ✅
+#### コンポーネント階層構造
 
-### 2.1 拡張エンティティの実装
+```
+App
+├── Header
+├── DataInput
+│   └── JsonDataInput
+├── SimulationControl
+│   ├── PlayPauseButton
+│   ├── SpeedControl
+│   └── Timeline
+├── OutputArea
+│   ├── LocationOutput
+│   └── LogOutput
+├── LocationLayout
+│   └── LocationBox
+└── ErrorDisplay
+```
 
-- [x] `src/types/extendedEntities.ts` を作成
-  - [x] 大道具・小道具の区別
-  - [x] 情報（Information）エンティティ
-  - [x] 人物の知識状態管理
+#### 主要コンポーネントの実装順序
 
-### 2.2 複雑なActの実装
+1. **App.tsx** - メインコンテナ
+2. **DataInput.tsx** - JSONデータ入力部分
+3. **SimulationControl.tsx** - シミュレーション制御部分
+4. **LocationLayout.tsx** - 場所レイアウト表示
+5. **OutputArea.tsx** - 出力エリア（位置情報、ログ）
 
-- [x] SpeakAct（情報の共有）
-- [x] UseItemAct（アイテムの使用）
-- [x] CombineItemsAct（アイテムの合成）
-- [ ] 条件付きAct（特定の状態でのみ実行可能）
+### フェーズ3: 状態管理の実装（2日）
 
-### 2.3 状態管理の拡張
+#### グローバル状態の設計
 
-- [x] `src/modules/state/extendedState.ts` を作成
-- [x] 既存のstateと新しい因果律状態の統合
-- [x] 状態の永続化（LocalStorage/IndexedDB）
+```typescript
+interface SimulationState {
+  // 時間管理
+  currentTimeMinutes: number
+  minTimeMinutes: number
+  maxTimeMinutes: number
 
----
+  // 再生状態
+  isPlaying: boolean
+  speed: number
 
-## Phase 3: インタラクティブUI機能の実装 ✅
+  // データ
+  indexedData: IndexedData | null
+  sortedEvents: Event[] | null
+  eventLogEntries: LogEntry[]
 
-### 3.1 ドラッグ&ドロップ機能
+  // UI状態
+  isDetailsOpen: boolean
+}
+```
 
-- [x] `src/modules/ui/dragDrop.ts` を作成
-- [x] 人物の移動をドラッグ&ドロップで実現
-- [x] アイテムの受け渡しUI
-- [x] リアルタイム整合性チェック
+#### Context APIまたはZustandでの実装
 
-### 3.2 ビジュアルフィードバック
+- シミュレーション状態の管理
+- アクション（play, pause, seek, changeSpeed, loadData）の実装
 
-- [x] 実行可能なActのハイライト表示
-- [x] 実行不可能な理由の表示
-- [x] アニメーション付き状態遷移
+### フェーズ4: 既存ロジックの移植（2-3日）
 
-### 3.3 タイムライン編集UI
+1. **ユーティリティ関数の移植**
 
-- [x] Act の追加・削除・並び替え
-- [x] 時間軸上での Act 配置
-- [x] 複数の Act の一括編集
+   - 時間変換関数（timeToMinutes, minutesToTime）
+   - データパース関数（parseJsonData）
+   - インデックス関数（indexStoryData, sortEvents）
 
----
+2. **シミュレーションロジックの移植**
 
-## Phase 4: 因果ビューと自動検証機能 ✅
+   - getStateAtTime
+   - generateLogEntries
+   - updateLocationVisualization
 
-### 4.1 因果関係の可視化
+3. **カスタムフックの作成**
+   - useSimulation - シミュレーション制御
+   - useStoryData - データ管理
+   - useLocationLayout - レイアウト管理
 
-- [x] `src/modules/ui/causalityView.ts` を作成
-- [x] グラフベースの因果関係表示
-- [x] 「なぜこの状態になったか」の逆引き追跡
-- [x] 影響範囲の可視化
+### フェーズ5: スタイリングの移植（1日）
 
-### 4.2 自動検証機能
+1. **CSS Modulesへの移行**
 
-- [x] 物語の論理的整合性チェック
-- [x] 到達不可能な状態の検出
-- [x] デッドロックの検出
-- [x] 推奨される Act の提案
+   - インラインスタイルをCSS Modulesに変換
+   - レスポンシブデザインの維持
 
-### 4.3 検証結果レポート
+2. **スタイルの整理**
+   - コンポーネント単位でのスタイル管理
+   - 共通スタイルの抽出
 
-- [x] 問題箇所のハイライト
-- [x] 修正提案の表示
-- [x] 検証結果のエクスポート
+### フェーズ6: テストの実装（2日）
 
----
+1. **ユニットテスト**
 
-## Phase 5: エンティティ編集とJSONエディタ ✅
+   - ユーティリティ関数のテスト
+   - カスタムフックのテスト
 
-### 5.1 高度なエンティティエディタ
+2. **コンポーネントテスト**
 
-- [x] `src/modules/ui/entityEditor/` を作成
-- [x] フォームベースの編集UI
-- [x] リレーション編集（接続関係など）
-- [x] バリデーション機能
+   - 各コンポーネントの表示テスト
+   - インタラクションテスト
 
-### 5.2 JSONエディタの強化
+3. **統合テスト**
+   - シミュレーション全体の動作テスト
 
-- [x] シンタックスハイライト
-- [x] スキーマ検証
-- [x] オートコンプリート
-- [x] Diff表示機能
+### フェーズ7: 最適化と仕上げ（1日）
 
-### 5.3 インポート/エクスポート機能
+1. **パフォーマンス最適化**
 
-- [x] 複数フォーマット対応（JSON, YAML, CSV, XML）
-- [x] 部分的なインポート/エクスポート
-- [x] バージョン管理対応
+   - React.memo の適用
+   - useMemo / useCallback の適用
+   - 不要な再レンダリングの削減
 
----
+2. **アクセシビリティの改善**
 
-## Phase 6: 場所の接続関係可視化 ✅
+   - ARIA属性の追加
+   - キーボード操作のサポート
 
-### 6.1 ノードベースのマップエディタ
+3. **ドキュメントの更新**
+   - README.mdの更新
+   - コンポーネントのドキュメント
 
-- [x] `src/modules/ui/mapEditor/MapEditor.ts` を作成
-- [x] ドラッグ可能なノード（場所）
-- [x] 接続関係の視覚的編集
-- [x] 自動レイアウト機能
+## 今後の拡張機能（REQUIREMENTS.mdより）
 
-### 6.2 3D/2.5D表示オプション
+移行完了後に実装を検討する機能：
 
-- [x] 立体的な場所配置
-- [x] 階層構造の表現
-- [x] ミニマップ機能
+1. **画面操作での物語データ編集**
 
-### 6.3 経路探索と分析
+   - ドラッグ&ドロップでの人物移動
+   - 場所の追加・削除
 
-- [x] 最短経路の計算・表示（A*アルゴリズム）
-- [x] 到達可能性の分析
-- [x] ボトルネックの検出
+2. **部屋の接続関係の可視化**
 
----
+   - グラフ表示での接続関係
 
-## Phase 7: 統合テストとリリース準備 ⬜
+3. **エンティティ一覧機能**
 
-### 7.1 E2Eテストの実装
+   - 登場人物、場所、小道具などの一覧表示
 
-- [ ] Playwright または Cypress の導入
-- [ ] 主要なユーザーフローのテスト
-- [ ] ビジュアルリグレッションテスト
+4. **因果ビュー**
 
-### 7.2 パフォーマンス最適化
+   - アイテムの所有履歴追跡
+   - 行動の前提条件・事後条件の検証
 
-- [ ] 大規模データ（1000+ Acts）での動作検証
-- [ ] メモリ使用量の最適化
-- [ ] レンダリングパフォーマンスの改善
+5. **人物ごとの所有物表示**
+   - 各人物が持っているアイテムの表示
 
-### 7.3 ドキュメントとチュートリアル
+## GitHub Pagesデプロイ設定
 
-- [ ] ユーザーガイドの作成
-- [ ] API ドキュメント
-- [ ] サンプルストーリーの提供
-- [ ] インタラクティブチュートリアル
+### ビルドプロセス
 
----
+1. **開発時**: `npm run dev`でsrc/index.htmlを起点に開発
+2. **ビルド時**: `npm run build`でdist/に最適化されたファイルを出力
+3. **デプロイ時**: GitHub Actionsがdist/の内容をGitHub Pagesに公開
 
-## ✅ 完了基準
+### GitHub Actions設定（.github/workflows/deploy.yml）
 
-- [ ] すべての新機能が実装され、テスト済み
-- [ ] 既存機能との完全な互換性
-- [ ] パフォーマンステストに合格（1000+ Acts で 60fps）
-- [ ] ドキュメントが完備
-- [ ] アクセシビリティ基準を満たす
+```yaml
+name: Deploy to GitHub Pages
 
-## ⚠️ 技術的考慮事項
+on:
+  push:
+    branches: [main]
 
-- 既存のコードベースを最大限活用し、破壊的変更を避ける
-- 新機能は段階的に有効化できるようフィーチャーフラグを使用
-- モバイル対応を考慮した設計
-- 国際化（i18n）の準備
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
-## 🔄 段階的リリース計画
+    steps:
+      - uses: actions/checkout@v3
 
-1. **v2.0-alpha**: Phase 1-2 完了時点でアルファ版リリース
-2. **v2.0-beta**: Phase 3-4 完了時点でベータ版リリース
-3. **v2.0**: Phase 7 完了後に正式リリース
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
----
+      - name: Install dependencies
+        run: npm ci
 
-_このドキュメントは開発の進行に応じて更新されます。_
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+```
+
+### デプロイ後のURL
+
+- https://[username].github.io/scene-flow/
+
+## 作業見積もり
+
+- **総作業日数**: 約12-16日（GitHub Pages設定含む）
+- **優先度**:
+  1. ファイル構成整理とGitHub Pages準備（フェーズ0-1）
+  2. 基本機能の移植（フェーズ2-4）
+  3. UI/UXの改善（フェーズ5）
+  4. 品質保証（フェーズ6-7）
+
+## リスクと対策
+
+### リスク
+
+1. **状態管理の複雑性**
+
+   - 対策: 段階的な移行とテストの充実
+
+2. **パフォーマンスの低下**
+
+   - 対策: 初期段階からの最適化意識
+
+3. **既存機能の漏れ**
+   - 対策: 詳細な機能一覧の作成とチェックリスト
+
+### 成功指標
+
+1. 既存の全機能がReactで動作する
+2. パフォーマンスが既存版と同等以上
+3. コードの保守性・拡張性が向上
+4. テストカバレッジ80%以上
+
+## 次のステップ
+
+1. この計画のレビューと承認
+2. フェーズ0のファイル構成整理から開始
+3. GitHub Pagesの設定確認
+4. フェーズ1の環境セットアップ
+5. 各フェーズ完了時の動作確認とフィードバック
+
+## 開発からデプロイまでのフロー
+
+1. **ローカル開発**
+
+   ```bash
+   npm run dev  # http://localhost:3000で確認
+   ```
+
+2. **ビルド確認**
+
+   ```bash
+   npm run build    # dist/にビルド
+   npm run preview  # ビルド結果をローカルで確認
+   ```
+
+3. **デプロイ**
+
+   ```bash
+   git add .
+   git commit -m "feat: implement feature"
+   git push origin main  # GitHub Actionsが自動でデプロイ
+   ```
+
+4. **公開確認**
+   - https://[username].github.io/scene-flow/ にアクセス
