@@ -25,13 +25,13 @@ Object.defineProperty(document, 'createElementNS', {
     element.removeChild = vi.fn()
     element.querySelector = vi.fn()
     element.querySelectorAll = vi.fn(() => [])
-    
+
     // Mock important properties
     Object.defineProperty(element, 'firstChild', {
       value: null,
       writable: true,
     })
-    
+
     return element
   }),
 })
@@ -55,7 +55,7 @@ describe('CausalityView', () => {
       y: 0,
       toJSON: vi.fn(),
     }))
-    
+
     // Mock querySelector methods
     container.querySelector = vi.fn((selector: string) => {
       if (selector === '.causality-canvas') {
@@ -86,7 +86,7 @@ describe('CausalityView', () => {
     }
 
     engine = new CausalityEngine(initialState)
-    
+
     causalityView = new CausalityView({
       container,
       engine,

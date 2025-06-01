@@ -153,7 +153,7 @@ export class ValidationReporter {
 
       // Filter suggestions by confidence threshold
       const filteredSuggestions = suggestions.filter(
-        s => s.confidence >= this.config.suggestionConfidenceThreshold
+        s => s.confidence >= this.config.suggestionConfidenceThreshold,
       )
 
       const validationDuration = Date.now() - startTime
@@ -411,7 +411,7 @@ export class ValidationReporter {
    */
   private async generateSuggestionsForIssue(
     issue: ValidationIssue,
-    initialState: WorldState
+    initialState: WorldState,
   ): Promise<ValidationSuggestion[]> {
     const suggestions: ValidationSuggestion[] = []
 
@@ -455,7 +455,7 @@ export class ValidationReporter {
    */
   private generatePreconditionFixSuggestions(
     issue: ValidationIssue,
-    initialState: WorldState
+    initialState: WorldState,
   ): ValidationSuggestion[] {
     const suggestions: ValidationSuggestion[] = []
     const act = this.engine.getActs().get(issue.affectedActIds[0])
@@ -535,7 +535,7 @@ export class ValidationReporter {
    */
   private generateDeadlockFixSuggestions(
     issue: ValidationIssue,
-    initialState: WorldState
+    initialState: WorldState,
   ): ValidationSuggestion[] {
     const suggestions: ValidationSuggestion[] = []
 
@@ -784,7 +784,7 @@ export class ValidationReporter {
     // Simplified comparison - in practice, would compare postconditions
     return (
       actA.type === actB.type &&
-      JSON.stringify(actA.getAffectedEntities().sort()) === 
+      JSON.stringify(actA.getAffectedEntities().sort()) ===
       JSON.stringify(actB.getAffectedEntities().sort())
     )
   }
@@ -792,7 +792,7 @@ export class ValidationReporter {
   private findStateInconsistencies(
     oldState: WorldState,
     newState: WorldState,
-    act: Act
+    act: Act,
   ): ValidationIssue[] {
     const issues: ValidationIssue[] = []
 
@@ -818,7 +818,7 @@ export class ValidationReporter {
 
   private findMissingPrerequisites(
     act: Act,
-    _initialState: WorldState
+    _initialState: WorldState,
   ): Array<{ type: string; entities: EntityId[] }> {
     // This would analyze the act's preconditions and suggest what's missing
     // For now, return a placeholder

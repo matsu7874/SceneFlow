@@ -65,8 +65,8 @@ describe('ValidationReporter', () => {
       const report = await reporter.generateReport(initialState)
 
       expect(report.totalIssues).toBeGreaterThan(0)
-      expect(report.issues.some(issue => 
-        issue.type === ValidationIssueType.PRECONDITION_VIOLATED
+      expect(report.issues.some(issue =>
+        issue.type === ValidationIssueType.PRECONDITION_VIOLATED,
       )).toBe(true)
     })
 
@@ -197,7 +197,7 @@ describe('ValidationReporter', () => {
 
       // Different types of acts should not be flagged as redundant
       const redundantIssues = report.issues.filter(
-        issue => issue.type === ValidationIssueType.REDUNDANT_ACT
+        issue => issue.type === ValidationIssueType.REDUNDANT_ACT,
       )
       expect(redundantIssues).toHaveLength(0)
     })
@@ -215,7 +215,7 @@ describe('ValidationReporter', () => {
       const report = await reporter.generateReport(initialState)
 
       expect(report.suggestions.length).toBeGreaterThanOrEqual(0)
-      
+
       if (report.suggestions.length > 0) {
         const suggestion = report.suggestions[0]
         expect(suggestion.description).toBeDefined()
@@ -266,7 +266,7 @@ describe('ValidationReporter', () => {
 
       // Valid sequence should have no consistency issues
       const consistencyIssues = report.issues.filter(
-        issue => issue.type === ValidationIssueType.INCONSISTENT_STATE
+        issue => issue.type === ValidationIssueType.INCONSISTENT_STATE,
       )
       expect(consistencyIssues).toHaveLength(0)
     })
@@ -385,7 +385,7 @@ describe('ValidationReporter', () => {
 
       expect(report.issuesBySeverity).toBeDefined()
       expect(report.issuesByType).toBeDefined()
-      
+
       const totalCounted = Object.values(report.issuesBySeverity)
         .reduce((sum, count) => sum + count, 0)
       expect(totalCounted).toBe(report.totalIssues)
