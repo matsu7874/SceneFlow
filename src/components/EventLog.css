@@ -1,0 +1,51 @@
+.event-log {
+  margin-bottom: 20px;
+}
+
+.event-log h3 {
+  margin-bottom: 10px;
+  font-size: 1.1em;
+}
+
+.event-log h3 span {
+  color: #007bff;
+}
+
+.log-output {
+  background: white;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  min-height: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+.log-entry {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.log-entry:last-child {
+  margin-bottom: 0;
+}
+
+.log-time {
+  color: #6c757d;
+  margin-right: 8px;
+}
+
+.log-person {
+  margin-right: 5px;
+}
+
+.log-text {
+  color: #333;
+}
+
+.empty-message {
+  color: #6c757d;
+  text-align: center;
+  padding: 40px 20px;
+}

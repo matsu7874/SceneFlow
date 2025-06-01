@@ -1,0 +1,21 @@
+.location-layout {
+  margin-bottom: 20px;
+}
+
+.location-layout h2 {
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.location-layout h2 span {
+  color: #007bff;
+}
+
+.layout-canvas {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: white;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+}
