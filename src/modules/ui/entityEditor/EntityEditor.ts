@@ -5,7 +5,7 @@
  */
 
 import type { EntityId } from '../../../types/causality'
-import type { ExtendedProp, Information } from '../../../types/extendedEntities'
+import type { } from '../../../types/extendedEntities'
 import { PropCategory, InformationCategory } from '../../../types/extendedEntities'
 import { VisualFeedbackManager, FeedbackType } from '../visualFeedback'
 
@@ -1224,7 +1224,7 @@ export class EntityEditor {
 
     // Remove tag buttons
     this.container.querySelectorAll('.remove-tag').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', (_e) => {
         const field = (btn as HTMLElement).dataset.field!
         const tag = (btn as HTMLElement).dataset.tag!
         this.removeTag(field, tag)
@@ -1245,7 +1245,7 @@ export class EntityEditor {
 
     // Remove entity buttons
     this.container.querySelectorAll('.remove-entity').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', (_e) => {
         const field = (btn as HTMLElement).dataset.field!
         const entityId = (btn as HTMLElement).dataset.entityId!
         this.removeEntityFromField(field, entityId)
@@ -1254,7 +1254,7 @@ export class EntityEditor {
 
     // Array input handling
     this.container.querySelectorAll('.add-item-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', (_e) => {
         const arrayInput = (btn as HTMLElement).closest('.array-input')
         const field = (arrayInput as HTMLElement)?.dataset.field!
         const input = arrayInput?.querySelector('.add-array-item input') as HTMLInputElement
@@ -1269,7 +1269,7 @@ export class EntityEditor {
 
     // Remove array item buttons
     this.container.querySelectorAll('.remove-array-item').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', (_e) => {
         const arrayItem = (btn as HTMLElement).closest('.array-item')
         const arrayInput = arrayItem?.closest('.array-input')
         const field = (arrayInput as HTMLElement)?.dataset.field!
@@ -1437,7 +1437,7 @@ export class EntityEditor {
 
       // Re-attach event handlers for remove buttons
       tagsDisplay.querySelectorAll('.remove-tag').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', (_e) => {
           const field = (btn as HTMLElement).dataset.field!
           const tag = (btn as HTMLElement).dataset.tag!
           this.removeTag(field, tag)

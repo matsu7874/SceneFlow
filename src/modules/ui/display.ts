@@ -45,12 +45,50 @@ export function updateUI(currentMinutes: number): void {
     })
   }
 
-  // 4. Filter and Display Logs (Text only for security)
-  const logToShow = simState.eventLogEntries
+  // 4. Filter and Display Logs
+  domElements.logOutput.innerHTML = '' // Clear existing content
+  const filteredEntries = simState.eventLogEntries
     .filter(entry => entry.timeMinutes <= currentMinutes)
-    .map(entry => entry.text)
-    .join('\n')
-  domElements.logOutput.textContent = logToShow || 'ログはありません'
+  
+  if (filteredEntries.length === 0) {
+    domElements.logOutput.textContent = 'ログはありません'
+  } else {
+    // Create log entries as DOM elements for security
+    filteredEntries.forEach(entry => {
+      const logLine = document.createElement('div')
+      logLine.style.marginBottom = '4px'
+      
+      // Parse the log entry to extract parts
+      const match = entry.text.match(/^\[([^\]]+)\]\s*<strong[^>]*>([^<]+)<\/strong>\s*(.*)$/)
+      if (match) {
+        const [, time, personName, rest] = match
+        
+        // Time part
+        const timeSpan = document.createElement('span')
+        timeSpan.textContent = `[${time}] `
+        logLine.appendChild(timeSpan)
+        
+        // Person name with color
+        const personSpan = document.createElement('strong')
+        const colorMatch = entry.text.match(/color:\s*([^;"]+)/)
+        if (colorMatch) {
+          personSpan.style.color = colorMatch[1]
+        }
+        personSpan.textContent = personName
+        logLine.appendChild(personSpan)
+        
+        // Rest of the text
+        const restSpan = document.createElement('span')
+        restSpan.textContent = ' ' + rest.replace(/<[^>]*>/g, '') // Remove any remaining HTML
+        logLine.appendChild(restSpan)
+      } else {
+        // Fallback for entries that don't match the expected format
+        logLine.textContent = entry.text.replace(/<[^>]*>/g, '')
+      }
+      
+      domElements.logOutput.appendChild(logLine)
+    })
+  }
   domElements.logOutput.scrollTop = domElements.logOutput.scrollHeight
 
   // 5. Update Fixed Layout Visualization

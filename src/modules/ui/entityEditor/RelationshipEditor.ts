@@ -212,12 +212,14 @@ export class RelationshipEditor {
    */
   private setupSVG(): void {
     this.svg = this.container.querySelector('.relationship-svg') as SVGElement
-    this.svg.style.position = 'absolute'
-    this.svg.style.top = '0'
-    this.svg.style.left = '0'
-    this.svg.style.width = '100%'
-    this.svg.style.height = '100%'
-    this.svg.style.pointerEvents = 'all'
+    if (this.svg) {
+      this.svg.style.position = 'absolute'
+      this.svg.style.top = '0'
+      this.svg.style.left = '0'
+      this.svg.style.width = '100%'
+      this.svg.style.height = '100%'
+      this.svg.style.pointerEvents = 'all'
+    }
   }
 
   /**
@@ -308,8 +310,10 @@ export class RelationshipEditor {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
     // Clear SVG
-    while (this.svg.firstChild) {
-      this.svg.removeChild(this.svg.firstChild)
+    if (this.svg && this.svg.firstChild) {
+      while (this.svg.firstChild) {
+        this.svg.removeChild(this.svg.firstChild)
+      }
     }
   }
 

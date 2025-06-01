@@ -188,7 +188,7 @@ export class MapEditor {
 
     this.canvas = this.container.querySelector('.map-canvas') as HTMLCanvasElement
     this.svg = this.container.querySelector('.map-svg') as SVGElement
-    
+
     const ctx = this.canvas.getContext('2d')
     if (!ctx) {
       throw new Error('Unable to get 2D context from canvas')
@@ -289,11 +289,11 @@ export class MapEditor {
     // Add connections
     connections.forEach(connection => {
       this.connections.set(connection.id, connection)
-      
+
       // Add to node connection lists
       const fromNode = this.nodes.get(connection.fromLocationId)
       const toNode = this.nodes.get(connection.toLocationId)
-      
+
       if (fromNode) {
         fromNode.connections.push(connection)
       }
@@ -327,7 +327,7 @@ export class MapEditor {
 
     // Size based on number of connections
     const connectionCount = Array.from(this.connections.values()).filter(
-      conn => conn.fromLocationId === location.id || conn.toLocationId === location.id
+      conn => conn.fromLocationId === location.id || conn.toLocationId === location.id,
     ).length
     baseSize += connectionCount * 2
 
@@ -339,7 +339,7 @@ export class MapEditor {
    */
   private render(): void {
     this.clearCanvas()
-    
+
     if (this.config.enableGrid) {
       this.renderGrid()
     }
@@ -360,7 +360,7 @@ export class MapEditor {
    */
   private clearCanvas(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    
+
     // Clear SVG
     while (this.svg.firstChild) {
       this.svg.removeChild(this.svg.firstChild)
@@ -372,7 +372,7 @@ export class MapEditor {
    */
   private renderGrid(): void {
     const gridSize = this.config.gridSize * this.zoom
-    
+
     this.ctx.strokeStyle = '#f0f0f0'
     this.ctx.lineWidth = 1
 
@@ -431,7 +431,7 @@ export class MapEditor {
     // Draw connection label
     const midX = (fromPos.x + toPos.x) / 2
     const midY = (fromPos.y + toPos.y) / 2
-    
+
     this.ctx.fillStyle = '#666'
     this.ctx.font = `${10 * this.zoom}px Arial`
     this.ctx.textAlign = 'center'
@@ -446,7 +446,7 @@ export class MapEditor {
   private renderNodes(): void {
     // Render nodes in order: normal -> hovered -> selected
     const normalNodes = Array.from(this.nodes.values()).filter(
-      node => !node.isSelected && node.id !== this.hoveredNode
+      node => !node.isSelected && node.id !== this.hoveredNode,
     )
     const hoveredNodes = this.hoveredNode ? [this.nodes.get(this.hoveredNode)!].filter(Boolean) : []
     const selectedNodes = Array.from(this.nodes.values()).filter(node => node.isSelected)
@@ -497,7 +497,7 @@ export class MapEditor {
     this.ctx.fillText(
       node.entity.name.slice(0, 8),
       pos.x,
-      pos.y
+      pos.y,
     )
 
     // Node capacity indicator
@@ -508,7 +508,7 @@ export class MapEditor {
       this.ctx.fillText(
         `(${capacity})`,
         pos.x,
-        pos.y + size / 2 + 15
+        pos.y + size / 2 + 15,
       )
     }
 
@@ -523,7 +523,7 @@ export class MapEditor {
       this.ctx.fillText(
         connectionCount.toString(),
         pos.x + size / 2,
-        pos.y - size / 2 + 6
+        pos.y - size / 2 + 6,
       )
     }
   }
@@ -541,13 +541,13 @@ export class MapEditor {
     this.ctx.lineJoin = 'round'
 
     this.ctx.beginPath()
-    
+
     for (let i = 0; i < this.currentPath.length; i++) {
       const node = this.nodes.get(this.currentPath[i])
       if (!node) continue
 
       const pos = this.worldToScreen(node.x, node.y)
-      
+
       if (i === 0) {
         this.ctx.moveTo(pos.x, pos.y)
       } else {
@@ -561,7 +561,7 @@ export class MapEditor {
     for (let i = 0; i < this.currentPath.length - 1; i++) {
       const fromNode = this.nodes.get(this.currentPath[i])
       const toNode = this.nodes.get(this.currentPath[i + 1])
-      
+
       if (fromNode && toNode) {
         const fromPos = this.worldToScreen(fromNode.x, fromNode.y)
         const toPos = this.worldToScreen(toNode.x, toNode.y)
@@ -582,11 +582,11 @@ export class MapEditor {
     this.ctx.moveTo(to.x, to.y)
     this.ctx.lineTo(
       to.x - size * Math.cos(angle - Math.PI / 6),
-      to.y - size * Math.sin(angle - Math.PI / 6)
+      to.y - size * Math.sin(angle - Math.PI / 6),
     )
     this.ctx.lineTo(
       to.x - size * Math.cos(angle + Math.PI / 6),
-      to.y - size * Math.sin(angle + Math.PI / 6)
+      to.y - size * Math.sin(angle + Math.PI / 6),
     )
     this.ctx.closePath()
     this.ctx.fill()
@@ -598,7 +598,7 @@ export class MapEditor {
   private getNodeColor(node: MapNode): string {
     if (node.isSelected) return '#2196f3'
     if (node.id === this.hoveredNode) return '#03a9f4'
-    
+
     // Color based on location attributes
     const entity = node.entity
     if (entity.type === 'location') {
@@ -607,7 +607,7 @@ export class MapEditor {
       if (capacity > 20) return '#ff9800' // Orange for medium locations
       return '#9e9e9e' // Gray for small locations
     }
-    
+
     return '#9e9e9e'
   }
 
@@ -634,14 +634,14 @@ export class MapEditor {
    */
   private getConnectionColor(connection: Connection): string {
     switch (connection.type) {
-      case 'DOOR': return '#4caf50'
-      case 'PASSAGE': return '#2196f3'
-      case 'STAIRS': return '#ff9800'
-      case 'ELEVATOR': return '#9c27b0'
-      case 'PORTAL': return '#e91e63'
-      case 'HIDDEN': return '#9e9e9e'
-      case 'LOCKED': return '#f44336'
-      default: return '#333'
+    case 'DOOR': return '#4caf50'
+    case 'PASSAGE': return '#2196f3'
+    case 'STAIRS': return '#ff9800'
+    case 'ELEVATOR': return '#9c27b0'
+    case 'PORTAL': return '#e91e63'
+    case 'HIDDEN': return '#9e9e9e'
+    case 'LOCKED': return '#f44336'
+    default: return '#333'
     }
   }
 
@@ -650,12 +650,12 @@ export class MapEditor {
    */
   private getConnectionWidth(connection: Connection): number {
     const baseWidth = 2 * this.zoom
-    
+
     switch (connection.type) {
-      case 'PASSAGE': return baseWidth * 1.5
-      case 'DOOR': return baseWidth
-      case 'HIDDEN': return baseWidth * 0.7
-      default: return baseWidth
+    case 'PASSAGE': return baseWidth * 1.5
+    case 'DOOR': return baseWidth
+    case 'HIDDEN': return baseWidth * 0.7
+    default: return baseWidth
     }
   }
 
@@ -690,7 +690,7 @@ export class MapEditor {
 
     // Check if clicking on a node
     const clickedNode = this.getNodeAt(worldPos.x, worldPos.y)
-    
+
     if (clickedNode) {
       // Handle pathfinding mode
       if (this.config.pathfindingEnabled && e.shiftKey) {
@@ -717,7 +717,7 @@ export class MapEditor {
         x: worldPos.x - clickedNode.x,
         y: worldPos.y - clickedNode.y,
       }
-      
+
       clickedNode.isDragging = true
     } else {
       // Clear selection if clicking on empty space
@@ -744,21 +744,21 @@ export class MapEditor {
       if (node) {
         node.x = worldPos.x - this.dragOffset.x
         node.y = worldPos.y - this.dragOffset.y
-        
+
         // Snap to grid if enabled
         if (this.config.enableGrid && !e.altKey) {
           const gridSize = this.config.gridSize
           node.x = Math.round(node.x / gridSize) * gridSize
           node.y = Math.round(node.y / gridSize) * gridSize
         }
-        
+
         this.render()
       }
     } else {
       // Handle hover
       const hoveredNode = this.getNodeAt(worldPos.x, worldPos.y)
       const newHovered = hoveredNode?.id || null
-      
+
       if (newHovered !== this.hoveredNode) {
         this.hoveredNode = newHovered
         this.canvas.style.cursor = newHovered ? 'pointer' : 'default'
@@ -822,7 +822,7 @@ export class MapEditor {
     const worldPos = this.screenToWorld(screenX, screenY)
 
     const clickedNode = this.getNodeAt(worldPos.x, worldPos.y)
-    
+
     if (clickedNode) {
       // Center view on double-clicked node
       this.centerOnNode(clickedNode.id)
@@ -836,32 +836,32 @@ export class MapEditor {
     if (!this.container.contains(document.activeElement)) return
 
     switch (e.key) {
-      case 'Delete':
-      case 'Backspace':
-        this.deleteSelectedNodes()
-        break
-      case 'a':
-        if (e.ctrlKey) {
-          e.preventDefault()
-          this.selectAllNodes()
-        }
-        break
-      case 'Escape':
-        this.clearSelection()
-        this.clearPath()
-        break
-      case '1':
-        this.applyLayout(LayoutAlgorithm.FORCE_DIRECTED)
-        break
-      case '2':
-        this.applyLayout(LayoutAlgorithm.CIRCULAR)
-        break
-      case '3':
-        this.applyLayout(LayoutAlgorithm.GRID)
-        break
-      case '0':
-        this.resetView()
-        break
+    case 'Delete':
+    case 'Backspace':
+      this.deleteSelectedNodes()
+      break
+    case 'a':
+      if (e.ctrlKey) {
+        e.preventDefault()
+        this.selectAllNodes()
+      }
+      break
+    case 'Escape':
+      this.clearSelection()
+      this.clearPath()
+      break
+    case '1':
+      this.applyLayout(LayoutAlgorithm.FORCE_DIRECTED)
+      break
+    case '2':
+      this.applyLayout(LayoutAlgorithm.CIRCULAR)
+      break
+    case '3':
+      this.applyLayout(LayoutAlgorithm.GRID)
+      break
+    case '0':
+      this.resetView()
+      break
     }
   }
 
@@ -935,7 +935,7 @@ export class MapEditor {
     if (this.selectedNodes.size === 0) return
 
     const nodeIds = Array.from(this.selectedNodes)
-    
+
     // Remove nodes
     nodeIds.forEach(nodeId => {
       this.nodes.delete(nodeId)
@@ -943,9 +943,9 @@ export class MapEditor {
 
     // Remove connections involving deleted nodes
     const connectionsToDelete = Array.from(this.connections.values()).filter(
-      conn => nodeIds.includes(conn.fromLocationId) || nodeIds.includes(conn.toLocationId)
+      conn => nodeIds.includes(conn.fromLocationId) || nodeIds.includes(conn.toLocationId),
     )
-    
+
     connectionsToDelete.forEach(conn => {
       this.connections.delete(conn.id)
     })
@@ -958,7 +958,7 @@ export class MapEditor {
 
     this.feedbackManager.showNotification(
       `Deleted ${nodeIds.length} node${nodeIds.length > 1 ? 's' : ''}`,
-      FeedbackType.INFO
+      FeedbackType.INFO,
     )
   }
 
@@ -983,12 +983,12 @@ export class MapEditor {
         this.currentPath = result.path
         this.feedbackManager.showNotification(
           `Path found: ${result.steps} steps, ${result.distance.toFixed(1)} distance`,
-          FeedbackType.SUCCESS
+          FeedbackType.SUCCESS,
         )
       } else {
         this.feedbackManager.showNotification(
           result.reason || 'No path found',
-          FeedbackType.ERROR
+          FeedbackType.ERROR,
         )
       }
       this.connectionStart = null
@@ -1034,7 +1034,7 @@ export class MapEditor {
     // Update node connections
     const fromNode = this.nodes.get(fromId)
     const toNode = this.nodes.get(toId)
-    
+
     if (fromNode) {
       fromNode.connections.push(connection)
     }
@@ -1108,20 +1108,20 @@ export class MapEditor {
    */
   private applyLayout(algorithm: LayoutAlgorithm): void {
     const layoutManager = new LayoutManager(this.nodes, this.connections)
-    
+
     switch (algorithm) {
-      case LayoutAlgorithm.FORCE_DIRECTED:
-        layoutManager.applyForceDirectedLayout()
-        break
-      case LayoutAlgorithm.HIERARCHICAL:
-        layoutManager.applyHierarchicalLayout()
-        break
-      case LayoutAlgorithm.CIRCULAR:
-        layoutManager.applyCircularLayout()
-        break
-      case LayoutAlgorithm.GRID:
-        layoutManager.applyGridLayout()
-        break
+    case LayoutAlgorithm.FORCE_DIRECTED:
+      layoutManager.applyForceDirectedLayout()
+      break
+    case LayoutAlgorithm.HIERARCHICAL:
+      layoutManager.applyHierarchicalLayout()
+      break
+    case LayoutAlgorithm.CIRCULAR:
+      layoutManager.applyCircularLayout()
+      break
+    case LayoutAlgorithm.GRID:
+      layoutManager.applyGridLayout()
+      break
     }
 
     this.render()
@@ -1404,7 +1404,7 @@ class PathfindingManager {
    */
   private reconstructPath(cameFrom: Map<EntityId, EntityId>, current: EntityId): EntityId[] {
     const path = [current]
-    
+
     while (cameFrom.has(current)) {
       current = cameFrom.get(current)!
       path.unshift(current)
@@ -1451,7 +1451,7 @@ class LayoutManager {
 
         for (let k = 0; k < nodeList.length; k++) {
           if (j === k) continue
-          
+
           const nodeB = nodeList[k]
           const dx = nodeA.x - nodeB.x
           const dy = nodeA.y - nodeB.y
@@ -1552,17 +1552,17 @@ class LayoutManager {
 
     // Simple BFS-based layering
     let currentLayer = nodeList.slice(0, 1)
-    
+
     while (currentLayer.length > 0 && visited.size < nodeList.length) {
       layers.push(currentLayer.slice())
       currentLayer.forEach(nodeId => visited.add(nodeId))
 
       const nextLayer: EntityId[] = []
-      
+
       for (const nodeId of currentLayer) {
         for (const connection of this.connections.values()) {
           let connectedId: EntityId | null = null
-          
+
           if (connection.fromLocationId === nodeId && !visited.has(connection.toLocationId)) {
             connectedId = connection.toLocationId
           } else if (connection.toLocationId === nodeId && connection.bidirectional && !visited.has(connection.fromLocationId)) {
