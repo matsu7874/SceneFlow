@@ -1,0 +1,62 @@
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #1f2937;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.link {
+  padding: 8px 16px;
+  color: #d1d5db;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.link:hover {
+  background: #374151;
+  color: white;
+}
+
+.link.active {
+  background: #3b82f6;
+  color: white;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .nav {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .links {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .link {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+}

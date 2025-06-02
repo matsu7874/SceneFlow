@@ -8,7 +8,9 @@
   background-color: #282c34;
   color: white;
   padding: 15px 20px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -64,4 +66,123 @@
   .layout-area {
     grid-column: 1;
   }
+}
+
+/* Page Styles */
+.page {
+  padding: 20px;
+  height: 100%;
+  overflow: auto;
+}
+
+.page h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.page-content {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  height: calc(100% - 60px);
+  overflow: auto;
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+/* Entities Page Styles */
+.entities-page .page-content {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+  height: calc(100% - 60px);
+}
+
+.entities-list {
+  border-right: 1px solid #eee;
+  padding-right: 20px;
+  overflow: auto;
+}
+
+.entities-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.entities-header h3 {
+  margin: 0;
+}
+
+.create-button {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.create-button:hover {
+  background: #45a049;
+}
+
+.entity-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.entity-item {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.entity-item:hover {
+  background-color: #f0f0f0;
+}
+
+.entity-item.selected {
+  background-color: #e3f2fd;
+  border-color: #2196F3;
+}
+
+.entity-type {
+  font-size: 12px;
+  background: #666;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.entity-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.entity-editor-container {
+  overflow: auto;
+}
+
+.no-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
 }

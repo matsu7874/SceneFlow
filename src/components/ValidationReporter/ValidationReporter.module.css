@@ -1,0 +1,288 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.refreshButton {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.refreshButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.summary {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.summaryItem.error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.summaryItem.warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.summaryItem.info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.icon {
+  font-size: 16px;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+}
+
+.filterSelect {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.issuesList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.noIssues {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.issue {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.issue:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.issue.error {
+  border-left: 4px solid #ef4444;
+}
+
+.issue.warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.issue.info {
+  border-left: 4px solid #3b82f6;
+}
+
+.issueHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.issueIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.issueCategory {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b7280;
+  padding: 2px 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.issueMessage {
+  flex: 1;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.issueDetails {
+  padding: 0 16px 16px 16px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 8px;
+  padding-top: 12px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.detail,
+.suggestion,
+.entity {
+  margin: 8px 0;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.detail strong,
+.suggestion strong,
+.entity strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.suggestion {
+  color: #059669;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background: #1f2937;
+  }
+
+  .header h3 {
+    color: #f9fafb;
+  }
+
+  .header {
+    border-bottom-color: #374151;
+  }
+
+  .summary {
+    background: #111827;
+  }
+
+  .filterSelect {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+
+  .issue {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .issueMessage {
+    color: #f9fafb;
+  }
+
+  .issueCategory {
+    background: #374151;
+    color: #d1d5db;
+  }
+
+  .detail,
+  .entity {
+    color: #d1d5db;
+  }
+
+  .detail strong,
+  .suggestion strong,
+  .entity strong {
+    color: #f9fafb;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .container {
+    padding: 16px;
+  }
+
+  .summary {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .issueHeader {
+    flex-wrap: wrap;
+  }
+
+  .issueCategory {
+    order: 3;
+    width: 100%;
+    margin-top: 8px;
+  }
+}

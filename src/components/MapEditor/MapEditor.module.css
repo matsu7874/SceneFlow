@@ -1,0 +1,359 @@
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #1a1a1a;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.canvas.grabbing {
+  cursor: grabbing;
+}
+
+.canvas.crosshair {
+  cursor: crosshair;
+}
+
+.canvas.pointer {
+  cursor: pointer;
+}
+
+.controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10;
+}
+
+.controlGroup {
+  display: flex;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.button {
+  background: #333;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.button:hover {
+  background: #444;
+  transform: translateY(-1px);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.button.active {
+  background: #007bff;
+}
+
+.button.danger {
+  background: #dc3545;
+}
+
+.button.danger:hover {
+  background: #c82333;
+}
+
+.iconButton {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.separator {
+  width: 1px;
+  background: #555;
+  margin: 0 5px;
+}
+
+.zoomControls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: 8px;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.zoomLevel {
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  margin: 5px 0;
+}
+
+.minimap {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 200px;
+  height: 150px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.minimapCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.nodeEditor {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  color: white;
+  z-index: 20;
+  min-width: 250px;
+  backdrop-filter: blur(10px);
+}
+
+.nodeEditor h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #007bff;
+}
+
+.formGroup {
+  margin-bottom: 12px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: #aaa;
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 8px;
+  color: white;
+  font-size: 14px;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.formGroup textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.formActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+
+.connectionEditor {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  color: white;
+  z-index: 20;
+  min-width: 200px;
+  backdrop-filter: blur(10px);
+}
+
+.connectionEditor h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #ffc107;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.checkbox input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.stats {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: 12px;
+  color: white;
+  font-size: 12px;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+
+.stats div {
+  margin-bottom: 4px;
+}
+
+.stats div:last-child {
+  margin-bottom: 0;
+}
+
+.tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: white;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 30;
+  white-space: nowrap;
+}
+
+.contextMenu {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 4px;
+  z-index: 25;
+  min-width: 150px;
+  backdrop-filter: blur(10px);
+}
+
+.contextMenuItem {
+  padding: 8px 16px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.contextMenuItem:hover {
+  background: #333;
+}
+
+.contextMenuSeparator {
+  height: 1px;
+  background: #444;
+  margin: 4px 8px;
+}
+
+.pathInfo {
+  position: absolute;
+  bottom: 180px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: 12px;
+  color: white;
+  font-size: 12px;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+
+.pathInfo h4 {
+  margin: 0 0 8px 0;
+  color: #28a745;
+  font-size: 14px;
+}
+
+.pathInfo div {
+  margin-bottom: 4px;
+}
+
+.helpText {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 20px;
+  padding: 8px 16px;
+  color: #aaa;
+  font-size: 12px;
+  z-index: 5;
+  backdrop-filter: blur(10px);
+}
+
+.layoutMenu {
+  position: relative;
+  display: inline-block;
+}
+
+.layoutDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 30;
+  min-width: 120px;
+}
+
+.layoutOption {
+  padding: 8px 16px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.layoutOption:hover {
+  background: #333;
+}
+
+.layoutOption.active {
+  background: #007bff;
+}

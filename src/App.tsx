@@ -1,84 +1,48 @@
-import React, { useState } from 'react'
-import { JsonDataInput } from './components/JsonDataInput'
-import { SimulationControls } from './components/SimulationControls'
-import { LocationDisplay } from './components/LocationDisplay'
-import { EventLog } from './components/EventLog'
-import { LocationLayout } from './components/LocationLayout'
-import { StoryData } from './types/StoryData'
-import { useSimulation } from './hooks/useSimulation'
+import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AppProvider } from './contexts/AppContext'
+import { VisualFeedbackProvider } from './contexts/VisualFeedbackContext'
+import { Navigation } from './components/Navigation'
+import { NotificationDisplay } from './components/NotificationDisplay'
+import { SimulationPage } from './pages/SimulationPage'
+import { CausalityPage } from './pages/CausalityPage'
+import { EntitiesPage } from './pages/EntitiesPage'
+import { MapEditorPage } from './pages/MapEditorPage'
+import { RelationshipsPage } from './pages/RelationshipsPage'
+import { ValidationPage } from './pages/ValidationPage'
 import './App.css'
 
 /**
  * Scene-Flow メインアプリケーションコンポーネント
  */
 function App() {
-  const [storyData, setStoryData] = useState<StoryData | null>(null)
-  
-  const {
-    isPlaying,
-    speed,
-    currentTime,
-    personPositions,
-    logEntries,
-    maxTime,
-    formatTime,
-    togglePlayPause,
-    setCurrentTime,
-    changeSpeed
-  } = useSimulation(storyData)
-
-  const handleDataLoad = (data: StoryData) => {
-    setStoryData(data)
-  }
-
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>Scene-Flow</h1>
-      </header>
-      <main className="app-main">
-        <div className="container">
-          <div className="input-area">
-            <JsonDataInput onDataLoad={handleDataLoad} />
-          </div>
-          
-          <div className="output-area">
-            <SimulationControls
-              isPlaying={isPlaying}
-              currentTime={currentTime}
-              maxTime={maxTime}
-              speed={speed}
-              onPlayPause={togglePlayPause}
-              onTimeChange={setCurrentTime}
-              onSpeedChange={changeSpeed}
-              disabled={!storyData}
-            />
+    <BrowserRouter>
+      <AppProvider>
+        <VisualFeedbackProvider>
+          <div className="app">
+            <header className="app-header">
+              <h1>Scene-Flow</h1>
+              <Navigation />
+            </header>
             
-            <LocationDisplay
-              persons={storyData?.persons || []}
-              locations={storyData?.locations || []}
-              personPositions={personPositions}
-              currentTime={formatTime(currentTime)}
-            />
+            <main className="app-main">
+              <Routes>
+                <Route path="/" element={<Navigate to="/simulation" replace />} />
+                <Route path="/simulation" element={<SimulationPage />} />
+                <Route path="/causality" element={<CausalityPage />} />
+                <Route path="/entities" element={<EntitiesPage />} />
+                <Route path="/map-editor" element={<MapEditorPage />} />
+                <Route path="/relationships" element={<RelationshipsPage />} />
+                <Route path="/validation" element={<ValidationPage />} />
+              </Routes>
+            </main>
             
-            <EventLog
-              logEntries={logEntries}
-              persons={storyData?.persons || []}
-              currentTime={formatTime(currentTime)}
-            />
+            <NotificationDisplay />
           </div>
-          
-          <div className="layout-area">
-            <LocationLayout
-              persons={storyData?.persons || []}
-              locations={storyData?.locations || []}
-              personPositions={personPositions}
-              currentTime={formatTime(currentTime)}
-            />
-          </div>
-        </div>
-      </main>
-    </div>
+        </VisualFeedbackProvider>
+      </AppProvider>
+    </BrowserRouter>
   )
 }
 
