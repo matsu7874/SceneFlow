@@ -11,7 +11,7 @@ const getEntityTypeLabel = (type: EntityType): string => {
     prop: '小道具',
     information: '情報',
     act: '行動',
-    event: 'イベント'
+    event: 'イベント',
   }
   return labels[type] || type
 }
@@ -30,223 +30,254 @@ export const EntitiesPage: React.FC = () => {
       // Convert story data entities to ExtendedEntity format
       const convertedEntities: ExtendedEntity[] = [
         ...storyData.persons.map(person => ({
-          id: person.id,
+          id: person.id.toString(),
           type: 'person' as EntityType,
           name: person.name,
           description: person.name || '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: person,
-          relationships: []
+          relationships: [],
         })),
         ...storyData.locations.map(location => ({
-          id: location.id,
+          id: location.id.toString(),
           type: 'location' as EntityType,
           name: location.name,
           description: location.name || '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: location,
-          relationships: []
+          relationships: [],
         })),
         ...storyData.props.map(prop => ({
-          id: prop.id,
+          id: prop.id.toString(),
           type: 'prop' as EntityType,
           name: prop.name,
           description: prop.name || '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: prop,
-          relationships: []
+          relationships: [],
         })),
         ...storyData.informations.map(info => ({
-          id: info.id,
+          id: info.id.toString(),
           type: 'information' as EntityType,
           name: info.content.substring(0, 50) + (info.content.length > 50 ? '...' : ''),
           description: info.content,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: info,
-          relationships: []
+          relationships: [],
         })),
         ...storyData.acts.map(act => ({
-          id: act.id,
+          id: act.id.toString(),
           type: 'act' as EntityType,
-          name: `${act.type} - ${act.id}`,
+          name: act.description || `行動 ${act.id}`,
           description: act.description || '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: act,
-          relationships: []
+          relationships: [],
         })),
         ...storyData.events.map(event => ({
-          id: event.id,
+          id: event.id.toString(),
           type: 'event' as EntityType,
-          name: event.id,
-          description: '',
+          name: `イベント ${event.id}`,
+          description: `${event.eventTime} - ${event.triggerType}`,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: event,
-          relationships: []
-        }))
+          relationships: [],
+        })),
       ]
       setEntities(convertedEntities)
     }
   }, [storyData])
 
-  const handleEntityUpdate = (updatedEntity: ExtendedEntity) => {
-    setEntities(prev => prev.map(e => e.id === updatedEntity.id ? updatedEntity : e))
-    
+  const handleEntityUpdate = (updatedEntity: ExtendedEntity): void => {
+    setEntities(prev => prev.map(e => (e.id === updatedEntity.id ? updatedEntity : e)))
+
     // Update story data if needed
     if (storyData) {
+      const numericId = Number(updatedEntity.id)
       if (updatedEntity.type === 'person') {
-        const updatedPersons = storyData.persons.map(p => 
-          p.id === updatedEntity.id ? { ...p, name: updatedEntity.name } : p
+        const updatedPersons = storyData.persons.map(p =>
+          p.id === numericId ? { ...p, name: updatedEntity.name } : p,
         )
         setStoryData({ ...storyData, persons: updatedPersons })
       } else if (updatedEntity.type === 'location') {
-        const updatedLocations = storyData.locations.map(l => 
-          l.id === updatedEntity.id ? { ...l, name: updatedEntity.name } : l
+        const updatedLocations = storyData.locations.map(l =>
+          l.id === numericId ? { ...l, name: updatedEntity.name } : l,
         )
         setStoryData({ ...storyData, locations: updatedLocations })
       }
     }
   }
 
-  const handleEntityCreate = (type: EntityType) => {
+  const handleEntityCreate = (type: EntityType): void => {
+    const newId = Date.now()
     const newEntity: ExtendedEntity = {
-      id: `${type}_${Date.now()}`,
+      id: newId.toString(),
       type,
       name: `新規${getEntityTypeLabel(type)}`,
       description: '',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       attributes: {},
-      relationships: []
+      relationships: [],
     }
     setEntities([...entities, newEntity])
     setSelectedEntity(newEntity)
     setShowCreateModal(false)
     showNotification(`新しい${getEntityTypeLabel(type)}を作成しました`, { type: 'success' })
-    
+
     // Also update story data
     if (storyData) {
       switch (type) {
         case 'person':
           setStoryData({
             ...storyData,
-            persons: [...storyData.persons, { id: newEntity.id, name: newEntity.name }]
+            persons: [...storyData.persons, { id: newId, name: newEntity.name, color: '#888888' }],
           })
           break
         case 'location':
           setStoryData({
             ...storyData,
-            locations: [...storyData.locations, { id: newEntity.id, name: newEntity.name, connectedTo: [] }]
+            locations: [
+              ...storyData.locations,
+              { id: newId, name: newEntity.name, connections: [] },
+            ],
           })
           break
         case 'prop':
           setStoryData({
             ...storyData,
-            props: [...storyData.props, { id: newEntity.id, name: newEntity.name }]
+            props: [...storyData.props, { id: newId, name: newEntity.name }],
           })
           break
         case 'information':
           setStoryData({
             ...storyData,
-            informations: [...storyData.informations, { id: newEntity.id, content: newEntity.name }]
+            informations: [...storyData.informations, { id: newId, content: newEntity.name }],
           })
           break
         case 'act':
           setStoryData({
             ...storyData,
-            acts: [...storyData.acts, { id: newEntity.id, type: 'generic' }]
+            acts: [
+              ...storyData.acts,
+              {
+                id: newId,
+                personId: 1,
+                locationId: 1,
+                time: '00:00',
+                description: newEntity.name,
+              },
+            ],
           })
           break
         case 'event':
           setStoryData({
             ...storyData,
-            events: [...storyData.events, { id: newEntity.id }]
+            events: [
+              ...storyData.events,
+              {
+                id: newId,
+                triggerType: '時刻',
+                triggerValue: '00:00',
+                eventTime: '00:00',
+                personId: 1,
+                actId: 1,
+              },
+            ],
           })
           break
       }
     }
   }
 
-  const handleEntityDelete = (entityId: string) => {
+  const handleEntityDelete = (entityId: string): void => {
     const entity = entities.find(e => e.id === entityId)
     if (!entity) return
-    
+
     setEntities(entities.filter(e => e.id !== entityId))
     if (selectedEntity?.id === entityId) {
       setSelectedEntity(null)
     }
-    
+
     // Also update story data
     if (storyData) {
+      const numericId = Number(entityId)
       switch (entity.type) {
         case 'person':
           setStoryData({
             ...storyData,
-            persons: storyData.persons.filter(p => p.id !== entityId)
+            persons: storyData.persons.filter(p => p.id !== numericId),
           })
           break
         case 'location':
           setStoryData({
             ...storyData,
-            locations: storyData.locations.filter(l => l.id !== entityId)
+            locations: storyData.locations.filter(l => l.id !== numericId),
           })
           break
         case 'prop':
           setStoryData({
             ...storyData,
-            props: storyData.props.filter(p => p.id !== entityId)
+            props: storyData.props.filter(p => p.id !== numericId),
           })
           break
         case 'information':
           setStoryData({
             ...storyData,
-            informations: storyData.informations.filter(i => i.id !== entityId)
+            informations: storyData.informations.filter(i => i.id !== numericId),
           })
           break
         case 'act':
           setStoryData({
             ...storyData,
-            acts: storyData.acts.filter(a => a.id !== entityId)
+            acts: storyData.acts.filter(a => a.id !== numericId),
           })
           break
         case 'event':
           setStoryData({
             ...storyData,
-            events: storyData.events.filter(e => e.id !== entityId)
+            events: storyData.events.filter(e => e.id !== numericId),
           })
           break
       }
     }
   }
-  
+
   // Filter entities based on search and type
   const filteredEntities = entities.filter(entity => {
-    const matchesSearch = entity.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         entity.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch =
+      entity.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      entity.description.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesType = selectedType === 'all' || entity.type === selectedType
     return matchesSearch && matchesType
   })
-  
+
   // Group entities by type
-  const groupedEntities = filteredEntities.reduce((acc, entity) => {
-    if (!acc[entity.type]) {
-      acc[entity.type] = []
-    }
-    acc[entity.type].push(entity)
-    return acc
-  }, {} as Record<EntityType, ExtendedEntity[]>)
+  const groupedEntities = filteredEntities.reduce(
+    (acc, entity) => {
+      if (!acc[entity.type]) {
+        acc[entity.type] = []
+      }
+      acc[entity.type].push(entity)
+      return acc
+    },
+    {} as Record<EntityType, ExtendedEntity[]>,
+  )
 
   if (!storyData) {
     return (
       <div className="page entities-page">
         <h2>エンティティ管理</h2>
         <div className="no-data-message">
-          <p>データが読み込まれていません。シミュレーションページで物語データを読み込んでください。</p>
+          <p>
+            データが読み込まれていません。シミュレーションページで物語データを読み込んでください。
+          </p>
         </div>
       </div>
     )
@@ -263,18 +294,18 @@ export const EntitiesPage: React.FC = () => {
               + 新規作成
             </button>
           </div>
-          
+
           <div className="entities-controls">
             <input
               type="text"
               placeholder="エンティティを検索..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="search-input"
             />
             <select
               value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value as EntityType | 'all')}
+              onChange={e => setSelectedType(e.target.value as EntityType | 'all')}
               className="type-filter"
             >
               <option value="all">すべてのタイプ</option>
@@ -286,11 +317,13 @@ export const EntitiesPage: React.FC = () => {
               <option value="event">イベント</option>
             </select>
           </div>
-          
+
           <div className="entity-items">
             {Object.entries(groupedEntities).map(([type, typeEntities]) => (
               <div key={type} className="entity-group">
-                <h4 className="entity-group-title">{getEntityTypeLabel(type as EntityType)} ({typeEntities.length})</h4>
+                <h4 className="entity-group-title">
+                  {getEntityTypeLabel(type as EntityType)} ({typeEntities.length})
+                </h4>
                 {typeEntities.map(entity => (
                   <div
                     key={entity.id}
@@ -307,13 +340,11 @@ export const EntitiesPage: React.FC = () => {
               </div>
             ))}
             {filteredEntities.length === 0 && (
-              <div className="no-results">
-                条件に一致するエンティティが見つかりません。
-              </div>
+              <div className="no-results">条件に一致するエンティティが見つかりません。</div>
             )}
           </div>
         </div>
-        
+
         <div className="entity-editor-container">
           {selectedEntity ? (
             <ExtendedEntityEditor
@@ -328,10 +359,10 @@ export const EntitiesPage: React.FC = () => {
           )}
         </div>
       </div>
-      
+
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             <h3>新規エンティティ作成</h3>
             <p>作成するエンティティのタイプを選択してください：</p>
             <div className="entity-type-buttons">
