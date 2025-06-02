@@ -13,37 +13,37 @@ export const Navigation: React.FC = () => {
           to="/" 
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
-          Simulation
+          シミュレーション
         </NavLink>
         <NavLink 
           to="/causality" 
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
-          Causality View
+          因果関係ビュー
         </NavLink>
         <NavLink 
           to="/entities" 
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
-          Entity Editor
+          エンティティ編集
         </NavLink>
         <NavLink 
-          to="/map" 
+          to="/map-editor" 
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
-          Map Editor
+          マップエディタ
         </NavLink>
         <NavLink 
           to="/relationships" 
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
-          Relationships
+          関係性
         </NavLink>
         <NavLink 
           to="/validation" 
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
-          Validation
+          検証
         </NavLink>
       </div>
     </nav>

@@ -7,6 +7,29 @@
 import type { EntityId } from './causality'
 
 /**
+ * Entity types that can be managed in the Entity Editor
+ */
+export type EntityType = 'person' | 'location' | 'prop' | 'information' | 'act' | 'event'
+
+/**
+ * Extended entity for generic entity management
+ */
+export interface ExtendedEntity {
+  id: string
+  type: EntityType
+  name: string
+  description: string
+  created_at: string
+  updated_at: string
+  attributes: Record<string, any>
+  relationships: Array<{
+    type: string
+    targetId: string
+    metadata?: Record<string, any>
+  }>
+}
+
+/**
  * Prop categories
  * 大道具 (Large Props): Furniture, fixtures, environmental objects
  * 小道具 (Small Props): Items that can be carried and used

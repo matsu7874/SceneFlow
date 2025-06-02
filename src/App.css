@@ -186,3 +186,158 @@
   height: 100%;
   color: #666;
 }
+
+/* Entity controls */
+.entities-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.type-filter {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+/* Entity groups */
+.entity-group {
+  margin-bottom: 20px;
+}
+
+.entity-group-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 8px 0;
+  text-transform: capitalize;
+}
+
+.entity-type-badge {
+  font-size: 11px;
+  background: #666;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.entity-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.entity-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entity-id {
+  font-size: 11px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.no-results {
+  text-align: center;
+  color: #666;
+  padding: 40px 20px;
+  font-size: 14px;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content h3 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+}
+
+.modal-content p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.entity-type-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.type-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.type-button:hover {
+  border-color: #2196F3;
+  background: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+.type-icon {
+  font-size: 32px;
+}
+
+.cancel-button {
+  width: 100%;
+  padding: 10px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.cancel-button:hover {
+  background: #e0e0e0;
+}
