@@ -31,7 +31,7 @@ export function parseJsonData(inputElement: HTMLTextAreaElement): StoryData {
 
   const typedData = data as Record<string, unknown>
 
-  const requiredKeys = ['persons', 'locations', 'acts', 'events', 'initialStates']
+  const requiredKeys = ['persons', 'locations', 'acts', 'initialStates']
   for (const key of requiredKeys) {
     if (!typedData[key]) throw new Error(`必須キーなし: ${key}`)
     if (!Array.isArray(typedData[key])) {
@@ -48,7 +48,7 @@ export function parseJsonData(inputElement: HTMLTextAreaElement): StoryData {
     }
   })
 
-  const optionalKeys = ['props', 'informations', 'moves', 'stays']
+  const optionalKeys = ['props', 'informations']
   optionalKeys.forEach(key => {
     if (typedData[key] && !Array.isArray(typedData[key])) {
       throw new Error(`キー "${key}" は配列必須`)

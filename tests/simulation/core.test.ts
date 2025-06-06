@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getStateAtTime } from '../../src/modules/simulation/core'
-import { indexStoryData, sortEvents } from '../../src/modules/data/indexer'
+import { indexStoryData } from '../../src/modules/data/indexer'
 import type { StoryData } from '../../src/types'
 
 describe('getStateAtTime', () => {
@@ -23,22 +23,14 @@ describe('getStateAtTime', () => {
     ],
     props: [],
     informations: [],
-    events: [
-      { id: 1, triggerType: '時刻', triggerValue: '09:00', eventTime: '09:00', personId: 1, actId: 1001 },
-      { id: 2, triggerType: '時刻', triggerValue: '09:30', eventTime: '09:30', personId: 1, actId: 1002 },
-      { id: 3, triggerType: '時刻', triggerValue: '10:00', eventTime: '10:00', personId: 2, actId: 1003 },
-      { id: 4, triggerType: '時刻', triggerValue: '10:30', eventTime: '10:30', personId: 1, actId: 1004 },
-    ],
     initialStates: [
       { personId: 1, locationId: 101, time: '09:00' },
       { personId: 2, locationId: 101, time: '09:00' },
     ],
-    moves: [],
-    stays: [],
   }
 
   const indexedData = indexStoryData(mockStoryData)
-  const sortedEvents = sortEvents(mockStoryData.events)
+  const sortedEvents = indexedData.sortedEvents
 
   it('should return initial states before any events', () => {
     const state = getStateAtTime(530, indexedData, sortedEvents, mockStoryData.initialStates) // 08:50

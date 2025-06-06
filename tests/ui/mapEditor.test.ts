@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { MapEditor, type MapNode, type MapEditorConfig, LayoutAlgorithm } from '../../src/modules/ui/mapEditor/MapEditor'
+import { MapEditor, type MapEditorConfig, LayoutAlgorithm } from '../../src/modules/ui/mapEditor/MapEditor'
 import type { EditableEntity } from '../../src/modules/ui/entityEditor/EntityEditor'
 import type { Connection, ConnectionType } from '../../src/modules/ui/entityEditor/RelationshipEditor'
 
@@ -55,12 +55,12 @@ Object.defineProperty(document, 'createElementNS', {
     element.removeChild = vi.fn()
     element.querySelector = vi.fn()
     element.querySelectorAll = vi.fn(() => [])
-    
+
     Object.defineProperty(element, 'firstChild', {
       value: null,
       writable: true,
     })
-    
+
     return element
   }),
 })
@@ -160,7 +160,7 @@ describe('MapEditor', () => {
         enableGrid: false,
         enable3D: true,
       }
-      
+
       const customEditor = new MapEditor(container, config)
       expect(customEditor).toBeDefined()
     })
@@ -178,10 +178,10 @@ describe('MapEditor', () => {
   describe('loading locations', () => {
     it('should load locations as map nodes', () => {
       mapEditor.loadLocations(testLocations, testConnections)
-      
+
       const nodes = mapEditor.getNodes()
       expect(nodes).toHaveLength(3)
-      
+
       const nodeIds = nodes.map(n => n.id)
       expect(nodeIds).toContain('room1')
       expect(nodeIds).toContain('room2')
@@ -190,10 +190,10 @@ describe('MapEditor', () => {
 
     it('should create connections between nodes', () => {
       mapEditor.loadLocations(testLocations, testConnections)
-      
+
       const connections = mapEditor.getConnections()
       expect(connections).toHaveLength(2)
-      
+
       const connectionIds = connections.map(c => c.id)
       expect(connectionIds).toContain('conn1')
       expect(connectionIds).toContain('conn2')
@@ -201,21 +201,21 @@ describe('MapEditor', () => {
 
     it('should calculate node sizes based on capacity', () => {
       mapEditor.loadLocations(testLocations)
-      
+
       const nodes = mapEditor.getNodes()
       const room1Node = nodes.find(n => n.id === 'room1')
       const room3Node = nodes.find(n => n.id === 'room3')
-      
+
       // Room1 has higher capacity, should have larger size
       expect(room1Node?.size).toBeGreaterThan(room3Node?.size || 0)
     })
 
     it('should handle empty location list', () => {
       mapEditor.loadLocations([])
-      
+
       const nodes = mapEditor.getNodes()
       const connections = mapEditor.getConnections()
-      
+
       expect(nodes).toHaveLength(0)
       expect(connections).toHaveLength(0)
     })
@@ -234,7 +234,7 @@ describe('MapEditor', () => {
       ]
 
       mapEditor.loadLocations(mixedEntities)
-      
+
       const nodes = mapEditor.getNodes()
       expect(nodes).toHaveLength(3) // Only locations should be loaded
     })
@@ -248,7 +248,7 @@ describe('MapEditor', () => {
     it('should have layout algorithm selector', () => {
       const layoutSelect = container.querySelector('.layout-algorithm') as HTMLSelectElement
       expect(layoutSelect).toBeTruthy()
-      
+
       const options = Array.from(layoutSelect.options).map(o => o.value)
       expect(options).toContain(LayoutAlgorithm.FORCE_DIRECTED)
       expect(options).toContain(LayoutAlgorithm.CIRCULAR)
@@ -258,20 +258,20 @@ describe('MapEditor', () => {
 
     it('should apply auto layout', () => {
       const autoLayoutBtn = container.querySelector('.btn-auto-layout') as HTMLButtonElement
-      
+
       // Get initial positions
       const initialNodes = mapEditor.getNodes()
       const initialPositions = initialNodes.map(n => ({ x: n.x, y: n.y }))
-      
+
       // Trigger auto layout
       autoLayoutBtn.click()
-      
+
       // Positions should change (in most cases)
       const updatedNodes = mapEditor.getNodes()
-      const hasChanged = updatedNodes.some((node, index) => 
-        node.x !== initialPositions[index].x || node.y !== initialPositions[index].y
+      const _hasChanged = updatedNodes.some((node, index) =>
+        node.x !== initialPositions[index].x || node.y !== initialPositions[index].y,
       )
-      
+
       // Note: Layout might not change if nodes are already optimally positioned
       expect(updatedNodes).toHaveLength(initialNodes.length)
     })
@@ -279,7 +279,7 @@ describe('MapEditor', () => {
     it('should reset view', () => {
       const resetViewBtn = container.querySelector('.btn-reset-view') as HTMLButtonElement
       expect(resetViewBtn).toBeTruthy()
-      
+
       // This should not throw
       resetViewBtn.click()
     })
@@ -298,7 +298,7 @@ describe('MapEditor', () => {
     it('should handle selection changes via callback', () => {
       const onSelectionChange = vi.fn()
       mapEditor.onSelectionChanged(onSelectionChange)
-      
+
       // This callback should be registered
       expect(onSelectionChange).toBeDefined()
     })
@@ -316,7 +316,7 @@ describe('MapEditor', () => {
 
     it('should clear path when button clicked', () => {
       const clearPathBtn = container.querySelector('.btn-clear-path') as HTMLButtonElement
-      
+
       // This should not throw
       clearPathBtn.click()
     })
@@ -335,10 +335,10 @@ describe('MapEditor', () => {
     it('should toggle grid visibility', () => {
       const gridToggle = container.querySelector('.toggle-grid') as HTMLInputElement
       expect(gridToggle).toBeTruthy()
-      
+
       const initialState = gridToggle.checked
       gridToggle.click()
-      
+
       // State should change
       expect(gridToggle.checked).toBe(!initialState)
     })
@@ -346,30 +346,30 @@ describe('MapEditor', () => {
     it('should toggle 3D view', () => {
       const threeDToggle = container.querySelector('.toggle-3d') as HTMLInputElement
       expect(threeDToggle).toBeTruthy()
-      
+
       const initialState = threeDToggle.checked
       threeDToggle.click()
-      
+
       expect(threeDToggle.checked).toBe(!initialState)
     })
 
     it('should toggle minimap', () => {
       const minimapToggle = container.querySelector('.toggle-minimap') as HTMLInputElement
       expect(minimapToggle).toBeTruthy()
-      
+
       const initialState = minimapToggle.checked
       minimapToggle.click()
-      
+
       expect(minimapToggle.checked).toBe(!initialState)
     })
 
     it('should toggle pathfinding', () => {
       const pathfindingToggle = container.querySelector('.toggle-pathfinding') as HTMLInputElement
       expect(pathfindingToggle).toBeTruthy()
-      
+
       const initialState = pathfindingToggle.checked
       pathfindingToggle.click()
-      
+
       expect(pathfindingToggle.checked).toBe(!initialState)
     })
   })
@@ -381,20 +381,20 @@ describe('MapEditor', () => {
 
     it('should handle mouse events on canvas', () => {
       const canvas = container.querySelector('.map-canvas') as HTMLCanvasElement
-      
+
       // Create mouse events
       const mouseDownEvent = new MouseEvent('mousedown', {
         clientX: 100,
         clientY: 100,
         bubbles: true,
       })
-      
+
       const mouseMoveEvent = new MouseEvent('mousemove', {
         clientX: 150,
         clientY: 150,
         bubbles: true,
       })
-      
+
       const mouseUpEvent = new MouseEvent('mouseup', {
         clientX: 150,
         clientY: 150,
@@ -411,12 +411,12 @@ describe('MapEditor', () => {
 
     it('should handle wheel events for zooming', () => {
       const canvas = container.querySelector('.map-canvas') as HTMLCanvasElement
-      
+
       const wheelEvent = new WheelEvent('wheel', {
         deltaY: 100,
         bubbles: true,
       })
-      
+
       Object.defineProperty(wheelEvent, 'preventDefault', {
         value: vi.fn(),
         writable: true,
@@ -429,7 +429,7 @@ describe('MapEditor', () => {
 
     it('should handle click events', () => {
       const canvas = container.querySelector('.map-canvas') as HTMLCanvasElement
-      
+
       const clickEvent = new MouseEvent('click', {
         clientX: 100,
         clientY: 100,
@@ -443,7 +443,7 @@ describe('MapEditor', () => {
 
     it('should handle double click events', () => {
       const canvas = container.querySelector('.map-canvas') as HTMLCanvasElement
-      
+
       const dblClickEvent = new MouseEvent('dblclick', {
         clientX: 100,
         clientY: 100,
@@ -477,7 +477,7 @@ describe('MapEditor', () => {
           value: vi.fn(),
           writable: true,
         })
-        
+
         expect(() => {
           document.dispatchEvent(event)
         }).not.toThrow()
@@ -493,21 +493,21 @@ describe('MapEditor', () => {
     it('should register node change callback', () => {
       const onNodeChange = vi.fn()
       mapEditor.onNodeChanged(onNodeChange)
-      
+
       expect(onNodeChange).toBeDefined()
     })
 
     it('should register connection change callback', () => {
       const onConnectionChange = vi.fn()
       mapEditor.onConnectionChanged(onConnectionChange)
-      
+
       expect(onConnectionChange).toBeDefined()
     })
 
     it('should register selection change callback', () => {
       const onSelectionChange = vi.fn()
       mapEditor.onSelectionChanged(onSelectionChange)
-      
+
       expect(onSelectionChange).toBeDefined()
     })
   })
@@ -545,7 +545,7 @@ describe('MapEditor', () => {
   describe('edge cases', () => {
     it('should handle resize events', () => {
       mapEditor.loadLocations(testLocations)
-      
+
       expect(() => {
         window.dispatchEvent(new Event('resize'))
       }).not.toThrow()
@@ -553,7 +553,7 @@ describe('MapEditor', () => {
 
     it('should handle empty connections', () => {
       mapEditor.loadLocations(testLocations, [])
-      
+
       const connections = mapEditor.getConnections()
       expect(connections).toHaveLength(0)
     })
@@ -589,7 +589,7 @@ describe('MapEditor', () => {
       expect(() => {
         mapEditor.loadLocations(locationsWithoutCapacity)
       }).not.toThrow()
-      
+
       const nodes = mapEditor.getNodes()
       expect(nodes).toHaveLength(1)
     })

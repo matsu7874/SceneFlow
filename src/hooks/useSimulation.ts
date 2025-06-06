@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { StoryData, Event, Act, Person } from '../types/StoryData'
+import { StoryData } from '../types/StoryData'
+import { generateEventsFromActs } from '../utils/eventGeneration'
 
 interface SimulationState {
   currentTime: number
@@ -19,22 +20,27 @@ export const useSimulation = (storyData: StoryData | null) => {
   const [simulationState, setSimulationState] = useState<SimulationState>({
     currentTime: 0,
     personPositions: new Map(),
-    logEntries: []
+    logEntries: [],
   })
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // 時間をフォーマット
+  // 時間をフォーマット（分単位の値をhh:mm:ss形式に変換）
   const formatTime = (minutes: number): string => {
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
+    const totalSeconds = Math.round(minutes * 60)
+    const hours = Math.floor(totalSeconds / 3600)
+    const mins = Math.floor((totalSeconds % 3600) / 60)
+    const secs = totalSeconds % 60
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  // 時刻文字列を分に変換
+  // 時刻文字列を分に変換（秒も考慮）
   const timeToMinutes = (timeStr: string): number => {
-    const [hours, minutes] = timeStr.split(':').map(Number)
-    return hours * 60 + minutes
+    const parts = timeStr.split(':').map(Number)
+    const hours = parts[0] || 0
+    const minutes = parts[1] || 0
+    const seconds = parts[2] || 0
+    return hours * 60 + minutes + seconds / 60
   }
 
   // 初期化
@@ -47,15 +53,15 @@ export const useSimulation = (storyData: StoryData | null) => {
 
     storyData.initialStates.forEach(state => {
       initialPositions.set(state.personId, state.locationId)
-      
+
       const person = storyData.persons.find(p => p.id === state.personId)
       const location = storyData.locations.find(l => l.id === state.locationId)
-      
+
       if (person && location) {
         initialLogs.push({
           time: state.time,
           personId: state.personId,
-          text: ` は ${location.name} にいます (初期状態)`
+          text: ` は ${location.name} にいます (初期状態)`,
         })
       }
     })
@@ -63,7 +69,7 @@ export const useSimulation = (storyData: StoryData | null) => {
     setSimulationState({
       currentTime: 0,
       personPositions: initialPositions,
-      logEntries: initialLogs
+      logEntries: initialLogs,
     })
   }, [storyData])
 
@@ -77,21 +83,22 @@ export const useSimulation = (storyData: StoryData | null) => {
     // 初期状態をコピー
     storyData.initialStates.forEach(state => {
       positions.set(state.personId, state.locationId)
-      
+
       const person = storyData.persons.find(p => p.id === state.personId)
       const location = storyData.locations.find(l => l.id === state.locationId)
-      
+
       if (person && location) {
         logs.push({
           time: state.time,
           personId: state.personId,
-          text: ` は ${location.name} にいます (初期状態)`
+          text: ` は ${location.name} にいます (初期状態)`,
         })
       }
     })
 
     // イベントを時間順に処理
-    const sortedEvents = [...storyData.events].sort((a, b) => {
+    const events = generateEventsFromActs(storyData.acts || [])
+    const sortedEvents = [...events].sort((a, b) => {
       const timeA = timeToMinutes(a.eventTime)
       const timeB = timeToMinutes(b.eventTime)
       return timeA - timeB
@@ -110,20 +117,20 @@ export const useSimulation = (storyData: StoryData | null) => {
       // ログエントリを作成
       const person = storyData.persons.find(p => p.id === act.personId)
       const location = storyData.locations.find(l => l.id === act.locationId)
-      
+
       if (person && location) {
         let logText = ` @ ${location.name}: ${act.description}`
-        
+
         if (act.interactedPersonId) {
           const interactedPerson = storyData.persons.find(p => p.id === act.interactedPersonId)
           logText += ` (対象: ${interactedPerson?.name || '不明'})`
         }
-        
+
         if (act.propId) {
           const prop = storyData.props.find(p => p.id === act.propId)
           logText += ` (小道具: ${prop?.name || '不明'})`
         }
-        
+
         if (act.informationId) {
           const info = storyData.informations.find(i => i.id === act.informationId)
           logText += ` (情報: ${info?.content || '不明'})`
@@ -132,7 +139,7 @@ export const useSimulation = (storyData: StoryData | null) => {
         logs.push({
           time: event.eventTime,
           personId: act.personId,
-          text: logText
+          text: logText,
         })
       }
     })
@@ -140,7 +147,7 @@ export const useSimulation = (storyData: StoryData | null) => {
     setSimulationState({
       currentTime: targetTime,
       personPositions: positions,
-      logEntries: logs
+      logEntries: logs,
     })
   }, [storyData])
 
@@ -164,7 +171,8 @@ export const useSimulation = (storyData: StoryData | null) => {
     if (!storyData) return 0
 
     let maxTime = 0
-    storyData.events.forEach(event => {
+    const events = generateEventsFromActs(storyData.acts || [])
+    events.forEach(event => {
       const time = timeToMinutes(event.eventTime)
       if (time > maxTime) maxTime = time
     })
@@ -177,9 +185,15 @@ export const useSimulation = (storyData: StoryData | null) => {
     if (isPlaying && storyData) {
       intervalRef.current = setInterval(() => {
         setSimulationState(prev => {
-          const newTime = prev.currentTime + speed
+          // 速度設定に基づいて時間を進める
+          // 1x = 1秒で1秒進む (実時間と同じ)
+          // 2x = 1秒で2秒進む (実時間の2倍速)
+          // 5x = 1秒で5秒進む (実時間の5倍速)
+          // 10x = 1秒で10秒進む (実時間の10倍速)
+          const timeIncrement = (speed * 0.1) / 60 // 100msごとに秒単位で進め、分に変換
+          const newTime = prev.currentTime + timeIncrement
           const maxTime = getMaxTime()
-          
+
           if (newTime >= maxTime) {
             setIsPlaying(false)
             return prev
@@ -213,6 +227,6 @@ export const useSimulation = (storyData: StoryData | null) => {
     formatTime,
     togglePlayPause,
     setCurrentTime,
-    changeSpeed
+    changeSpeed,
   }
 }

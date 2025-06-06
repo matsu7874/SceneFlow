@@ -21,14 +21,9 @@ describe('indexStoryData', () => {
     informations: [
       { id: 301, content: 'Secret info' },
     ],
-    events: [
-      { id: 1, triggerType: '時刻', triggerValue: '09:00', eventTime: '09:00', personId: 1, actId: 1001 },
-    ],
     initialStates: [
       { personId: 1, locationId: 101, time: '09:00' },
     ],
-    moves: [],
-    stays: [],
   }
 
   it('should create maps for all entity types', () => {
@@ -57,7 +52,8 @@ describe('indexStoryData', () => {
     expect(result.persons).toEqual(mockStoryData.persons)
     expect(result.locations).toEqual(mockStoryData.locations)
     expect(result.acts).toEqual(mockStoryData.acts)
-    expect(result.events).toEqual(mockStoryData.events)
+    // eventsは自動生成されるので、acts数と同じになることを確認
+    expect(result.events.length).toEqual(mockStoryData.acts.length)
     expect(result.initialStates).toEqual(mockStoryData.initialStates)
   })
 
@@ -68,10 +64,7 @@ describe('indexStoryData', () => {
       acts: [],
       props: [],
       informations: [],
-      events: [],
       initialStates: [],
-      moves: [],
-      stays: [],
     }
 
     const result = indexStoryData(emptyData)
@@ -88,18 +81,60 @@ describe('indexStoryData', () => {
       persons: mockStoryData.persons,
       locations: mockStoryData.locations,
       acts: mockStoryData.acts,
-      events: mockStoryData.events,
       initialStates: mockStoryData.initialStates,
-      props: undefined as any,
-      informations: undefined as any,
-      moves: [],
-      stays: [],
+      props: undefined,
+      informations: undefined,
     }
 
     const result = indexStoryData(minimalData)
 
     expect(result.propMap.size).toBe(0)
     expect(result.infoMap.size).toBe(0)
+  })
+
+  it('should generate events from acts automatically', () => {
+    const result = indexStoryData(mockStoryData)
+
+    // eventsは自動生成される
+    expect(result.events).toHaveLength(mockStoryData.acts.length)
+    expect(result.events[0]).toMatchObject({
+      id: 1,
+      triggerType: '時刻',
+      triggerValue: '09:00',
+      eventTime: '09:00',
+      personId: 1,
+      actId: 1001,
+    })
+    expect(result.sortedEvents).toHaveLength(mockStoryData.acts.length)
+  })
+
+  it('should generate events with correct properties', () => {
+    const dataWithMultipleActs: StoryData = {
+      persons: [{ id: 1, name: 'Alice', color: '#ff0000' }],
+      locations: [{ id: 101, name: 'Room', connections: [] }],
+      acts: [
+        { id: 1, personId: 1, locationId: 101, time: '09:00:00', description: 'Act 1' },
+        { id: 2, personId: 1, locationId: 101, time: '10:30:00', description: 'Act 2' },
+        { id: 3, personId: 1, locationId: 101, time: '12:00:00', description: 'Act 3' },
+      ],
+      props: [],
+      informations: [],
+      initialStates: [],
+    }
+
+    const result = indexStoryData(dataWithMultipleActs)
+
+    expect(result.events).toHaveLength(3)
+    result.events.forEach((event, index) => {
+      const act = dataWithMultipleActs.acts[index]
+      expect(event.triggerType).toBe('時刻')
+      expect(event.triggerValue).toBe(act.time)
+      expect(event.eventTime).toBe(act.time)
+      expect(event.personId).toBe(act.personId)
+      expect(event.actId).toBe(act.id)
+      expect(event.name).toBe(`Event for ${act.description}`)
+      expect(event.description).toBe(`Triggered by act: ${act.description}`)
+    })
   })
 })
 

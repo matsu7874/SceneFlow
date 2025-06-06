@@ -18,9 +18,6 @@ describe('parseJsonData', () => {
     acts: [
       { id: 1001, personId: 1, locationId: 101, time: '09:00', description: 'Test act' },
     ],
-    events: [
-      { id: 1, triggerType: '時刻', triggerValue: '09:00', eventTime: '09:00', personId: 1, actId: 1001 },
-    ],
     initialStates: [
       { personId: 1, locationId: 101, time: '09:00' },
     ],
@@ -33,8 +30,6 @@ describe('parseJsonData', () => {
       ...validJsonData,
       props: [],
       informations: [],
-      moves: [],
-      stays: [],
     })
   })
 
@@ -44,11 +39,11 @@ describe('parseJsonData', () => {
   })
 
   it('should throw error for missing required keys', () => {
-    const requiredKeys = ['persons', 'locations', 'acts', 'events', 'initialStates']
+    const requiredKeys = ['persons', 'locations', 'acts', 'initialStates']
 
     requiredKeys.forEach(keyToRemove => {
       const incompleteData = { ...validJsonData }
-      delete (incompleteData as any)[keyToRemove]
+      delete (incompleteData as Record<string, unknown>)[keyToRemove]
       const textarea = createMockTextArea(JSON.stringify(incompleteData))
       expect(() => parseJsonData(textarea)).toThrow(`必須キーなし: ${keyToRemove}`)
     })
@@ -68,8 +63,6 @@ describe('parseJsonData', () => {
 
     expect(result.props).toEqual([])
     expect(result.informations).toEqual([])
-    expect(result.moves).toEqual([])
-    expect(result.stays).toEqual([])
   })
 
   it('should throw error if optional keys are not arrays', () => {
