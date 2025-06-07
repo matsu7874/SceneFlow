@@ -15,6 +15,7 @@ import {
   type KnowledgeState,
   type LocationProperties,
 } from '../../types/extendedEntities'
+import { timeToMinutes } from '../utils/timeUtils'
 
 /**
  * Convert classic StoryData to basic WorldState
@@ -28,18 +29,27 @@ export function storyDataToWorldState(storyData: StoryData, timestamp: number): 
     itemLocations: {},
   }
 
-  // Map person positions
+  // Map person positions from acts
   const personEvents = new Map<EntityId, EntityId>()
-  storyData.events
-    .filter(e => e.timestamp <= timestamp)
-    .sort((a, b) => b.timestamp - a.timestamp)
-    .forEach(event => {
-      const personId = event.person as EntityId
-      const locationId = event.location as EntityId
-      if (!personEvents.has(personId)) {
-        personEvents.set(personId, locationId)
-      }
-    })
+  if (storyData.acts) {
+    storyData.acts
+      .filter(act => {
+        const actTime = timeToMinutes(act.time)
+        return actTime <= timestamp
+      })
+      .sort((a, b) => {
+        const timeA = timeToMinutes(a.time)
+        const timeB = timeToMinutes(b.time)
+        return timeB - timeA
+      })
+      .forEach(act => {
+        const personId = act.personId as EntityId
+        const locationId = act.locationId as EntityId
+        if (!personEvents.has(personId)) {
+          personEvents.set(personId, locationId)
+        }
+      })
+  }
 
   personEvents.forEach((location, person) => {
     worldState.personPositions[person] = location
@@ -80,18 +90,27 @@ export function storyDataToExtendedWorldState(
     locationProperties: {},
   }
 
-  // Map person positions
+  // Map person positions from acts
   const personEvents = new Map<EntityId, EntityId>()
-  storyData.events
-    .filter(e => e.timestamp <= timestamp)
-    .sort((a, b) => b.timestamp - a.timestamp)
-    .forEach(event => {
-      const personId = event.person as EntityId
-      const locationId = event.location as EntityId
-      if (!personEvents.has(personId)) {
-        personEvents.set(personId, locationId)
-      }
-    })
+  if (storyData.acts) {
+    storyData.acts
+      .filter(act => {
+        const actTime = timeToMinutes(act.time)
+        return actTime <= timestamp
+      })
+      .sort((a, b) => {
+        const timeA = timeToMinutes(a.time)
+        const timeB = timeToMinutes(b.time)
+        return timeB - timeA
+      })
+      .forEach(act => {
+        const personId = act.personId as EntityId
+        const locationId = act.locationId as EntityId
+        if (!personEvents.has(personId)) {
+          personEvents.set(personId, locationId)
+        }
+      })
+  }
 
   personEvents.forEach((location, person) => {
     extendedState.personPositions[person] = location

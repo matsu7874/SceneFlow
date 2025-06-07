@@ -9,7 +9,7 @@ import { useAppContext } from '../contexts/AppContext'
 
 export const SimulationPage: React.FC = () => {
   const { storyData, setStoryData } = useAppContext()
-  
+
   const {
     isPlaying,
     speed,
@@ -20,10 +20,10 @@ export const SimulationPage: React.FC = () => {
     formatTime,
     togglePlayPause,
     setCurrentTime,
-    changeSpeed
+    changeSpeed,
   } = useSimulation(storyData)
 
-  const handleDataLoad = (data: typeof storyData) => {
+  const handleDataLoad = (data: typeof storyData): void => {
     if (data) {
       setStoryData(data)
     }
@@ -34,9 +34,9 @@ export const SimulationPage: React.FC = () => {
       <h2>Simulation</h2>
       <div className="container">
         <div className="input-area">
-          <JsonDataInput onDataLoad={handleDataLoad} />
+          <JsonDataInput onDataLoad={handleDataLoad} currentData={storyData} />
         </div>
-        
+
         <div className="output-area">
           <SimulationControls
             isPlaying={isPlaying}
@@ -48,21 +48,21 @@ export const SimulationPage: React.FC = () => {
             onSpeedChange={changeSpeed}
             disabled={!storyData}
           />
-          
+
           <LocationDisplay
             persons={storyData?.persons || []}
             locations={storyData?.locations || []}
             personPositions={personPositions}
             currentTime={formatTime(currentTime)}
           />
-          
+
           <EventLog
             logEntries={logEntries}
             persons={storyData?.persons || []}
             currentTime={formatTime(currentTime)}
           />
         </div>
-        
+
         <div className="layout-area">
           <LocationLayout
             persons={storyData?.persons || []}

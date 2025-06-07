@@ -1,4 +1,6 @@
-import { StoryData, Act, Event } from '../../types'
+import { StoryData } from '../../types'
+import { generateEventsFromActs } from '../../utils/eventGeneration'
+import { timeToMinutes } from '../utils/timeUtils'
 
 export interface CausalRelationship {
   from: string
@@ -24,61 +26,45 @@ export class CausalityEngine {
   }
 
   private buildRelationships(): void {
-    // Build relationships from acts
+    // Build relationships from acts based on time and location
     this.storyData.acts.forEach(act => {
-      // Check preconditions and postconditions
-      if (act.preconditions && act.postconditions) {
-        // Create relationships based on conditions
-        this.storyData.acts.forEach(otherAct => {
-          if (act.id !== otherAct.id && otherAct.preconditions) {
-            // Check if this act's postconditions satisfy other act's preconditions
-            const enablesOther = this.checkConditionOverlap(
-              act.postconditions,
-              otherAct.preconditions
-            )
-            
-            if (enablesOther) {
+      // Create time-based relationships
+      this.storyData.acts.forEach(otherAct => {
+        if (act.id !== otherAct.id) {
+          // If acts are by the same person and one follows the other
+          if (act.personId === otherAct.personId) {
+            const actTime = timeToMinutes(act.time)
+            const otherActTime = timeToMinutes(otherAct.time)
+
+            if (actTime < otherActTime) {
               this.relationships.push({
                 from: `act-${act.id}`,
                 to: `act-${otherAct.id}`,
                 type: 'enables',
-                strength: 0.8
+                strength: 0.8,
               })
             }
           }
-        })
-      }
+        }
+      })
     })
 
-    // Build relationships from events
-    this.storyData.events.forEach(event => {
-      if (event.trigger) {
-        // Event triggered by act completion
-        if (event.trigger.type === 'actCompleted' && event.trigger.actId) {
-          this.relationships.push({
-            from: `act-${event.trigger.actId}`,
-            to: `event-${event.id}`,
-            type: 'triggers',
-            strength: 1.0
-          })
-        }
-        
-        // Event triggers other acts through its actions
-        event.actions?.forEach(action => {
-          if (action.type === 'startAct' && action.actId) {
-            this.relationships.push({
-              from: `event-${event.id}`,
-              to: `act-${action.actId}`,
-              type: 'triggers',
-              strength: 1.0
-            })
-          }
+    // Build relationships from events (generated from acts)
+    const events = generateEventsFromActs(this.storyData.acts || [])
+    events.forEach(event => {
+      // Each event is triggered by its corresponding act
+      if (event.actId) {
+        this.relationships.push({
+          from: `act-${event.actId}`,
+          to: `event-${event.id}`,
+          type: 'triggers',
+          strength: 1.0,
         })
       }
     })
   }
 
-  private checkConditionOverlap(postconditions: any, preconditions: any): boolean {
+  private checkConditionOverlap(_postconditions: unknown, _preconditions: unknown): boolean {
     // Simplified condition checking
     // In a real implementation, this would do deep object comparison
     // and check if postconditions satisfy preconditions
@@ -91,15 +77,15 @@ export class CausalityEngine {
 
   validateCausality(): CausalityConflict[] {
     const conflicts: CausalityConflict[] = []
-    
+
     // Check for circular dependencies
     const visited = new Set<string>()
     const recursionStack = new Set<string>()
-    
+
     const hasCycle = (node: string): boolean => {
       visited.add(node)
       recursionStack.add(node)
-      
+
       const outgoing = this.relationships.filter(r => r.from === node)
       for (const rel of outgoing) {
         if (!visited.has(rel.to)) {
@@ -108,18 +94,18 @@ export class CausalityEngine {
           return true
         }
       }
-      
+
       recursionStack.delete(node)
       return false
     }
-    
+
     // Check all nodes for cycles
     const allNodes = new Set<string>()
     this.relationships.forEach(rel => {
       allNodes.add(rel.from)
       allNodes.add(rel.to)
     })
-    
+
     for (const node of allNodes) {
       if (!visited.has(node)) {
         if (hasCycle(node)) {
@@ -127,39 +113,40 @@ export class CausalityEngine {
             message: `Circular dependency detected involving ${node}`,
             description: 'There is a circular chain of dependencies that could prevent proper execution',
             suggestion: 'Review the causal relationships and break the circular dependency',
-            severity: 'error'
+            severity: 'error',
           })
         }
       }
     }
-    
+
     // Check for timing conflicts
     const actTimes = new Map<string, { start?: number, end?: number }>()
     this.storyData.acts.forEach(act => {
+      const startTime = timeToMinutes(act.time) || 0
       actTimes.set(`act-${act.id}`, {
-        start: act.startTime,
-        end: act.endTime
+        start: startTime,
+        end: startTime + 5, // Default to 5 minutes duration
       })
     })
-    
+
     this.relationships.forEach(rel => {
       if (rel.type === 'triggers' || rel.type === 'enables') {
         const fromTime = actTimes.get(rel.from)
         const toTime = actTimes.get(rel.to)
-        
+
         if (fromTime?.end !== undefined && toTime?.start !== undefined) {
           if (fromTime.end > toTime.start) {
             conflicts.push({
               message: `Timing conflict: ${rel.from} should complete before ${rel.to} starts`,
               description: `${rel.from} ends at ${fromTime.end} but ${rel.to} starts at ${toTime.start}`,
               suggestion: 'Adjust the timing of acts to respect causal relationships',
-              severity: 'warning'
+              severity: 'warning',
             })
           }
         }
       }
     })
-    
+
     return conflicts
   }
 
@@ -167,18 +154,18 @@ export class CausalityEngine {
   findCausalChain(targetId: string): string[] {
     const chain: string[] = []
     const visited = new Set<string>()
-    
-    const traverse = (nodeId: string) => {
+
+    const traverse = (nodeId: string): void => {
       if (visited.has(nodeId)) return
       visited.add(nodeId)
-      
+
       const incoming = this.relationships.filter(r => r.to === nodeId)
       incoming.forEach(rel => {
         chain.push(rel.from)
         traverse(rel.from)
       })
     }
-    
+
     traverse(targetId)
     return chain
   }
@@ -187,18 +174,18 @@ export class CausalityEngine {
   findEffects(sourceId: string): string[] {
     const effects: string[] = []
     const visited = new Set<string>()
-    
-    const traverse = (nodeId: string) => {
+
+    const traverse = (nodeId: string): void => {
       if (visited.has(nodeId)) return
       visited.add(nodeId)
-      
+
       const outgoing = this.relationships.filter(r => r.from === nodeId)
       outgoing.forEach(rel => {
         effects.push(rel.to)
         traverse(rel.to)
       })
     }
-    
+
     traverse(sourceId)
     return effects
   }

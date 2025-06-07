@@ -14,7 +14,18 @@ interface LogEntry {
   text: string
 }
 
-export const useSimulation = (storyData: StoryData | null) => {
+export const useSimulation = (storyData: StoryData | null): {
+  isPlaying: boolean
+  speed: number
+  currentTime: number
+  personPositions: Map<number, number>
+  logEntries: LogEntry[]
+  maxTime: number
+  formatTime: (minutes: number) => string
+  togglePlayPause: () => void
+  setCurrentTime: (time: number) => void
+  changeSpeed: (newSpeed: number) => void
+} => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
   const [simulationState, setSimulationState] = useState<SimulationState>({

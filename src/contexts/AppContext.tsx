@@ -14,7 +14,7 @@ interface AppProviderProps {
   children: ReactNode
 }
 
-export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+export const AppProvider: React.FC<AppProviderProps> = ({ children }): React.ReactElement => {
   const [storyData, setStoryData] = useState<StoryData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -24,7 +24,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         storyData,
         setStoryData,
         isLoading,
-        setIsLoading
+        setIsLoading,
       }}
     >
       {children}

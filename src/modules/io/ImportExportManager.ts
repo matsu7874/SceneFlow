@@ -178,32 +178,32 @@ export class ImportExportManager {
       let filename: string
 
       switch (options.format) {
-        case ExportFormat.JSON:
-          exportData = this.exportToJSON(dataPackage, options)
-          mimeType = 'application/json'
-          filename = options.filename || `sceneflow-export-${Date.now()}.json`
-          break
+      case ExportFormat.JSON:
+        exportData = this.exportToJSON(dataPackage, options)
+        mimeType = 'application/json'
+        filename = options.filename || `sceneflow-export-${Date.now()}.json`
+        break
 
-        case ExportFormat.YAML:
-          exportData = this.exportToYAML(dataPackage, options)
-          mimeType = 'application/x-yaml'
-          filename = options.filename || `sceneflow-export-${Date.now()}.yaml`
-          break
+      case ExportFormat.YAML:
+        exportData = this.exportToYAML(dataPackage, options)
+        mimeType = 'application/x-yaml'
+        filename = options.filename || `sceneflow-export-${Date.now()}.yaml`
+        break
 
-        case ExportFormat.CSV:
-          exportData = this.exportToCSV(entities, options)
-          mimeType = 'text/csv'
-          filename = options.filename || `sceneflow-export-${Date.now()}.csv`
-          break
+      case ExportFormat.CSV:
+        exportData = this.exportToCSV(entities, options)
+        mimeType = 'text/csv'
+        filename = options.filename || `sceneflow-export-${Date.now()}.csv`
+        break
 
-        case ExportFormat.XML:
-          exportData = this.exportToXML(dataPackage, options)
-          mimeType = 'application/xml'
-          filename = options.filename || `sceneflow-export-${Date.now()}.xml`
-          break
+      case ExportFormat.XML:
+        exportData = this.exportToXML(dataPackage, options)
+        mimeType = 'application/xml'
+        filename = options.filename || `sceneflow-export-${Date.now()}.xml`
+        break
 
-        default:
-          throw new Error(`Unsupported export format: ${String(options.format)}`)
+      default:
+        throw new Error(`Unsupported export format: ${String(options.format)}`)
       }
 
       // Handle compression if requested
@@ -255,33 +255,33 @@ export class ImportExportManager {
       let dataPackage: DataPackage
 
       switch (detectedFormat) {
-        case ExportFormat.JSON:
-          dataPackage = this.importFromJSON(content)
-          break
+      case ExportFormat.JSON:
+        dataPackage = this.importFromJSON(content)
+        break
 
-        case ExportFormat.YAML:
-          dataPackage = this.importFromYAML(content)
-          break
+      case ExportFormat.YAML:
+        dataPackage = this.importFromYAML(content)
+        break
 
-        case ExportFormat.CSV: {
-          const entities = this.importFromCSV(content)
-          dataPackage = {
-            version: '1.0.0',
-            timestamp: Date.now(),
-            metadata: { exportedBy: 'CSV Import' },
-            entities,
-            relationships: [],
-            connections: [],
-          }
-          break
+      case ExportFormat.CSV: {
+        const entities = this.importFromCSV(content)
+        dataPackage = {
+          version: '1.0.0',
+          timestamp: Date.now(),
+          metadata: { exportedBy: 'CSV Import' },
+          entities,
+          relationships: [],
+          connections: [],
         }
+        break
+      }
 
-        case ExportFormat.XML:
-          dataPackage = this.importFromXML(content)
-          break
+      case ExportFormat.XML:
+        dataPackage = this.importFromXML(content)
+        break
 
-        default:
-          throw new Error(`Unsupported import format: ${String(detectedFormat)}`)
+      default:
+        throw new Error(`Unsupported import format: ${String(detectedFormat)}`)
       }
 
       // Apply data transformation if provided
@@ -636,77 +636,77 @@ export class ImportExportManager {
       }
 
       switch (type) {
-        case 'person':
-          return {
-            ...baseEntity,
-            type: 'person',
-            currentLocation:
+      case 'person':
+        return {
+          ...baseEntity,
+          type: 'person',
+          currentLocation:
               typeof data.currentLocation === 'string' || typeof data.currentLocation === 'number'
                 ? String(data.currentLocation)
                 : undefined,
-            attributes: {
-              personality: typeof data.personality === 'string' ? data.personality.split(';') : [],
-              skills: typeof data.skills === 'string' ? data.skills.split(';') : [],
-              relationships: {},
-            },
-          }
+          attributes: {
+            personality: typeof data.personality === 'string' ? data.personality.split(';') : [],
+            skills: typeof data.skills === 'string' ? data.skills.split(';') : [],
+            relationships: {},
+          },
+        }
 
-        case 'location':
-          return {
-            ...baseEntity,
-            type: 'location',
-            connections: typeof data.connections === 'string' ? data.connections.split(';') : [],
-            capacity:
+      case 'location':
+        return {
+          ...baseEntity,
+          type: 'location',
+          connections: typeof data.connections === 'string' ? data.connections.split(';') : [],
+          capacity:
               typeof data.capacity === 'number'
                 ? data.capacity
                 : typeof data.capacity === 'string'
                   ? Number(data.capacity)
                   : 10,
-            attributes: {},
-          }
+          attributes: {},
+        }
 
-        case 'item':
-          return {
-            ...baseEntity,
-            type: 'item',
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            category: typeof data.category === 'string' ? (data.category as any) : undefined,
-            owner:
+      case 'item':
+        return {
+          ...baseEntity,
+          type: 'item',
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          category: typeof data.category === 'string' ? (data.category as any) : undefined,
+          owner:
               typeof data.owner === 'string' || typeof data.owner === 'number'
                 ? String(data.owner)
                 : undefined,
-            location:
+          location:
               typeof data.location === 'string' || typeof data.location === 'number'
                 ? String(data.location)
                 : undefined,
-            attributes: {},
-          }
+          attributes: {},
+        }
 
-        case 'information':
-          return {
-            ...baseEntity,
-            type: 'information',
-            content:
+      case 'information':
+        return {
+          ...baseEntity,
+          type: 'information',
+          content:
               typeof data.content === 'string' || typeof data.content === 'number'
                 ? String(data.content)
                 : '',
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            category: typeof data.category === 'string' ? (data.category as any) : undefined,
-            source:
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          category: typeof data.category === 'string' ? (data.category as any) : undefined,
+          source:
               typeof data.source === 'string' || typeof data.source === 'number'
                 ? String(data.source)
                 : undefined,
-            reliability:
+          reliability:
               typeof data.reliability === 'number'
                 ? data.reliability
                 : typeof data.reliability === 'string'
                   ? Number(data.reliability)
                   : 1.0,
-            attributes: {},
-          }
+          attributes: {},
+        }
 
-        default:
-          return null
+      default:
+        return null
       }
     } catch {
       return null
@@ -729,15 +729,15 @@ export class ImportExportManager {
     const ext = filename.toLowerCase().split('.').pop()
 
     switch (ext) {
-      case 'json':
-        return ExportFormat.JSON
-      case 'yaml':
-      case 'yml':
-        return ExportFormat.YAML
-      case 'csv':
-        return ExportFormat.CSV
-      case 'xml':
-        return ExportFormat.XML
+    case 'json':
+      return ExportFormat.JSON
+    case 'yaml':
+    case 'yml':
+      return ExportFormat.YAML
+    case 'csv':
+      return ExportFormat.CSV
+    case 'xml':
+      return ExportFormat.XML
     }
 
     // Try to detect from content

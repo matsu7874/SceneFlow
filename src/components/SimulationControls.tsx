@@ -20,12 +20,14 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
   onPlayPause,
   onTimeChange,
   onSpeedChange,
-  disabled = false
+  disabled = false,
 }) => {
   const formatTime = (minutes: number): string => {
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
+    const totalSeconds = Math.round(minutes * 60)
+    const hours = Math.floor(totalSeconds / 3600)
+    const mins = Math.floor((totalSeconds % 3600) / 60)
+    const secs = totalSeconds % 60
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
   return (
@@ -33,24 +35,26 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
       <h2>シミュレーション制御</h2>
       <div className="controls">
         <div className="control-group">
-          <button 
-            onClick={onPlayPause} 
+          <button
+            onClick={onPlayPause}
             disabled={disabled}
             className="play-pause-button"
           >
             {isPlaying ? '⏸ Pause' : '▶ Play'}
           </button>
           <label htmlFor="speedControl">速度:</label>
-          <select 
-            id="speedControl" 
-            value={speed} 
+          <select
+            id="speedControl"
+            value={speed}
             onChange={(e) => onSpeedChange(Number(e.target.value))}
             disabled={disabled}
           >
+            <option value="0.5">0.5x</option>
             <option value="1">1x</option>
             <option value="2">2x</option>
             <option value="5">5x</option>
             <option value="10">10x</option>
+            <option value="20">20x</option>
           </select>
         </div>
         <div className="control-group">
@@ -60,7 +64,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
             value={currentTime}
             min="0"
             max={maxTime}
-            step="1"
+            step="0.0167"
             onChange={(e) => onTimeChange(Number(e.target.value))}
             disabled={disabled}
           />

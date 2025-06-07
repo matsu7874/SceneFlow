@@ -23,7 +23,7 @@ export function generateEventsFromActs(acts: Act[]): Event[] {
  * For now, all acts generate events, but this could be extended
  * to filter based on act type or other criteria
  */
-export function shouldGenerateEvent(act: Act): boolean {
+export function shouldGenerateEvent(_act: Act): boolean {
   // All acts generate time-based events
   return true
 }

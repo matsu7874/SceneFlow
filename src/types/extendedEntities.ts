@@ -12,6 +12,83 @@ import type { EntityId } from './causality'
 export type EntityType = 'person' | 'location' | 'prop' | 'information' | 'act' | 'event'
 
 /**
+ * Extended Person type with additional fields
+ */
+export interface ExtendedPerson {
+  id: number
+  name: string
+  color: string
+  description?: string
+  age?: number
+  occupation?: string
+  personality?: string
+  goals?: string[]
+  relationships?: Array<{
+    targetId: string
+    type: string
+  }>
+}
+
+/**
+ * Extended Location type with additional fields
+ */
+export interface ExtendedLocation {
+  id: number
+  name: string
+  connections: number[]
+  description?: string
+  type?: 'indoor' | 'outdoor' | 'transit'
+  capacity?: number
+  connectedTo?: string[]
+  properties?: {
+    isLocked?: boolean
+    requiredItem?: string
+    atmosphere?: string
+  }
+}
+
+/**
+ * Extended Act type
+ */
+export interface ExtendedAct {
+  id: number
+  type?: string
+  personId: number
+  locationId: number
+  startTime?: number
+  endTime?: number
+  time?: string
+  description: string
+  itemId?: number
+  propId?: number
+  informationId?: number
+  interactedPersonId?: number
+}
+
+/**
+ * Extended Event type
+ */
+export interface ExtendedEvent {
+  id: number
+  name?: string
+  description?: string
+  trigger?: {
+    type: 'time' | 'actCompleted' | 'condition'
+    time?: number
+    actId?: string
+  }
+  actions?: Array<{
+    type: string
+    description: string
+  }>
+  triggerType?: string
+  triggerValue?: string
+  eventTime?: string
+  personId?: number
+  actId?: number
+}
+
+/**
  * Extended entity for generic entity management
  */
 export interface ExtendedEntity {
