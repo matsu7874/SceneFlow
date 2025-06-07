@@ -338,7 +338,7 @@
   border: 1px solid #333;
   border-radius: 4px;
   overflow: hidden;
-  z-index: 30;
+  z-index: 100;
   min-width: 120px;
 }
 
