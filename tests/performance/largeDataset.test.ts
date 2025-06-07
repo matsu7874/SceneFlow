@@ -30,15 +30,6 @@ const generateLargeDataset = (scale: number): StoryData => {
     description: `Action ${i + 1}`,
   }))
 
-  const events = Array.from({ length: scale * 2 }, (_, i) => ({
-    id: i + 1,
-    triggerType: 'time',
-    triggerValue: `${String(Math.floor(i / 30)).padStart(2, '0')}:${String((i % 30) * 2).padStart(2, '0')}`,
-    eventTime: `${String(Math.floor(i / 30)).padStart(2, '0')}:${String((i % 30) * 2).padStart(2, '0')}`,
-    personId: (i % scale) + 1,
-    actId: (i % (scale * 5)) + 1,
-  }))
-
   const initialStates = persons.map(person => ({
     personId: person.id,
     locationId: 1,
@@ -48,12 +39,9 @@ const generateLargeDataset = (scale: number): StoryData => {
     persons,
     locations,
     acts,
-    events,
     initialStates,
     props: [],
     informations: [],
-    moves: [],
-    stays: [],
   }
 }
 

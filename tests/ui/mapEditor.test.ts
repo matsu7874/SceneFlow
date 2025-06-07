@@ -268,9 +268,9 @@ describe('MapEditor', () => {
 
       // Positions should change (in most cases)
       const updatedNodes = mapEditor.getNodes()
-      const _hasChanged = updatedNodes.some((node, index) =>
-        node.x !== initialPositions[index].x || node.y !== initialPositions[index].y,
-      )
+      // const _hasChanged = updatedNodes.some((node, index) =>
+      //   node.x !== initialPositions[index].x || node.y !== initialPositions[index].y,
+      // )
 
       // Note: Layout might not change if nodes are already optimally positioned
       expect(updatedNodes).toHaveLength(initialNodes.length)
