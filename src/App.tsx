@@ -25,7 +25,7 @@ function App() {
               <h1>Scene-Flow</h1>
               <Navigation />
             </header>
-            
+
             <main className="app-main">
               <Routes>
                 <Route path="/" element={<Navigate to="/simulation" replace />} />
@@ -37,7 +37,7 @@ function App() {
                 <Route path="/validation" element={<ValidationPage />} />
               </Routes>
             </main>
-            
+
             <NotificationDisplay />
           </div>
         </VisualFeedbackProvider>

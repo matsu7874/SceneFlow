@@ -1,6 +1,7 @@
 import React from 'react'
 import { CausalityView } from '../components/CausalityView'
 import { useAppContext } from '../contexts/AppContext'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 
 export const CausalityPage: React.FC = () => {
   const { storyData } = useAppContext()
@@ -20,7 +21,9 @@ export const CausalityPage: React.FC = () => {
     <div className="page causality-page">
       <h2>Causality Analysis</h2>
       <div className="page-content">
-        <CausalityView storyData={storyData} />
+        <ErrorBoundary>
+          <CausalityView storyData={storyData} />
+        </ErrorBoundary>
       </div>
     </div>
   )
