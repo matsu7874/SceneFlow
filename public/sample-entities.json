@@ -1,0 +1,206 @@
+{
+  "storyTitle": "サンプル物語",
+  "initialTime": "2024-01-01T09:00:00",
+  "locations": [
+    {
+      "id": 1,
+      "name": "受付",
+      "description": "建物の入り口にある受付エリア",
+      "type": "indoor",
+      "capacity": 10,
+      "connections": [2, 3],
+      "properties": {
+        "isLocked": false,
+        "atmosphere": "明るく開放的"
+      }
+    },
+    {
+      "id": 2,
+      "name": "会議室A",
+      "description": "小規模な会議室",
+      "type": "indoor", 
+      "capacity": 8,
+      "connections": [1, 3, 4],
+      "properties": {
+        "isLocked": true,
+        "requiredItem": "101",
+        "atmosphere": "静かで集中できる"
+      }
+    },
+    {
+      "id": 3,
+      "name": "廊下",
+      "description": "各部屋をつなぐ廊下",
+      "type": "transit",
+      "capacity": 20,
+      "connections": [1, 2, 4]
+    },
+    {
+      "id": 4,
+      "name": "オフィス",
+      "description": "メインのオフィススペース",
+      "type": "indoor",
+      "capacity": 50,
+      "connections": [2, 3]
+    }
+  ],
+  "persons": [
+    {
+      "id": 1,
+      "name": "田中太郎",
+      "description": "営業部マネージャー",
+      "age": 35,
+      "occupation": "営業マネージャー",
+      "personality": "リーダーシップがあり、人当たりが良い",
+      "goals": ["新規契約の獲得", "チームの成長"],
+      "relationships": [
+        {
+          "targetId": "2",
+          "type": "colleague"
+        },
+        {
+          "targetId": "3",
+          "type": "friend"
+        }
+      ],
+      "color": "#3B82F6"
+    },
+    {
+      "id": 2,
+      "name": "鈴木花子",
+      "description": "受付担当",
+      "age": 28,
+      "occupation": "受付",
+      "personality": "親切で気配りができる",
+      "goals": ["顧客満足度の向上"],
+      "relationships": [
+        {
+          "targetId": "1",
+          "type": "colleague"
+        }
+      ],
+      "color": "#EC4899"
+    },
+    {
+      "id": 3,
+      "name": "山田次郎",
+      "description": "技術部エンジニア",
+      "age": 32,
+      "occupation": "ソフトウェアエンジニア",
+      "personality": "論理的で問題解決能力が高い",
+      "goals": ["新システムの開発", "技術力の向上"],
+      "relationships": [
+        {
+          "targetId": "1",
+          "type": "friend"
+        },
+        {
+          "targetId": "2",
+          "type": "colleague"
+        }
+      ],
+      "color": "#10B981"
+    }
+  ],
+  "props": [
+    {
+      "id": 101,
+      "name": "会議室の鍵",
+      "description": "会議室Aの鍵",
+      "category": "SMALL_PROP",
+      "isPortable": true,
+      "isConsumable": false,
+      "isCombineable": false,
+      "currentLocation": "1",
+      "owner": "2"
+    },
+    {
+      "id": 102,
+      "name": "プロジェクター",
+      "description": "会議用プロジェクター",
+      "category": "LARGE_PROP",
+      "isPortable": false,
+      "isConsumable": false,
+      "isCombineable": false,
+      "currentLocation": "2"
+    },
+    {
+      "id": 103,
+      "name": "ノートPC",
+      "description": "業務用ノートパソコン",
+      "category": "SMALL_PROP",
+      "isPortable": true,
+      "isConsumable": false,
+      "isCombineable": true,
+      "combinesWith": ["102"],
+      "currentLocation": "4",
+      "owner": "3"
+    }
+  ],
+  "acts": [
+    {
+      "id": 1,
+      "type": "move",
+      "personId": 1,
+      "locationId": 1,
+      "startTime": 0,
+      "endTime": 5,
+      "description": "田中が受付に到着"
+    },
+    {
+      "id": 2,
+      "type": "speak",
+      "personId": 1,
+      "locationId": 1,
+      "startTime": 5,
+      "endTime": 10,
+      "description": "田中が挨拶をする"
+    },
+    {
+      "id": 3,
+      "type": "give",
+      "personId": 2,
+      "locationId": 1,
+      "startTime": 10,
+      "endTime": 15,
+      "description": "鈴木が田中に鍵を渡す",
+      "itemId": 101
+    }
+  ],
+  "informations": [
+    {
+      "id": 1,
+      "name": "会議室の予約情報",
+      "content": "会議室Aは10時から12時まで予約済み",
+      "description": "本日の会議室予約状況",
+      "category": "FACT",
+      "isSecret": false
+    },
+    {
+      "id": 2,
+      "name": "プロジェクトの噂",
+      "content": "新しいプロジェクトが始まるらしい",
+      "description": "社内で流れている噂話",
+      "category": "RUMOR",
+      "isSecret": false,
+      "requiresContext": ["1"]
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "name": "会議開始",
+      "description": "定例会議の開始",
+      "trigger": {
+        "type": "time",
+        "time": 60
+      },
+      "actions": [
+        {
+          "type": "notification",
+          "description": "会議が始まります"
+        }
+      ]
+    }
+  ]
+}

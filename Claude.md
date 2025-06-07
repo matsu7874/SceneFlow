@@ -1,148 +1,116 @@
-# SceneFlow 開発状況分析
+# CLAUDE.md
 
-## 現在の実装状況と必要な開発項目
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-### 1. タイムライン管理機能
+## Project Overview
 
-#### 実装済み ✅
-- 時系列でのAct配置機能（`src/modules/ui/timelineEditor.ts`）
-- Act の追加・削除・並び替え
-- ドラッグ&ドロップでの編集機能（`src/modules/ui/dragDrop.ts`）
+SceneFlow is an immersive theater performance simulator that visualizes and simulates stories with multiple characters progressing simultaneously in different locations. It's a React TypeScript application with a focus on causality tracking and visual story editing.
 
-#### 要開発 🔲
-- **キャラクターごとの行動履歴表示の拡張**
-  - 現在はAct単位の表示のみで、キャラクター視点での時系列表示が不足
-- **移動時間の自動計算と反映**
-  - ロケーション間の移動時間が未実装
+## Development Commands
 
-### 2. キャラクター管理機能
+```bash
+# Start development server
+npm run dev
 
-#### 実装済み ✅
-- Person型の基本定義（`src/types/index.ts`）
-- 初期位置設定（InitialState）
+# Run tests
+npm test                    # Run all tests
+npm test <file-path>       # Run specific test file
+npm run test:ui            # Open Vitest UI
+npm run coverage           # Generate coverage report
 
-#### 要開発 🔲
-- **詳細プロフィール管理**
-  - 現在は名前とカラーのみ、持ち物などの属性が不足
-- **関連イベント・シーンの一覧表示UI**
-- **セリフ・台本管理機能**
-- **ハンドアウト出力機能**
+# Playwright E2E tests
+npm run test:e2e           # Run E2E tests
+npm run test:e2e:ui        # Open Playwright UI
 
-### 3. シーン管理機能
+# Code quality
+npm run lint               # Run ESLint
+npm run lint:fix           # Fix ESLint issues
+npm run format             # Format code with Prettier
+npm run format:check       # Check formatting
 
-#### 実装済み ✅
-- Act として基本的なシーン概念は実装済み
-- 場所・時間・人物の関連付け
+# Build
+npm run build              # Production build
+npm run preview           # Preview production build
+```
 
-#### 要開発 🔲
-- **シーンという独立した概念の追加**
-  - 複数のActをグループ化するシーン管理
-- **シーン削除時の依存関係チェック**
-  - 現在は因果律エンジンで部分的に実装済みだが、シーン単位での管理が必要
+## Architecture Overview
 
-### 4. アイテム管理機能
+### Core Concepts
 
-#### 実装済み ✅
-- ExtendedProp型で大道具・小道具の区別（`src/types/extendedEntities.ts`）
-- アイテムの受け渡しAct（GiveItemAct, TakeItemAct, PlaceItemAct）
-- 所有権・位置の追跡（WorldState内）
+1. **Entities**: Person, Location, Prop (ExtendedProp), Information
+2. **Acts**: Actions with preconditions and postconditions for causality tracking
+3. **WorldState**: Tracks entity positions and item ownership at any point in time
+4. **Causality Engine**: Validates act sequences and tracks dependencies
 
-#### 要開発 🔲
-- **アイテム中心のビュー**
-  - 現在は状態の一部として管理されているが、専用UIが不足
-- **アイテムの生成・廃棄の記録**
-  - UseItemActで消費は実装済みだが、生成の仕組みが不完全
+### Key Directories
 
-### 5. ロケーション管理機能
+- `src/types/`: Core type definitions (StoryData, Entity types, Acts)
+- `src/modules/causality/`: Causality engine and act implementations
+- `src/components/`: React components for different views
+- `src/pages/`: Main application pages
+- `src/contexts/`: React contexts for global state
 
-#### 実装済み ✅
-- 基本的な接続関係（connections配列）
-- 場所のレイアウト表示（`src/modules/ui/layout.ts`）
+### Act System
 
-#### 要開発 🔲
-- **移動時間の設定と管理**
-  - 接続に移動時間の属性が不足
-- **マップビューの実装**
-  - ノードベースの可視化（Phase 6で計画済み）
-- **経路探索機能**
+Acts are the fundamental unit of action with:
+- Preconditions that must be satisfied
+- Postconditions that modify the world state
+- Automatic validation through the causality engine
 
-### 6. 情報・小道具の整合性チェック機能
+Example acts:
+- MoveAct: Character movement between locations
+- GiveItemAct/TakeItemAct: Item transfers
+- UseItemAct/CombineItemsAct: Item transformations
+- SpeakAct: Dialog and information sharing
 
-#### 実装済み ✅
-- 因果律エンジンによる基本的な整合性チェック（`src/modules/causality/engine.ts`）
-- 事前条件・事後条件の検証
-- 因果ビューでの依存関係追跡（`src/modules/ui/causalityView.ts`）
+### State Management
 
-#### 要開発 🔲
-- **経路削除時の警告UI**
-- **修正候補の自動提示機能の拡張**
+1. **AppContext**: Main application state (story data, simulation state)
+2. **ExtendedState**: Persistent storage with LocalStorage
+3. **WorldState**: Runtime state tracking during simulation
 
-### 7. データ管理機能
+### Visual Components
 
-#### 実装済み ✅
-- JSONインポート・エクスポート基本機能
-- LocalStorageでの状態保存（`src/modules/state/extendedState.ts`）
+1. **MapEditor**: Node-based location editor with pathfinding
+2. **EntityEditor**: CRUD interface for all entity types
+3. **CausalityView**: Dependency tracking visualization
+4. **SimulationControls**: Timeline playback with speed control
+5. **ValidationReporter**: Real-time constraint checking
 
-#### 要開発 🔲
-- **複数フォーマット対応**（YAML, CSV）
-- **部分的なインポート・エクスポート**
-- **バージョン管理・差分表示**
+## Testing Strategy
 
-## 推奨開発優先順位
+- Unit tests for core logic (acts, causality engine, state management)
+- Component tests for UI behavior
+- E2E tests for critical user workflows
+- Performance tests for large datasets (500+ entities)
 
-### Phase 1: 基本機能の補完（1-2週間）
-1. **移動時間の実装**
-   - Location型に`travelTimes: Record<LocationId, number>`を追加
-   - MoveActで移動時間を自動計算
-   
-2. **キャラクター詳細プロフィール**
-   - Person型の拡張（初期持ち物、属性）
-   - プロフィール編集UI
+## Current Implementation Status
 
-3. **シーン管理の実装**
-   - Scene型の追加
-   - Actのグループ化機能
+### Completed ✅
+- Basic entity system with extended properties
+- Act-based action system with causality tracking
+- Map editor with node-based location editing
+- Real-time simulation with timeline controls
+- JSON import/export functionality
+- React migration with TypeScript
 
-### Phase 2: UI/UXの強化（2-3週間）
-1. **キャラクター中心ビュー**
-   - 特定キャラクターの行動履歴タイムライン
-   - 関連イベント一覧
+### In Development 🔲
+- Travel time between locations
+- Character-centric timeline view
+- Scene grouping (multiple acts as scenes)
+- Item lifecycle tracking (creation/destruction)
+- Advanced layout algorithms for map visualization
 
-2. **アイテム中心ビュー**
-   - アイテムの所有履歴
-   - 受け渡しフロー可視化
+## Important Patterns
 
-3. **セリフ・台本管理**
-   - Act に dialogue フィールド追加
-   - 台本エクスポート機能
+1. **Type Safety**: All entities use discriminated unions with entityType field
+2. **Immutability**: State updates use immutable patterns
+3. **Validation**: Acts validate preconditions before execution
+4. **Extensibility**: New act types can be added by extending BaseAct
 
-### Phase 3: 高度な機能（3-4週間）
-1. **マップエディタ**（Phase 6の実装）
-   - ノードベースの場所編集
-   - 移動経路の可視化
+## Performance Considerations
 
-2. **高度なデータ管理**
-   - YAML/CSVサポート
-   - 差分表示機能
-
-3. **ハンドアウト生成**
-   - キャラクターごとの情報整理
-   - PDF/HTML出力
-
-## 技術的な推奨事項
-
-1. **型定義の拡張**
-   - Scene, Dialogue, CharacterProfile などの新しい型を追加
-   - 既存の型を拡張する際は後方互換性を維持
-
-2. **UIコンポーネントの整理**
-   - 各ビュー（キャラクター、アイテム、シーン）を独立したモジュールとして実装
-   - 共通UIコンポーネントの抽出
-
-3. **データ永続化の強化**
-   - IndexedDBの活用検討
-   - オートセーブ機能の実装
-
-4. **テストの拡充**
-   - 新機能ごとにユニットテストを追加
-   - E2Eテストでユーザーシナリオをカバー
+- Maximum 500 concurrent entities
+- 10MB data limit for import
+- Efficient indexing for entity lookups
+- Optimized rendering for map visualization
