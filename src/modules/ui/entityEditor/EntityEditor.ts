@@ -292,59 +292,59 @@ export class EntityEditor {
     }
 
     switch (type) {
-      case 'person':
-        return {
-          ...baseEntity,
-          type: 'person',
-          attributes: {
-            personality: [],
-            skills: [],
-            relationships: {},
-          },
-        } as PersonEntity
+    case 'person':
+      return {
+        ...baseEntity,
+        type: 'person',
+        attributes: {
+          personality: [],
+          skills: [],
+          relationships: {},
+        },
+      } as PersonEntity
 
-      case 'location':
-        return {
-          ...baseEntity,
-          type: 'location',
-          connections: [],
-          capacity: 10,
-          attributes: {
-            environment: '',
-            accessibility: [],
-            specialFeatures: [],
-          },
-        } as LocationEntity
+    case 'location':
+      return {
+        ...baseEntity,
+        type: 'location',
+        connections: [],
+        capacity: 10,
+        attributes: {
+          environment: '',
+          accessibility: [],
+          specialFeatures: [],
+        },
+      } as LocationEntity
 
-      case 'item':
-        return {
-          ...baseEntity,
-          type: 'item',
-          category: PropCategory.SMALL_PROP,
-          attributes: {
-            weight: 1,
-            size: 'small',
-            durability: 100,
-            specialProperties: [],
-          },
-        } as ItemEntity
+    case 'item':
+      return {
+        ...baseEntity,
+        type: 'item',
+        category: PropCategory.SMALL_PROP,
+        attributes: {
+          weight: 1,
+          size: 'small',
+          durability: 100,
+          specialProperties: [],
+        },
+      } as ItemEntity
 
-      case 'information':
-        return {
-          ...baseEntity,
-          type: 'information',
-          category: InformationCategory.FACT,
-          content: '',
-          reliability: 1.0,
-          attributes: {
-            visibility: 'public',
-            relatedEntities: [],
-          },
-        } as InformationEntity
+    case 'information':
+      return {
+        ...baseEntity,
+        type: 'information',
+        category: InformationCategory.FACT,
+        content: '',
+        reliability: 1.0,
+        attributes: {
+          visibility: 'public',
+          relatedEntities: [],
+        },
+      } as InformationEntity
 
-      default:
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        throw new Error(`Unknown entity type: ${type}`)
+    default:
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      throw new Error(`Unknown entity type: ${type}`)
     }
   }
 
@@ -408,66 +408,66 @@ export class EntityEditor {
     errors: Array<{ field: string; message: string; severity: 'error' | 'warning' }>,
   ): void {
     switch (entity.type) {
-      case 'person':
-        if (entity.currentLocation && !this.availableEntities.has(entity.currentLocation)) {
-          errors.push({
-            field: 'currentLocation',
-            message: 'Referenced location does not exist',
-            severity: 'warning',
-          })
-        }
-        break
+    case 'person':
+      if (entity.currentLocation && !this.availableEntities.has(entity.currentLocation)) {
+        errors.push({
+          field: 'currentLocation',
+          message: 'Referenced location does not exist',
+          severity: 'warning',
+        })
+      }
+      break
 
-      case 'location':
-        if (entity.connections) {
-          entity.connections.forEach(connectionId => {
-            if (!this.availableEntities.has(connectionId)) {
-              errors.push({
-                field: 'connections',
-                message: `Connected location ${connectionId} does not exist`,
-                severity: 'warning',
-              })
-            }
-          })
-        }
-        break
+    case 'location':
+      if (entity.connections) {
+        entity.connections.forEach(connectionId => {
+          if (!this.availableEntities.has(connectionId)) {
+            errors.push({
+              field: 'connections',
+              message: `Connected location ${connectionId} does not exist`,
+              severity: 'warning',
+            })
+          }
+        })
+      }
+      break
 
-      case 'item':
-        if (entity.owner && !this.availableEntities.has(entity.owner)) {
-          errors.push({
-            field: 'owner',
-            message: 'Referenced owner does not exist',
-            severity: 'warning',
-          })
-        }
-        if (entity.location && !this.availableEntities.has(entity.location)) {
-          errors.push({
-            field: 'location',
-            message: 'Referenced location does not exist',
-            severity: 'warning',
-          })
-        }
-        break
+    case 'item':
+      if (entity.owner && !this.availableEntities.has(entity.owner)) {
+        errors.push({
+          field: 'owner',
+          message: 'Referenced owner does not exist',
+          severity: 'warning',
+        })
+      }
+      if (entity.location && !this.availableEntities.has(entity.location)) {
+        errors.push({
+          field: 'location',
+          message: 'Referenced location does not exist',
+          severity: 'warning',
+        })
+      }
+      break
 
-      case 'information':
-        if (entity.source && !this.availableEntities.has(entity.source)) {
-          errors.push({
-            field: 'source',
-            message: 'Referenced source does not exist',
-            severity: 'warning',
-          })
-        }
-        if (
-          entity.reliability !== undefined &&
+    case 'information':
+      if (entity.source && !this.availableEntities.has(entity.source)) {
+        errors.push({
+          field: 'source',
+          message: 'Referenced source does not exist',
+          severity: 'warning',
+        })
+      }
+      if (
+        entity.reliability !== undefined &&
           (entity.reliability < 0 || entity.reliability > 1)
-        ) {
-          errors.push({
-            field: 'reliability',
-            message: 'Reliability must be between 0 and 1',
-            severity: 'error',
-          })
-        }
-        break
+      ) {
+        errors.push({
+          field: 'reliability',
+          message: 'Reliability must be between 0 and 1',
+          severity: 'error',
+        })
+      }
+      break
     }
   }
 
@@ -498,13 +498,13 @@ export class EntityEditor {
             <select id="entity-type-select" class="entity-type-select">
               <option value="">Select type...</option>
               ${this.config.allowedEntityTypes
-                .map(
-                  type =>
-                    `<option value="${type}" ${this.currentEntity?.type === type ? 'selected' : ''}>
+    .map(
+      type =>
+        `<option value="${type}" ${this.currentEntity?.type === type ? 'selected' : ''}>
                   ${type.charAt(0).toUpperCase() + type.slice(1)}
                 </option>`,
-                )
-                .join('')}
+    )
+    .join('')}
             </select>
             <button class="btn-new-entity" ${!this.getSelectedType() ? 'disabled' : ''}>
               New ${this.getSelectedType() || 'Entity'}
@@ -600,16 +600,16 @@ export class EntityEditor {
 
     // Type-specific fields
     switch (entity.type) {
-      case 'person':
-        return ['currentLocation', 'attributes'].includes(field) || field === 'relationships'
-      case 'location':
-        return ['connections', 'capacity', 'attributes'].includes(field)
-      case 'item':
-        return ['category', 'owner', 'location', 'attributes'].includes(field)
-      case 'information':
-        return ['category', 'content', 'source', 'reliability', 'attributes'].includes(field)
-      default:
-        return false
+    case 'person':
+      return ['currentLocation', 'attributes'].includes(field) || field === 'relationships'
+    case 'location':
+      return ['connections', 'capacity', 'attributes'].includes(field)
+    case 'item':
+      return ['category', 'owner', 'location', 'attributes'].includes(field)
+    case 'information':
+      return ['category', 'content', 'source', 'reliability', 'attributes'].includes(field)
+    default:
+      return false
     }
   }
 
@@ -624,35 +624,35 @@ export class EntityEditor {
     const isRequired = this.config.requiredFields[this.currentEntity.type]?.includes(field) || false
 
     switch (field) {
-      case 'id':
-        return this.renderTextInput('id', 'ID', value as string, isRequired, true)
-      case 'name':
-        return this.renderTextInput('name', 'Name', value as string, isRequired)
-      case 'description':
-        return this.renderTextarea('description', 'Description', value as string)
-      case 'tags':
-        return this.renderTagsInput('tags', 'Tags', value as string[])
-      case 'content':
-        return this.renderTextarea('content', 'Content', value as string, isRequired)
-      case 'category':
-        return this.renderCategorySelect(field, 'Category', value as string)
-      case 'currentLocation':
-      case 'owner':
-      case 'location':
-      case 'source':
-        return this.renderEntitySelect(field, this.formatFieldLabel(field), value as EntityId)
-      case 'connections':
-        return this.renderMultiEntitySelect(field, 'Connections', value as EntityId[])
-      case 'capacity':
-        return this.renderNumberInput('capacity', 'Capacity', value as number)
-      case 'reliability':
-        return this.renderRangeInput('reliability', 'Reliability', value as number, 0, 1, 0.1)
-      case 'attributes':
-        return this.renderAttributesEditor(field, value as Record<string, unknown>)
-      case 'metadata':
-        return this.renderMetadataEditor(field, value as Record<string, unknown>)
-      default:
-        return this.renderTextInput(field, this.formatFieldLabel(field), value as string)
+    case 'id':
+      return this.renderTextInput('id', 'ID', value as string, isRequired, true)
+    case 'name':
+      return this.renderTextInput('name', 'Name', value as string, isRequired)
+    case 'description':
+      return this.renderTextarea('description', 'Description', value as string)
+    case 'tags':
+      return this.renderTagsInput('tags', 'Tags', value as string[])
+    case 'content':
+      return this.renderTextarea('content', 'Content', value as string, isRequired)
+    case 'category':
+      return this.renderCategorySelect(field, 'Category', value as string)
+    case 'currentLocation':
+    case 'owner':
+    case 'location':
+    case 'source':
+      return this.renderEntitySelect(field, this.formatFieldLabel(field), value as EntityId)
+    case 'connections':
+      return this.renderMultiEntitySelect(field, 'Connections', value as EntityId[])
+    case 'capacity':
+      return this.renderNumberInput('capacity', 'Capacity', value as number)
+    case 'reliability':
+      return this.renderRangeInput('reliability', 'Reliability', value as number, 0, 1, 0.1)
+    case 'attributes':
+      return this.renderAttributesEditor(field, value as Record<string, unknown>)
+    case 'metadata':
+      return this.renderMetadataEditor(field, value as Record<string, unknown>)
+    default:
+      return this.renderTextInput(field, this.formatFieldLabel(field), value as string)
     }
   }
 
@@ -840,27 +840,27 @@ export class EntityEditor {
         <div class="multi-select-container">
           <div class="selected-entities" id="${field}-selected">
             ${currentValues
-              .map(entityId => {
-                const entity = this.availableEntities.get(entityId)
-                return entity
-                  ? `
+    .map(entityId => {
+      const entity = this.availableEntities.get(entityId)
+      return entity
+        ? `
                 <span class="selected-entity" data-entity-id="${entityId}">
                   ${entity.name}
                   <button type="button" class="remove-entity" data-field="${field}" data-entity-id="${entityId}">×</button>
                 </span>
               `
-                  : ''
-              })
-              .join('')}
+        : ''
+    })
+    .join('')}
           </div>
           <select class="form-select add-entity-select" data-field="${field}">
             <option value="">Add entity...</option>
             ${relevantEntities
-              .filter(entity => !currentValues.includes(entity.id))
-              .map(
-                entity => `<option value="${entity.id}">${entity.name} (${entity.type})</option>`,
-              )
-              .join('')}
+    .filter(entity => !currentValues.includes(entity.id))
+    .map(
+      entity => `<option value="${entity.id}">${entity.name} (${entity.type})</option>`,
+    )
+    .join('')}
           </select>
         </div>
         <div class="field-error" id="${field}-error"></div>
@@ -875,17 +875,17 @@ export class EntityEditor {
     const allEntities = Array.from(this.availableEntities.values())
 
     switch (field) {
-      case 'currentLocation':
-      case 'location':
-        return allEntities.filter(e => e.type === 'location')
-      case 'owner':
-        return allEntities.filter(e => e.type === 'person')
-      case 'source':
-        return allEntities.filter(e => e.type === 'person')
-      case 'connections':
-        return allEntities.filter(e => e.type === 'location' && e.id !== this.currentEntity?.id)
-      default:
-        return allEntities
+    case 'currentLocation':
+    case 'location':
+      return allEntities.filter(e => e.type === 'location')
+    case 'owner':
+      return allEntities.filter(e => e.type === 'person')
+    case 'source':
+      return allEntities.filter(e => e.type === 'person')
+    case 'connections':
+      return allEntities.filter(e => e.type === 'location' && e.id !== this.currentEntity?.id)
+    default:
+      return allEntities
     }
   }
 
@@ -901,15 +901,15 @@ export class EntityEditor {
         <div class="tags-input-container">
           <div class="tags-display" id="${field}-tags">
             ${currentTags
-              .map(
-                tag => `
+    .map(
+      tag => `
               <span class="tag">
                 ${tag}
                 <button type="button" class="remove-tag" data-field="${field}" data-tag="${tag}">×</button>
               </span>
             `,
-              )
-              .join('')}
+    )
+    .join('')}
           </div>
           <input
             type="text"
@@ -933,16 +933,16 @@ export class EntityEditor {
 
     // Type-specific attribute rendering
     switch (this.currentEntity.type) {
-      case 'person':
-        return this.renderPersonAttributes(attributes)
-      case 'location':
-        return this.renderLocationAttributes(attributes)
-      case 'item':
-        return this.renderItemAttributes(attributes)
-      case 'information':
-        return this.renderInformationAttributes(attributes)
-      default:
-        return this.renderGenericAttributes(field, attributes)
+    case 'person':
+      return this.renderPersonAttributes(attributes)
+    case 'location':
+      return this.renderLocationAttributes(attributes)
+    case 'item':
+      return this.renderItemAttributes(attributes)
+    case 'information':
+      return this.renderInformationAttributes(attributes)
+    default:
+      return this.renderGenericAttributes(field, attributes)
     }
   }
 
@@ -963,15 +963,15 @@ export class EntityEditor {
             <h5>Personality</h5>
             <div class="array-input" data-field="attributes.personality">
               ${personality
-                .map(
-                  trait => `
+    .map(
+      trait => `
                 <div class="array-item">
                   <input type="text" value="${trait}" readonly />
                   <button type="button" class="remove-array-item">×</button>
                 </div>
               `,
-                )
-                .join('')}
+    )
+    .join('')}
               <div class="add-array-item">
                 <input type="text" placeholder="Add personality trait..." />
                 <button type="button" class="add-item-btn">+</button>
@@ -982,15 +982,15 @@ export class EntityEditor {
             <h5>Skills</h5>
             <div class="array-input" data-field="attributes.skills">
               ${skills
-                .map(
-                  skill => `
+    .map(
+      skill => `
                 <div class="array-item">
                   <input type="text" value="${skill}" readonly />
                   <button type="button" class="remove-array-item">×</button>
                 </div>
               `,
-                )
-                .join('')}
+    )
+    .join('')}
               <div class="add-array-item">
                 <input type="text" placeholder="Add skill..." />
                 <button type="button" class="add-item-btn">+</button>
@@ -1019,15 +1019,15 @@ export class EntityEditor {
             <h5>Accessibility</h5>
             <div class="array-input" data-field="attributes.accessibility">
               ${accessibility
-                .map(
-                  feature => `
+    .map(
+      feature => `
                 <div class="array-item">
                   <input type="text" value="${feature}" readonly />
                   <button type="button" class="remove-array-item">×</button>
                 </div>
               `,
-                )
-                .join('')}
+    )
+    .join('')}
               <div class="add-array-item">
                 <input type="text" placeholder="Add accessibility feature..." />
                 <button type="button" class="add-item-btn">+</button>
@@ -1038,15 +1038,15 @@ export class EntityEditor {
             <h5>Special Features</h5>
             <div class="array-input" data-field="attributes.specialFeatures">
               ${specialFeatures
-                .map(
-                  feature => `
+    .map(
+      feature => `
                 <div class="array-item">
                   <input type="text" value="${feature}" readonly />
                   <button type="button" class="remove-array-item">×</button>
                 </div>
               `,
-                )
-                .join('')}
+    )
+    .join('')}
               <div class="add-array-item">
                 <input type="text" placeholder="Add special feature..." />
                 <button type="button" class="add-item-btn">+</button>
@@ -1087,15 +1087,15 @@ export class EntityEditor {
             <h5>Special Properties</h5>
             <div class="array-input" data-field="attributes.specialProperties">
               ${specialProperties
-                .map(
-                  property => `
+    .map(
+      property => `
                 <div class="array-item">
                   <input type="text" value="${property}" readonly />
                   <button type="button" class="remove-array-item">×</button>
                 </div>
               `,
-                )
-                .join('')}
+    )
+    .join('')}
               <div class="add-array-item">
                 <input type="text" placeholder="Add special property..." />
                 <button type="button" class="add-item-btn">+</button>

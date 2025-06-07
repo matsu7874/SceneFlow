@@ -51,10 +51,10 @@ export function validateStoryData(data: unknown): ValidationResult {
 
     initialStates.forEach((state, index: number) => {
       if (!personIds.has(state.personId)) {
-        errors.push(`initialStates[${index}]: 存在しないpersonId: ${state.personId}`)
+        errors.push(`initialStates[${index}]: 存在しないpersonId: ${String(state.personId)}`)
       }
       if (!locationIds.has(state.locationId)) {
-        errors.push(`initialStates[${index}]: 存在しないlocationId: ${state.locationId}`)
+        errors.push(`initialStates[${index}]: 存在しないlocationId: ${String(state.locationId)}`)
       }
     })
   }
@@ -63,7 +63,7 @@ export function validateStoryData(data: unknown): ValidationResult {
   const acts = dataObj.acts as Array<Record<string, unknown>>
   const props = dataObj.props as Array<Record<string, unknown>> | undefined
   const informations = dataObj.informations as Array<Record<string, unknown>> | undefined
-  
+
   const personIds = new Set(persons?.map((p) => p.id) || [])
   const locationIds = new Set(locations?.map((l) => l.id) || [])
   const propIds = new Set(props?.map((p) => p.id) || [])
@@ -74,19 +74,19 @@ export function validateStoryData(data: unknown): ValidationResult {
       errors.push(`acts[${index}]: id, personId, locationId, time, descriptionは必須です`)
     }
     if (!personIds.has(act.personId)) {
-      errors.push(`acts[${index}]: 存在しないpersonId: ${act.personId}`)
+      errors.push(`acts[${index}]: 存在しないpersonId: ${String(act.personId)}`)
     }
     if (!locationIds.has(act.locationId)) {
-      errors.push(`acts[${index}]: 存在しないlocationId: ${act.locationId}`)
+      errors.push(`acts[${index}]: 存在しないlocationId: ${String(act.locationId)}`)
     }
     if (act.propId && !propIds.has(act.propId)) {
-      errors.push(`acts[${index}]: 存在しないpropId: ${act.propId}`)
+      errors.push(`acts[${index}]: 存在しないpropId: ${String(act.propId)}`)
     }
     if (act.informationId && !infoIds.has(act.informationId)) {
-      errors.push(`acts[${index}]: 存在しないinformationId: ${act.informationId}`)
+      errors.push(`acts[${index}]: 存在しないinformationId: ${String(act.informationId)}`)
     }
     if (act.interactedPersonId && !personIds.has(act.interactedPersonId)) {
-      errors.push(`acts[${index}]: 存在しないinteractedPersonId: ${act.interactedPersonId}`)
+      errors.push(`acts[${index}]: 存在しないinteractedPersonId: ${String(act.interactedPersonId)}`)
     }
   })
 
@@ -100,10 +100,10 @@ export function validateStoryData(data: unknown): ValidationResult {
         errors.push(`events[${index}]: すべてのフィールドは必須です`)
       }
       if (!personIds.has(event.personId)) {
-        errors.push(`events[${index}]: 存在しないpersonId: ${event.personId}`)
+        errors.push(`events[${index}]: 存在しないpersonId: ${String(event.personId)}`)
       }
       if (!actIds.has(event.actId)) {
-        errors.push(`events[${index}]: 存在しないactId: ${event.actId}`)
+        errors.push(`events[${index}]: 存在しないactId: ${String(event.actId)}`)
       }
     })
   }

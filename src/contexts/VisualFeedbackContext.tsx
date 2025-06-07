@@ -38,12 +38,12 @@ export const VisualFeedbackProvider: React.FC<{ children: ReactNode }> = ({ chil
   const showNotification = useCallback((message: string, options: FeedbackOptions = {}) => {
     const { duration = 3000, type = 'info' } = options
     const id = `notification-${notificationIdRef.current++}`
-    
+
     const notification: Notification = {
       id,
       message,
       type,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
 
     setNotifications(prev => [...prev, notification])
@@ -61,20 +61,20 @@ export const VisualFeedbackProvider: React.FC<{ children: ReactNode }> = ({ chil
 
   const highlightElement = useCallback((element: HTMLElement, options: FeedbackOptions = {}) => {
     const { duration = 1000, type = 'info' } = options
-    
+
     const colorMap = {
       success: '#22c55e',
       error: '#ef4444',
       warning: '#f59e0b',
-      info: '#3b82f6'
+      info: '#3b82f6',
     }
 
     const originalBoxShadow = element.style.boxShadow
     const originalTransition = element.style.transition
-    
+
     element.style.transition = 'box-shadow 0.3s ease-in-out'
     element.style.boxShadow = `0 0 0 3px ${colorMap[type]}, 0 0 20px ${colorMap[type]}40`
-    
+
     setTimeout(() => {
       element.style.boxShadow = originalBoxShadow
       setTimeout(() => {
@@ -108,7 +108,7 @@ export const VisualFeedbackProvider: React.FC<{ children: ReactNode }> = ({ chil
     clearNotifications,
     notifications,
     highlightElement,
-    animateTransition
+    animateTransition,
   }
 
   return (
