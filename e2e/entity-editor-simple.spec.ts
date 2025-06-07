@@ -14,18 +14,6 @@ const simpleTestData = {
     { personId: 2, locationId: 1, time: '09:00' },
   ],
   acts: [{ id: 1, personId: 1, locationId: 1, time: '09:00', description: 'テスト行動' }],
-  moves: [],
-  stays: [],
-  events: [
-    {
-      id: 1,
-      triggerType: '時刻',
-      triggerValue: '09:00',
-      eventTime: '09:00',
-      personId: 1,
-      actId: 1,
-    },
-  ],
 }
 
 test.describe('エンティティ編集の基本動作確認', () => {
