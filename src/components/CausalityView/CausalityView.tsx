@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { StoryData, Act, Event } from '../../types'
 import { useVisualFeedback } from '../../contexts/VisualFeedbackContext'
 import { CausalityEngine } from '../../modules/core/causalityEngine'
+import { generateEventsFromActs } from '../../utils/eventGeneration'
+import { timeToMinutes } from '../../modules/utils/timeUtils'
 import styles from './CausalityView.module.css'
 
 interface CausalityViewProps {
@@ -27,88 +29,44 @@ interface ViewState {
   offsetY: number
 }
 
-export const CausalityView: React.FC<CausalityViewProps> = ({ 
-  storyData, 
+export const CausalityView: React.FC<CausalityViewProps> = ({
+  storyData,
   currentTime = 0,
-  onTimeSeek 
+  onTimeSeek,
 }) => {
+  const [error, setError] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  
+
   const [viewState, setViewState] = useState<ViewState>({
     scale: 1,
     offsetX: 0,
-    offsetY: 0
+    offsetY: 0,
   })
-  
+
   const [selectedNode, setSelectedNode] = useState<string | null>(null)
   const [hoveredNode, setHoveredNode] = useState<string | null>(null)
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
-  
+
   const { showNotification } = useVisualFeedback()
-  
+
   // Initialize causality engine
   const causalityEngine = useMemo(() => {
-    return new CausalityEngine(storyData)
+    try {
+      return new CausalityEngine(storyData)
+    } catch (err) {
+      console.error('Error initializing CausalityEngine:', err)
+      setError(`Failed to initialize causality engine: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      return null
+    }
   }, [storyData])
 
-  // Build node graph
-  const nodes = useMemo(() => {
-    const nodeMap = new Map<string, Node>()
-    const relationships = causalityEngine.getCausalRelationships()
-    
-    // Create nodes for acts
-    storyData.acts.forEach((act, index) => {
-      const node: Node = {
-        id: `act-${act.id}`,
-        type: 'act',
-        data: act,
-        x: 0,
-        y: 0,
-        time: act.startTime || 0,
-        causedBy: [],
-        causes: []
-      }
-      nodeMap.set(node.id, node)
-    })
-    
-    // Create nodes for events
-    storyData.events.forEach((event, index) => {
-      const node: Node = {
-        id: `event-${event.id}`,
-        type: 'event',
-        data: event,
-        x: 0,
-        y: 0,
-        time: 0, // Will be calculated based on trigger
-        causedBy: [],
-        causes: []
-      }
-      nodeMap.set(node.id, node)
-    })
-    
-    // Build relationships
-    relationships.forEach(rel => {
-      const fromNode = nodeMap.get(rel.from)
-      const toNode = nodeMap.get(rel.to)
-      if (fromNode && toNode) {
-        fromNode.causes.push(rel.to)
-        toNode.causedBy.push(rel.from)
-      }
-    })
-    
-    // Layout nodes
-    layoutNodes(Array.from(nodeMap.values()))
-    
-    return Array.from(nodeMap.values())
-  }, [storyData, causalityEngine])
-
   // Layout algorithm
-  const layoutNodes = (nodes: Node[]) => {
+  const layoutNodes = useCallback((nodes: Node[]) => {
     const timeGroups = new Map<number, Node[]>()
-    
+
     // Group by time
     nodes.forEach(node => {
       const time = Math.floor(node.time / 60) * 60 // Round to nearest hour
@@ -117,33 +75,93 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
       }
       timeGroups.get(time)!.push(node)
     })
-    
+
     // Position nodes
     const times = Array.from(timeGroups.keys()).sort((a, b) => a - b)
     times.forEach((time, timeIndex) => {
       const nodesAtTime = timeGroups.get(time)!
       const spacing = 120
       const yStart = -(nodesAtTime.length - 1) * spacing / 2
-      
+
       nodesAtTime.forEach((node, nodeIndex) => {
         node.x = timeIndex * 200 + 100
         node.y = yStart + nodeIndex * spacing + 100
       })
     })
-  }
+  }, [])
+
+  // Build node graph
+  const nodes = useMemo(() => {
+    if (!causalityEngine) return []
+
+    try {
+      const nodeMap = new Map<string, Node>()
+      const relationships = causalityEngine.getCausalRelationships()
+
+      // Create nodes for acts
+      storyData.acts.forEach((act, index) => {
+        const node: Node = {
+          id: `act-${act.id}`,
+          type: 'act',
+          data: act,
+          x: 0,
+          y: 0,
+          time: timeToMinutes(act.time) || 0,
+          causedBy: [],
+          causes: [],
+        }
+        nodeMap.set(node.id, node)
+      })
+
+      // Create nodes for events (generated from acts)
+      const events = generateEventsFromActs(storyData.acts || [])
+      events.forEach((event, index) => {
+        const node: Node = {
+          id: `event-${event.id}`,
+          type: 'event',
+          data: event,
+          x: 0,
+          y: 0,
+          time: timeToMinutes(event.eventTime) || 0,
+          causedBy: [],
+          causes: [],
+        }
+        nodeMap.set(node.id, node)
+      })
+
+      // Build relationships
+      relationships.forEach(rel => {
+        const fromNode = nodeMap.get(rel.from)
+        const toNode = nodeMap.get(rel.to)
+        if (fromNode && toNode) {
+          fromNode.causes.push(rel.to)
+          toNode.causedBy.push(rel.from)
+        }
+      })
+
+      // Layout nodes
+      layoutNodes(Array.from(nodeMap.values()))
+
+      return Array.from(nodeMap.values())
+    } catch (err) {
+      console.error('Error building node graph:', err)
+      setError(`Failed to build node graph: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      return []
+    }
+  }, [storyData, causalityEngine, layoutNodes])
 
   // Convert coordinates
   const worldToScreen = useCallback((x: number, y: number) => {
     return {
       x: (x - viewState.offsetX) * viewState.scale,
-      y: (y - viewState.offsetY) * viewState.scale
+      y: (y - viewState.offsetY) * viewState.scale,
     }
   }, [viewState])
 
   const screenToWorld = useCallback((x: number, y: number) => {
     return {
       x: x / viewState.scale + viewState.offsetX,
-      y: y / viewState.scale + viewState.offsetY
+      y: y / viewState.scale + viewState.offsetY,
     }
   }, [viewState])
 
@@ -152,50 +170,50 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
-    
+
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    
+
     // Save context
     ctx.save()
-    
+
     // Apply transformations
     ctx.scale(viewState.scale, viewState.scale)
     ctx.translate(-viewState.offsetX, -viewState.offsetY)
-    
+
     // Draw connections
     ctx.strokeStyle = '#94a3b8'
     ctx.lineWidth = 2
-    
+
     nodes.forEach(node => {
       node.causes.forEach(targetId => {
         const targetNode = nodes.find(n => n.id === targetId)
         if (targetNode) {
           ctx.beginPath()
           ctx.moveTo(node.x, node.y)
-          
+
           // Draw curved line
           const cp1x = node.x + (targetNode.x - node.x) * 0.5
           const cp1y = node.y
           const cp2x = node.x + (targetNode.x - node.x) * 0.5
           const cp2y = targetNode.y
-          
+
           ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, targetNode.x, targetNode.y)
           ctx.stroke()
-          
+
           // Draw arrowhead
           const angle = Math.atan2(targetNode.y - cp2y, targetNode.x - cp2x)
           const arrowSize = 10
-          
+
           ctx.beginPath()
           ctx.moveTo(targetNode.x, targetNode.y)
           ctx.lineTo(
             targetNode.x - arrowSize * Math.cos(angle - Math.PI / 6),
-            targetNode.y - arrowSize * Math.sin(angle - Math.PI / 6)
+            targetNode.y - arrowSize * Math.sin(angle - Math.PI / 6),
           )
           ctx.lineTo(
             targetNode.x - arrowSize * Math.cos(angle + Math.PI / 6),
-            targetNode.y - arrowSize * Math.sin(angle + Math.PI / 6)
+            targetNode.y - arrowSize * Math.sin(angle + Math.PI / 6),
           )
           ctx.closePath()
           ctx.fillStyle = '#94a3b8'
@@ -203,7 +221,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
         }
       })
     })
-    
+
     // Restore context
     ctx.restore()
   }, [nodes, viewState])
@@ -213,17 +231,17 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
     e.preventDefault()
     const delta = e.deltaY > 0 ? 0.9 : 1.1
     const newScale = Math.min(Math.max(viewState.scale * delta, 0.1), 5)
-    
+
     const rect = containerRef.current?.getBoundingClientRect()
     if (rect) {
       const mouseX = e.clientX - rect.left
       const mouseY = e.clientY - rect.top
       const worldPos = screenToWorld(mouseX, mouseY)
-      
+
       setViewState(prev => ({
         scale: newScale,
         offsetX: worldPos.x - mouseX / newScale,
-        offsetY: worldPos.y - mouseY / newScale
+        offsetY: worldPos.y - mouseY / newScale,
       }))
     }
   }, [viewState.scale, screenToWorld])
@@ -234,21 +252,21 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
       const x = e.clientX - rect.left
       const y = e.clientY - rect.top
       const worldPos = screenToWorld(x, y)
-      
+
       // Check if clicking on a node
       const clickedNode = nodes.find(node => {
         const dx = worldPos.x - node.x
         const dy = worldPos.y - node.y
         return Math.sqrt(dx * dx + dy * dy) < 40
       })
-      
+
       if (clickedNode) {
         setSelectedNode(clickedNode.id)
         showNotification(`Selected: ${clickedNode.data.id}`, { type: 'info' })
-        
+
         if (onTimeSeek && clickedNode.type === 'act') {
           const act = clickedNode.data as Act
-          onTimeSeek(act.startTime || 0)
+          onTimeSeek(timeToMinutes(act.time) || 0)
         }
       } else {
         setIsPanning(true)
@@ -261,13 +279,13 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
     if (isPanning) {
       const dx = e.clientX - panStart.x
       const dy = e.clientY - panStart.y
-      
+
       setViewState(prev => ({
         ...prev,
         offsetX: prev.offsetX - dx / prev.scale,
-        offsetY: prev.offsetY - dy / prev.scale
+        offsetY: prev.offsetY - dy / prev.scale,
       }))
-      
+
       setPanStart({ x: e.clientX, y: e.clientY })
     } else {
       const rect = containerRef.current?.getBoundingClientRect()
@@ -275,13 +293,13 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
         const x = e.clientX - rect.left
         const y = e.clientY - rect.top
         const worldPos = screenToWorld(x, y)
-        
+
         const hoveredNode = nodes.find(node => {
           const dx = worldPos.x - node.x
           const dy = worldPos.y - node.y
           return Math.sqrt(dx * dx + dy * dy) < 40
         })
-        
+
         setHoveredNode(hoveredNode?.id || null)
       }
     }
@@ -297,7 +315,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
       const container = containerRef.current
       const canvas = canvasRef.current
       const svg = svgRef.current
-      
+
       if (container && canvas && svg) {
         const rect = container.getBoundingClientRect()
         canvas.width = rect.width
@@ -306,7 +324,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
         svg.setAttribute('height', rect.height.toString())
       }
     }
-    
+
     updateSize()
     window.addEventListener('resize', updateSize)
     return () => window.removeEventListener('resize', updateSize)
@@ -317,8 +335,19 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
     renderCanvas()
   }, [renderCanvas])
 
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.error}>
+          <h3>Error in Causality View</h3>
+          <p>{error}</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div 
+    <div
       ref={containerRef}
       className={styles.container}
       onWheel={handleWheel}
@@ -327,11 +356,11 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      <canvas 
+      <canvas
         ref={canvasRef}
         className={styles.canvas}
       />
-      <svg 
+      <svg
         ref={svgRef}
         className={styles.svg}
       >
@@ -340,7 +369,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
           const isSelected = node.id === selectedNode
           const isHovered = node.id === hoveredNode
           const radius = 35
-          
+
           return (
             <g key={node.id}>
               <circle
@@ -356,7 +385,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
                 dominantBaseline="middle"
                 className={styles.nodeText}
               >
-                {node.data.id.slice(0, 8)}
+                {String(node.data.id).slice(0, 8)}
               </text>
             </g>
           )
