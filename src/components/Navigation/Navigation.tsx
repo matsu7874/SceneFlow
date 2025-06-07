@@ -9,38 +9,38 @@ export const Navigation: React.FC = () => {
         <h1>Scene-Flow</h1>
       </div>
       <div className={styles.links}>
-        <NavLink 
-          to="/" 
+        <NavLink
+          to="/"
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
           シミュレーション
         </NavLink>
-        <NavLink 
-          to="/causality" 
+        <NavLink
+          to="/causality"
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
           因果関係ビュー
         </NavLink>
-        <NavLink 
-          to="/entities" 
+        <NavLink
+          to="/entities"
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
           エンティティ編集
         </NavLink>
-        <NavLink 
-          to="/map-editor" 
+        <NavLink
+          to="/map-editor"
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
           マップエディタ
         </NavLink>
-        <NavLink 
-          to="/relationships" 
+        <NavLink
+          to="/relationships"
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
           関係性
         </NavLink>
-        <NavLink 
-          to="/validation" 
+        <NavLink
+          to="/validation"
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
           検証

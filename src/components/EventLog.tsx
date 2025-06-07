@@ -17,7 +17,7 @@ interface EventLogProps {
 export const EventLog: React.FC<EventLogProps> = ({
   logEntries,
   persons,
-  currentTime
+  currentTime,
 }) => {
   const logRef = useRef<HTMLDivElement>(null)
 
@@ -47,7 +47,7 @@ export const EventLog: React.FC<EventLogProps> = ({
           logEntries.map((entry, index) => (
             <div key={index} className="log-entry">
               <span className="log-time">[{entry.time}]</span>
-              <strong 
+              <strong
                 className="log-person"
                 style={{ color: getPersonColor(entry.personId) }}
               >

@@ -13,7 +13,7 @@ export const LocationDisplay: React.FC<LocationDisplayProps> = ({
   persons,
   locations,
   personPositions,
-  currentTime
+  currentTime,
 }) => {
   const getLocationName = (locationId: number): string => {
     const location = locations.find(l => l.id === locationId)
@@ -21,8 +21,8 @@ export const LocationDisplay: React.FC<LocationDisplayProps> = ({
   }
 
   const getPersonsAtLocation = (locationId: number): Person[] => {
-    return persons.filter(person => 
-      personPositions.get(person.id) === locationId
+    return persons.filter(person =>
+      personPositions.get(person.id) === locationId,
     )
   }
 
@@ -39,10 +39,13 @@ export const LocationDisplay: React.FC<LocationDisplayProps> = ({
               <strong>{location.name}:</strong>
               <div className="persons-list">
                 {personsHere.map(person => (
-                  <span 
-                    key={person.id} 
+                  <span
+                    key={person.id}
                     className="person-tag"
-                    style={{ color: person.color || '#000' }}
+                    style={{
+                      backgroundColor: person.color || '#3B82F6',
+                      color: 'white',
+                    }}
                   >
                     {person.name}
                   </span>
