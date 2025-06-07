@@ -1,0 +1,84 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.canvas {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.selectedInfo {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 200px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.selectedInfo h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.colorSection {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.relationships h5 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.relationship {
+  padding: 4px 0;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .canvas {
+    background: #1a1a1a;
+  }
+  
+  .selectedInfo {
+    background: #2a2a2a;
+  }
+}
