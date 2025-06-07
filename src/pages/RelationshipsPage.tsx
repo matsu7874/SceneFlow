@@ -1,16 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { RelationshipEditor } from '../components/RelationshipEditor'
+import { CharacterRelationshipDiagram } from '../components/CharacterRelationshipDiagram'
 import { useAppContext } from '../contexts/AppContext'
 
 export const RelationshipsPage: React.FC = () => {
   const { storyData } = useAppContext()
+  const [viewMode, setViewMode] = useState<'diagram' | 'editor'>('diagram')
 
   if (!storyData) {
     return (
       <div className="page relationships-page">
-        <h2>Relationship Editor</h2>
+        <h2>関係性</h2>
         <div className="no-data-message">
-          <p>No story data loaded. Please load data from the Simulation page first.</p>
+          <p>データが読み込まれていません。シミュレーションページで物語データを読み込んでください。</p>
         </div>
       </div>
     )
@@ -26,7 +28,7 @@ export const RelationshipsPage: React.FC = () => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       attributes: {},
-      relationships: []
+      relationships: [],
     })),
     ...storyData.locations.map(location => ({
       id: location.id,
@@ -36,15 +38,33 @@ export const RelationshipsPage: React.FC = () => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       attributes: {},
-      relationships: []
-    }))
+      relationships: [],
+    })),
   ]
 
   return (
     <div className="page relationships-page">
-      <h2>Relationship Editor</h2>
+      <h2>関係性</h2>
+      <div className="view-mode-selector">
+        <button
+          className={viewMode === 'diagram' ? 'active' : ''}
+          onClick={() => setViewMode('diagram')}
+        >
+          相関図
+        </button>
+        <button
+          className={viewMode === 'editor' ? 'active' : ''}
+          onClick={() => setViewMode('editor')}
+        >
+          エディタ
+        </button>
+      </div>
       <div className="page-content">
-        <RelationshipEditor entities={entities} />
+        {viewMode === 'diagram' ? (
+          <CharacterRelationshipDiagram persons={storyData.persons} />
+        ) : (
+          <RelationshipEditor entities={entities} />
+        )}
       </div>
     </div>
   )

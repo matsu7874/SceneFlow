@@ -1,2 +1,2 @@
-export { default as RelationshipEditor } from './RelationshipEditor';
-export type { RelationshipEditorProps } from './RelationshipEditor';
+export { default as RelationshipEditor } from './RelationshipEditor'
+export type { RelationshipEditorProps } from './RelationshipEditor'

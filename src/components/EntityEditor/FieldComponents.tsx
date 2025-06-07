@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
-import styles from './EntityEditor.module.css';
+import React, { useState, useCallback } from 'react'
+import { ColorPicker } from '../ColorPicker'
+import styles from './EntityEditor.module.css'
 
 interface FieldProps {
   name: string;
@@ -18,7 +19,7 @@ export const StringField: React.FC<FieldProps & { placeholder?: string }> = ({
   error,
   required,
   disabled,
-  placeholder
+  placeholder,
 }) => {
   return (
     <div className={styles.field}>
@@ -33,8 +34,8 @@ export const StringField: React.FC<FieldProps & { placeholder?: string }> = ({
       />
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
-  );
-};
+  )
+}
 
 // Number Field Component
 export const NumberField: React.FC<FieldProps & { min?: number; max?: number; step?: number }> = ({
@@ -46,7 +47,7 @@ export const NumberField: React.FC<FieldProps & { min?: number; max?: number; st
   disabled,
   min,
   max,
-  step
+  step,
 }) => {
   return (
     <div className={styles.field}>
@@ -63,8 +64,8 @@ export const NumberField: React.FC<FieldProps & { min?: number; max?: number; st
       />
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
-  );
-};
+  )
+}
 
 // Boolean Field Component
 export const BooleanField: React.FC<FieldProps> = ({
@@ -72,7 +73,7 @@ export const BooleanField: React.FC<FieldProps> = ({
   value,
   onChange,
   error,
-  disabled
+  disabled,
 }) => {
   return (
     <div className={styles.field}>
@@ -87,8 +88,8 @@ export const BooleanField: React.FC<FieldProps> = ({
       </label>
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
-  );
-};
+  )
+}
 
 // Select Field Component
 interface SelectFieldProps extends FieldProps {
@@ -104,7 +105,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   required,
   disabled,
   options,
-  multiple
+  multiple,
 }) => {
   return (
     <div className={styles.field}>
@@ -112,10 +113,10 @@ export const SelectField: React.FC<SelectFieldProps> = ({
         value={value || (multiple ? [] : '')}
         onChange={(e) => {
           if (multiple) {
-            const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-            onChange(name, selectedOptions);
+            const selectedOptions = Array.from(e.target.selectedOptions, option => option.value)
+            onChange(name, selectedOptions)
           } else {
-            onChange(name, e.target.value);
+            onChange(name, e.target.value)
           }
         }}
         multiple={multiple}
@@ -132,8 +133,8 @@ export const SelectField: React.FC<SelectFieldProps> = ({
       </select>
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
-  );
-};
+  )
+}
 
 // Array Field Component
 interface ArrayFieldProps extends FieldProps {
@@ -149,25 +150,34 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
   error,
   disabled,
   itemType,
-  renderItem
+  renderItem,
 }) => {
-  const items = Array.isArray(value) ? value : [];
+  const items = Array.isArray(value) ? value : []
 
   const handleAdd = () => {
-    const newItem = itemType === 'string' ? '' : itemType === 'number' ? 0 : {};
-    onChange(name, [...items, newItem]);
-  };
+    let newItem
+    if (itemType === 'string') {
+      newItem = ''
+    } else if (itemType === 'number') {
+      newItem = 0
+    } else if (itemType === 'reference') {
+      newItem = null
+    } else {
+      newItem = {}
+    }
+    onChange(name, [...items, newItem])
+  }
 
   const handleItemChange = (index: number, newValue: any) => {
-    const newItems = [...items];
-    newItems[index] = newValue;
-    onChange(name, newItems);
-  };
+    const newItems = [...items]
+    newItems[index] = newValue
+    onChange(name, newItems)
+  }
 
   const handleRemove = (index: number) => {
-    const newItems = items.filter((_, i) => i !== index);
-    onChange(name, newItems);
-  };
+    const newItems = items.filter((_, i) => i !== index)
+    onChange(name, newItems)
+  }
 
   return (
     <div className={styles.arrayField}>
@@ -178,7 +188,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
               item,
               index,
               (newValue) => handleItemChange(index, newValue),
-              () => handleRemove(index)
+              () => handleRemove(index),
             )}
           </div>
         ))}
@@ -189,12 +199,12 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
         disabled={disabled}
         className={styles.addButton}
       >
-        + Add Item
+        + 追加
       </button>
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
-  );
-};
+  )
+}
 
 // Reference Field Component
 interface ReferenceFieldProps extends FieldProps {
@@ -210,7 +220,7 @@ export const ReferenceField: React.FC<ReferenceFieldProps> = ({
   required,
   disabled,
   entityType,
-  entities
+  entities,
 }) => {
   return (
     <div className={styles.field}>
@@ -230,8 +240,8 @@ export const ReferenceField: React.FC<ReferenceFieldProps> = ({
       </select>
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
-  );
-};
+  )
+}
 
 // Object Field Component (for nested objects)
 interface ObjectFieldProps extends FieldProps {
@@ -246,17 +256,17 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
   error,
   disabled,
   schema,
-  renderFields
+  renderFields,
 }) => {
-  const [collapsed, setCollapsed] = useState(false);
-  const objectValue = value || {};
+  const [collapsed, setCollapsed] = useState(false)
+  const objectValue = value || {}
 
   const handleFieldChange = (fieldName: string, fieldValue: any) => {
     onChange(name, {
       ...objectValue,
-      [fieldName]: fieldValue
-    });
-  };
+      [fieldName]: fieldValue,
+    })
+  }
 
   return (
     <div className={styles.objectField}>
@@ -274,8 +284,35 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
       )}
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
-  );
-};
+  )
+}
+
+// Field Group Component for organizing fields
+interface FieldGroupProps {
+  title: string;
+  children: React.ReactNode;
+  defaultExpanded?: boolean;
+}
+
+// Color Field Component
+export const ColorField: React.FC<FieldProps> = ({
+  name,
+  value,
+  onChange,
+  error,
+  disabled,
+}) => {
+  return (
+    <div className={styles.field}>
+      <ColorPicker
+        value={value || '#3B82F6'}
+        onChange={(color) => onChange(name, color)}
+        disabled={disabled}
+      />
+      {error && <span className={styles.errorMessage}>{error}</span>}
+    </div>
+  )
+}
 
 // Field Group Component for organizing fields
 interface FieldGroupProps {
@@ -287,9 +324,9 @@ interface FieldGroupProps {
 export const FieldGroup: React.FC<FieldGroupProps> = ({
   title,
   children,
-  defaultExpanded = true
+  defaultExpanded = true,
 }) => {
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [expanded, setExpanded] = useState(defaultExpanded)
 
   return (
     <div className={styles.fieldGroup}>
@@ -306,5 +343,5 @@ export const FieldGroup: React.FC<FieldGroupProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { ExtendedEntity, EntityType } from '../../types/extendedEntities'
 import { EntityEditor } from './EntityEditor'
 import { useVisualFeedback } from '../../contexts/VisualFeedbackContext'
+import { useAppContext } from '../../contexts/AppContext'
 import styles from './EntityEditor.module.css'
 
 interface ExtendedEntityEditorProps {
@@ -15,6 +16,7 @@ const entitySchemas: Record<EntityType, any> = {
   person: {
     fields: {
       name: { type: 'string', label: '名前', validation: { required: true, minLength: 1 } },
+      color: { type: 'color', label: '色' },
       description: { type: 'string', label: '説明' },
       age: { type: 'number', label: '年齢', validation: { min: 0, max: 200 } },
       occupation: { type: 'string', label: '職業' },
@@ -25,25 +27,19 @@ const entitySchemas: Record<EntityType, any> = {
         schema: {
           fields: {
             targetId: { type: 'reference', label: '人物', entityType: 'person' },
-            type: { type: 'select', label: 'タイプ', options: [
-              { value: 'friend', label: '友人' },
-              { value: 'enemy', label: '敵' },
-              { value: 'family', label: '家族' },
-              { value: 'colleague', label: '同僚' },
-              { value: 'romantic', label: '恋愛関係' }
-            ]}
-          }
-        }
-      }}
+            type: { type: 'string', label: 'タイプ', placeholder: '例: 友人、恋人、ライバル' },
+          },
+        },
+      } },
     },
     groups: {
-      '基本情報': ['name', 'description', 'age', 'occupation'],
+      '基本情報': ['name', 'color', 'description', 'age', 'occupation'],
       'キャラクター': ['personality', 'goals'],
-      '関係性': ['relationships']
+      '関係性': ['relationships'],
     },
-    required: ['name']
+    required: ['name'],
   },
-  
+
   location: {
     fields: {
       name: { type: 'string', label: '名前', validation: { required: true, minLength: 1 } },
@@ -51,49 +47,49 @@ const entitySchemas: Record<EntityType, any> = {
       type: { type: 'select', label: 'タイプ', options: [
         { value: 'indoor', label: '屋内' },
         { value: 'outdoor', label: '屋外' },
-        { value: 'transit', label: '移動場所' }
-      ]},
+        { value: 'transit', label: '移動場所' },
+      ] },
       capacity: { type: 'number', label: '収容人数', validation: { min: 1 } },
       connectedTo: { type: 'array', label: '接続された場所', itemType: 'reference', entityType: 'location' },
       properties: { type: 'object', label: 'プロパティ', schema: {
         fields: {
           isLocked: { type: 'boolean', label: 'ロック状態' },
           requiredItem: { type: 'reference', label: '必要なアイテム', entityType: 'prop' },
-          atmosphere: { type: 'string', label: '雰囲気' }
-        }
-      }}
+          atmosphere: { type: 'string', label: '雰囲気' },
+        },
+      } },
     },
     groups: {
       '基本情報': ['name', 'description', 'type', 'capacity'],
       '接続': ['connectedTo'],
-      'プロパティ': ['properties']
+      'プロパティ': ['properties'],
     },
-    required: ['name']
+    required: ['name'],
   },
-  
+
   prop: {
     fields: {
       name: { type: 'string', label: '名前', validation: { required: true, minLength: 1 } },
       description: { type: 'string', label: '説明' },
       category: { type: 'select', label: 'カテゴリー', options: [
         { value: 'LARGE_PROP', label: '大道具' },
-        { value: 'SMALL_PROP', label: '小道具' }
-      ]},
+        { value: 'SMALL_PROP', label: '小道具' },
+      ] },
       isPortable: { type: 'boolean', label: '持ち運び可能' },
       isConsumable: { type: 'boolean', label: '消費可能' },
       isCombineable: { type: 'boolean', label: '組み合わせ可能' },
       combinesWith: { type: 'array', label: '組み合わせ対象', itemType: 'reference', entityType: 'prop' },
       currentLocation: { type: 'reference', label: '現在の場所', entityType: 'location' },
-      owner: { type: 'reference', label: '所有者', entityType: 'person' }
+      owner: { type: 'reference', label: '所有者', entityType: 'person' },
     },
     groups: {
       '基本情報': ['name', 'description', 'category'],
       'プロパティ': ['isPortable', 'isConsumable', 'isCombineable', 'combinesWith'],
-      '場所': ['currentLocation', 'owner']
+      '場所': ['currentLocation', 'owner'],
     },
-    required: ['name', 'category']
+    required: ['name', 'category'],
   },
-  
+
   information: {
     fields: {
       name: { type: 'string', label: '名前', validation: { required: true, minLength: 1 } },
@@ -104,21 +100,21 @@ const entitySchemas: Record<EntityType, any> = {
         { value: 'RUMOR', label: '噂' },
         { value: 'SECRET', label: '秘密' },
         { value: 'INSTRUCTION', label: '指示' },
-        { value: 'LOCATION', label: '場所情報' }
-      ]},
+        { value: 'LOCATION', label: '場所情報' },
+      ] },
       isSecret: { type: 'boolean', label: '秘密情報' },
       requiresContext: { type: 'array', label: '必要な文脈', itemType: 'reference', entityType: 'information' },
       enablesActions: { type: 'array', label: '可能にするアクション', itemType: 'string' },
-      revealsInformation: { type: 'array', label: '明らかになる情報', itemType: 'reference', entityType: 'information' }
+      revealsInformation: { type: 'array', label: '明らかになる情報', itemType: 'reference', entityType: 'information' },
     },
     groups: {
       '基本情報': ['name', 'content', 'description', 'category'],
       'プロパティ': ['isSecret', 'requiresContext'],
-      '効果': ['enablesActions', 'revealsInformation']
+      '効果': ['enablesActions', 'revealsInformation'],
     },
-    required: ['name', 'content', 'category']
+    required: ['name', 'content', 'category'],
   },
-  
+
   act: {
     fields: {
       id: { type: 'string', label: 'ID', validation: { required: true } },
@@ -127,16 +123,16 @@ const entitySchemas: Record<EntityType, any> = {
       locationId: { type: 'reference', label: '場所', entityType: 'location' },
       startTime: { type: 'number', label: '開始時間（分）' },
       endTime: { type: 'number', label: '終了時間（分）' },
-      description: { type: 'string', label: '説明' }
+      description: { type: 'string', label: '説明' },
     },
     groups: {
       '基本情報': ['id', 'type', 'description'],
       '参照': ['personId', 'locationId'],
-      'タイミング': ['startTime', 'endTime']
+      'タイミング': ['startTime', 'endTime'],
     },
-    required: ['id', 'type']
+    required: ['id', 'type'],
   },
-  
+
   event: {
     fields: {
       id: { type: 'string', label: 'ID', validation: { required: true } },
@@ -147,61 +143,83 @@ const entitySchemas: Record<EntityType, any> = {
           type: { type: 'select', label: 'タイプ', options: [
             { value: 'time', label: '時間' },
             { value: 'actCompleted', label: 'アクト完了' },
-            { value: 'condition', label: '条件' }
-          ]},
+            { value: 'condition', label: '条件' },
+          ] },
           time: { type: 'number', label: '時間（分）' },
-          actId: { type: 'reference', label: 'アクト', entityType: 'act' }
-        }
-      }},
+          actId: { type: 'reference', label: 'アクト', entityType: 'act' },
+        },
+      } },
       actions: { type: 'array', label: 'アクション', itemType: 'object', itemSchema: {
         type: 'object',
         schema: {
           fields: {
             type: { type: 'string', label: 'アクションタイプ' },
-            description: { type: 'string', label: '説明' }
-          }
-        }
-      }}
+            description: { type: 'string', label: '説明' },
+          },
+        },
+      } },
     },
     groups: {
       '基本情報': ['id', 'name', 'description'],
       'トリガー': ['trigger'],
-      'アクション': ['actions']
+      'アクション': ['actions'],
     },
-    required: ['id']
-  }
+    required: ['id'],
+  },
 }
 
 export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
   entity,
   onUpdate,
-  onDelete
+  onDelete,
 }) => {
   const { showNotification } = useVisualFeedback()
-  
+  const { storyData } = useAppContext()
+
   const schema = useMemo(() => {
     return entitySchemas[entity.type] || entitySchemas.person
   }, [entity.type])
-  
+
+  // Prepare entities for reference fields
+  const entities = useMemo(() => {
+    if (!storyData) return {}
+
+    return {
+      person: storyData.persons.map(p => ({ id: p.id.toString(), name: p.name })),
+      location: storyData.locations.map(l => ({ id: l.id.toString(), name: l.name })),
+      prop: storyData.props.map(p => ({ id: p.id.toString(), name: p.name })),
+      information: storyData.informations.map(i => ({ id: i.id.toString(), name: i.content.substring(0, 50) })),
+      act: storyData.acts.map(a => ({ id: a.id.toString(), name: a.description || `Act ${a.id}` })),
+      event: storyData.events.map(e => ({ id: e.id.toString(), name: `Event ${e.id}` })),
+    }
+  }, [storyData])
+
   const handleSave = (data: any) => {
+    // For location entities, ensure connectedTo is properly set
+    if (entity.type === 'location' && data.connectedTo) {
+      data.connections = data.connectedTo.map((id: string | number) =>
+        typeof id === 'string' ? parseInt(id) : id,
+      )
+    }
+
     const updatedEntity: ExtendedEntity = {
       ...entity,
       ...data,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     }
     onUpdate(updatedEntity)
     showNotification(`${entity.type}を保存しました`, { type: 'success' })
   }
-  
+
   const handleChange = (data: any) => {
     // Real-time updates if needed
   }
-  
+
   return (
     <div className={styles.extendedEditor}>
       <div className={styles.editorHeader}>
         <h3>{entity.type}を編集: {entity.name}</h3>
-        <button 
+        <button
           className={styles.deleteButton}
           onClick={() => {
             if (confirm(`この${entity.type}を削除してもよろしいですか？`)) {
@@ -213,13 +231,14 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
           削除
         </button>
       </div>
-      
+
       <EntityEditor
         entityType={entity.type}
         entityData={entity}
         schema={schema}
         onChange={handleChange}
         onSave={handleSave}
+        entities={entities}
       />
     </div>
   )

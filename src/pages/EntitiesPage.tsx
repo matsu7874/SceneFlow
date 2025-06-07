@@ -3,6 +3,7 @@ import { ExtendedEntityEditor } from '../components/EntityEditor/ExtendedEntityE
 import { useAppContext } from '../contexts/AppContext'
 import { ExtendedEntity, EntityType } from '../types/extendedEntities'
 import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
+import { generateEventsFromActs } from '../utils/eventGeneration'
 
 const getEntityTypeLabel = (type: EntityType): string => {
   const labels: Record<EntityType, string> = {
@@ -33,41 +34,47 @@ export const EntitiesPage: React.FC = () => {
           id: person.id.toString(),
           type: 'person' as EntityType,
           name: person.name,
-          description: person.name || '',
+          description: person.description || '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: person,
-          relationships: [],
+          relationships: person.relationships || [],
+          color: person.color,
+          ...person,
         })),
         ...storyData.locations.map(location => ({
           id: location.id.toString(),
           type: 'location' as EntityType,
           name: location.name,
-          description: location.name || '',
+          description: location.description || '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: location,
           relationships: [],
+          connectedTo: location.connections?.map(conn => conn.toString()) || [],
+          ...location,
         })),
         ...storyData.props.map(prop => ({
           id: prop.id.toString(),
           type: 'prop' as EntityType,
           name: prop.name,
-          description: prop.name || '',
+          description: prop.description || '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: prop,
           relationships: [],
+          ...prop,
         })),
         ...storyData.informations.map(info => ({
           id: info.id.toString(),
           type: 'information' as EntityType,
-          name: info.content.substring(0, 50) + (info.content.length > 50 ? '...' : ''),
-          description: info.content,
+          name: info.name || info.content.substring(0, 50) + (info.content.length > 50 ? '...' : ''),
+          description: info.description || info.content,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: info,
           relationships: [],
+          ...info,
         })),
         ...storyData.acts.map(act => ({
           id: act.id.toString(),
@@ -78,16 +85,19 @@ export const EntitiesPage: React.FC = () => {
           updated_at: new Date().toISOString(),
           attributes: act,
           relationships: [],
+          ...act,
         })),
-        ...storyData.events.map(event => ({
+        // Events are generated from acts
+        ...generateEventsFromActs(storyData.acts || []).map(event => ({
           id: event.id.toString(),
           type: 'event' as EntityType,
-          name: `イベント ${event.id}`,
-          description: `${event.eventTime} - ${event.triggerType}`,
+          name: event.name || `イベント ${event.id}`,
+          description: event.description || `${event.eventTime} - ${event.triggerType}`,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           attributes: event,
           relationships: [],
+          ...event,
         })),
       ]
       setEntities(convertedEntities)
@@ -97,19 +107,79 @@ export const EntitiesPage: React.FC = () => {
   const handleEntityUpdate = (updatedEntity: ExtendedEntity): void => {
     setEntities(prev => prev.map(e => (e.id === updatedEntity.id ? updatedEntity : e)))
 
-    // Update story data if needed
+    // Update story data with all fields
     if (storyData) {
       const numericId = Number(updatedEntity.id)
-      if (updatedEntity.type === 'person') {
+
+      switch (updatedEntity.type) {
+      case 'person':
         const updatedPersons = storyData.persons.map(p =>
-          p.id === numericId ? { ...p, name: updatedEntity.name } : p,
+          p.id === numericId ? {
+            ...p,
+            ...updatedEntity.attributes,
+            id: numericId,
+            name: updatedEntity.name,
+            color: updatedEntity.color || updatedEntity.attributes?.color || p.color || '#3B82F6',
+          } : p,
         )
         setStoryData({ ...storyData, persons: updatedPersons })
-      } else if (updatedEntity.type === 'location') {
+        break
+
+      case 'location':
         const updatedLocations = storyData.locations.map(l =>
-          l.id === numericId ? { ...l, name: updatedEntity.name } : l,
+          l.id === numericId ? {
+            ...l,
+            ...updatedEntity.attributes,
+            id: numericId,
+            name: updatedEntity.name,
+            connections: (updatedEntity.connectedTo || updatedEntity.connections || []).map((id: string | number) =>
+              typeof id === 'string' ? parseInt(id) : id,
+            ),
+          } : l,
         )
         setStoryData({ ...storyData, locations: updatedLocations })
+        break
+
+      case 'prop':
+        const updatedProps = storyData.props.map(p =>
+          p.id === numericId ? {
+            ...p,
+            ...updatedEntity.attributes,
+            id: numericId,
+            name: updatedEntity.name,
+          } : p,
+        )
+        setStoryData({ ...storyData, props: updatedProps })
+        break
+
+      case 'information':
+        const updatedInformations = storyData.informations.map(i =>
+          i.id === numericId ? {
+            ...i,
+            ...updatedEntity.attributes,
+            id: numericId,
+            content: updatedEntity.content || updatedEntity.name,
+          } : i,
+        )
+        setStoryData({ ...storyData, informations: updatedInformations })
+        break
+
+      case 'act':
+        const updatedActs = storyData.acts.map(a =>
+          a.id === numericId ? {
+            ...a,
+            ...updatedEntity.attributes,
+            id: numericId,
+            description: updatedEntity.description || updatedEntity.name,
+          } : a,
+        )
+        setStoryData({ ...storyData, acts: updatedActs })
+        break
+
+      case 'event':
+        // Events are generated from acts, so we can't update them directly
+        showNotification('イベントは行動から自動生成されるため、直接編集できません', { type: 'warning' })
+        break
       }
     }
   }
@@ -134,64 +204,98 @@ export const EntitiesPage: React.FC = () => {
     // Also update story data
     if (storyData) {
       switch (type) {
-        case 'person':
-          setStoryData({
-            ...storyData,
-            persons: [...storyData.persons, { id: newId, name: newEntity.name, color: '#888888' }],
-          })
-          break
-        case 'location':
-          setStoryData({
-            ...storyData,
-            locations: [
-              ...storyData.locations,
-              { id: newId, name: newEntity.name, connections: [] },
-            ],
-          })
-          break
-        case 'prop':
-          setStoryData({
-            ...storyData,
-            props: [...storyData.props, { id: newId, name: newEntity.name }],
-          })
-          break
-        case 'information':
-          setStoryData({
-            ...storyData,
-            informations: [...storyData.informations, { id: newId, content: newEntity.name }],
-          })
-          break
-        case 'act':
-          setStoryData({
-            ...storyData,
-            acts: [
-              ...storyData.acts,
-              {
-                id: newId,
-                personId: 1,
-                locationId: 1,
-                time: '00:00',
-                description: newEntity.name,
+      case 'person':
+        setStoryData({
+          ...storyData,
+          persons: [...storyData.persons, {
+            id: newId,
+            name: newEntity.name,
+            color: '#3B82F6',
+            description: '',
+            age: 30,
+            occupation: '',
+            personality: '',
+            goals: [],
+            relationships: [],
+          }],
+        })
+        break
+      case 'location':
+        setStoryData({
+          ...storyData,
+          locations: [
+            ...storyData.locations,
+            {
+              id: newId,
+              name: newEntity.name,
+              connections: [],
+              description: '',
+              type: 'indoor',
+              capacity: 10,
+              connectedTo: [],
+              properties: {
+                isLocked: false,
+                atmosphere: '',
               },
-            ],
-          })
-          break
-        case 'event':
-          setStoryData({
-            ...storyData,
-            events: [
-              ...storyData.events,
-              {
-                id: newId,
-                triggerType: '時刻',
-                triggerValue: '00:00',
-                eventTime: '00:00',
-                personId: 1,
-                actId: 1,
-              },
-            ],
-          })
-          break
+            },
+          ],
+        })
+        break
+      case 'prop':
+        setStoryData({
+          ...storyData,
+          props: [...storyData.props, {
+            id: newId,
+            name: newEntity.name,
+            description: '',
+            category: 'SMALL_PROP',
+            isPortable: true,
+            isConsumable: false,
+            isCombineable: false,
+            combinesWith: [],
+            currentLocation: '',
+            owner: '',
+          }],
+        })
+        break
+      case 'information':
+        setStoryData({
+          ...storyData,
+          informations: [...storyData.informations, {
+            id: newId,
+            name: newEntity.name,
+            content: newEntity.name,
+            description: '',
+            category: 'FACT',
+            isSecret: false,
+            requiresContext: [],
+            enablesActions: [],
+            revealsInformation: [],
+          }],
+        })
+        break
+      case 'act':
+        setStoryData({
+          ...storyData,
+          acts: [
+            ...storyData.acts,
+            {
+              id: newId,
+              type: 'move',
+              personId: 1,
+              locationId: 1,
+              startTime: 0,
+              endTime: 5,
+              time: '00:00',
+              description: newEntity.name,
+            },
+          ],
+        })
+        break
+      case 'event':
+        // Events are generated from acts, so we can't create them directly
+        showNotification('イベントは行動から自動生成されます', { type: 'info' })
+        break
       }
     }
   }
@@ -209,42 +313,40 @@ export const EntitiesPage: React.FC = () => {
     if (storyData) {
       const numericId = Number(entityId)
       switch (entity.type) {
-        case 'person':
-          setStoryData({
-            ...storyData,
-            persons: storyData.persons.filter(p => p.id !== numericId),
-          })
-          break
-        case 'location':
-          setStoryData({
-            ...storyData,
-            locations: storyData.locations.filter(l => l.id !== numericId),
-          })
-          break
-        case 'prop':
-          setStoryData({
-            ...storyData,
-            props: storyData.props.filter(p => p.id !== numericId),
-          })
-          break
-        case 'information':
-          setStoryData({
-            ...storyData,
-            informations: storyData.informations.filter(i => i.id !== numericId),
-          })
-          break
-        case 'act':
-          setStoryData({
-            ...storyData,
-            acts: storyData.acts.filter(a => a.id !== numericId),
-          })
-          break
-        case 'event':
-          setStoryData({
-            ...storyData,
-            events: storyData.events.filter(e => e.id !== numericId),
-          })
-          break
+      case 'person':
+        setStoryData({
+          ...storyData,
+          persons: storyData.persons.filter(p => p.id !== numericId),
+        })
+        break
+      case 'location':
+        setStoryData({
+          ...storyData,
+          locations: storyData.locations.filter(l => l.id !== numericId),
+        })
+        break
+      case 'prop':
+        setStoryData({
+          ...storyData,
+          props: storyData.props.filter(p => p.id !== numericId),
+        })
+        break
+      case 'information':
+        setStoryData({
+          ...storyData,
+          informations: storyData.informations.filter(i => i.id !== numericId),
+        })
+        break
+      case 'act':
+        setStoryData({
+          ...storyData,
+          acts: storyData.acts.filter(a => a.id !== numericId),
+        })
+        break
+      case 'event':
+        // Events are generated from acts, so we can't delete them directly
+        showNotification('イベントは行動から自動生成されるため、削除できません', { type: 'warning' })
+        break
       }
     }
   }

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import * as d3 from 'd3';
-import styles from './RelationshipEditor.module.css';
-import { useRelationshipEditor, EditorMode, GraphNode, GraphLink } from './useRelationshipEditor';
-import { Relationship, Connection } from '../../types';
+import React, { useEffect, useState } from 'react'
+import * as d3 from 'd3'
+import styles from './RelationshipEditor.module.css'
+import { useRelationshipEditor, EditorMode, GraphNode, GraphLink } from './useRelationshipEditor'
+import { Relationship, Connection } from '../../types'
 
 export interface RelationshipEditorProps {
   initialMode?: EditorMode;
@@ -13,10 +13,10 @@ export interface RelationshipEditorProps {
 const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
   initialMode = 'relationships',
   onItemSelect,
-  className
+  className,
 }) => {
-  const [mode, setMode] = useState<EditorMode>(initialMode);
-  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [mode, setMode] = useState<EditorMode>(initialMode)
+  const [showFilterMenu, setShowFilterMenu] = useState(false)
 
   const {
     graphData,
@@ -43,31 +43,31 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
     handleDrag,
     handleDragEnd,
     handleUpdateStrength,
-    handleDelete
-  } = useRelationshipEditor(mode);
+    handleDelete,
+  } = useRelationshipEditor(mode)
 
   // Initialize D3 elements
   useEffect(() => {
-    if (!svgRef.current || graphData.nodes.length === 0) return;
+    if (!svgRef.current || graphData.nodes.length === 0) return
 
-    const svg = d3.select(svgRef.current);
+    const svg = d3.select(svgRef.current)
 
     // Clear previous elements
-    svg.selectAll('*').remove();
+    svg.selectAll('*').remove()
 
     // Create container groups
-    const g = svg.append('g');
-    const linksGroup = g.append('g').attr('class', 'links');
-    const nodesGroup = g.append('g').attr('class', 'nodes');
+    const g = svg.append('g')
+    const linksGroup = g.append('g').attr('class', 'links')
+    const nodesGroup = g.append('g').attr('class', 'nodes')
 
     // Add zoom behavior
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
       .on('zoom', (event) => {
-        g.attr('transform', event.transform);
-      });
+        g.attr('transform', event.transform)
+      })
 
-    svg.call(zoom);
+    svg.call(zoom)
 
     // Create links
     const links = linksGroup.selectAll<SVGLineElement, GraphLink>('line')
@@ -76,14 +76,14 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
       .attr('class', d => `${styles.link} ${hoveredLink === d.id ? styles.highlighted : ''}`)
       .attr('stroke-width', d => Math.max(1, d.strength * 5))
       .on('click', (event, d) => {
-        event.stopPropagation();
-        handleLinkClick(d);
+        event.stopPropagation()
+        handleLinkClick(d)
       })
       .on('contextmenu', (event, d) => {
-        handleLinkContextMenu(event as any, d);
+        handleLinkContextMenu(event, d)
       })
       .on('mouseenter', (event, d) => setHoveredLink(d.id))
-      .on('mouseleave', () => setHoveredLink(null));
+      .on('mouseleave', () => setHoveredLink(null))
 
     // Create nodes
     const nodes = nodesGroup.selectAll<SVGGElement, GraphNode>('g')
@@ -95,26 +95,26 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
         .on('drag', handleDrag)
         .on('end', handleDragEnd) as any)
       .on('click', (event, d) => {
-        event.stopPropagation();
-        handleNodeClick(d);
+        event.stopPropagation()
+        handleNodeClick(d)
       })
       .on('contextmenu', (event, d) => {
-        handleNodeContextMenu(event as any, d);
+        handleNodeContextMenu(event, d)
       })
       .on('mouseenter', (event, d) => setHoveredNode(d.id))
-      .on('mouseleave', () => setHoveredNode(null));
+      .on('mouseleave', () => setHoveredNode(null))
 
     // Add circles to nodes
     nodes.append('circle')
       .attr('class', styles.nodeCircle)
-      .attr('r', 20);
+      .attr('r', 20)
 
     // Add labels to nodes
     nodes.append('text')
       .attr('class', styles.nodeLabel)
       .attr('dy', 35)
       .text(d => d.name)
-      .style('font-size', '12px');
+      .style('font-size', '12px')
 
     // Add icons to nodes
     nodes.append('text')
@@ -122,49 +122,49 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
       .attr('dy', 5)
       .style('font-size', '14px')
       .style('fill', 'white')
-      .text(d => d.type === 'person' ? '👤' : '📍');
+      .text(d => d.type === 'person' ? '👤' : '📍')
 
-  }, [graphData, hoveredNode, hoveredLink, handleNodeClick, handleLinkClick, 
-      handleNodeContextMenu, handleLinkContextMenu, handleDragStart, handleDrag, handleDragEnd,
-      setHoveredNode, setHoveredLink]);
+  }, [graphData, hoveredNode, hoveredLink, handleNodeClick, handleLinkClick,
+    handleNodeContextMenu, handleLinkContextMenu, handleDragStart, handleDrag, handleDragEnd,
+    setHoveredNode, setHoveredLink])
 
   // Handle clicks outside context menu
   useEffect(() => {
     if (contextMenu) {
-      const handleClick = () => handleCloseContextMenu();
-      document.addEventListener('click', handleClick);
-      return () => document.removeEventListener('click', handleClick);
+      const handleClick = () => handleCloseContextMenu()
+      document.addEventListener('click', handleClick)
+      return () => document.removeEventListener('click', handleClick)
     }
-  }, [contextMenu, handleCloseContextMenu]);
+  }, [contextMenu, handleCloseContextMenu])
 
   // Notify parent of selection
   useEffect(() => {
     if (selectedItem && onItemSelect) {
-      onItemSelect(selectedItem);
+      onItemSelect(selectedItem)
     }
-  }, [selectedItem, onItemSelect]);
+  }, [selectedItem, onItemSelect])
 
   const handleFilterSelect = (type: 'entity' | 'type', value: string) => {
     if (type === 'entity') {
       setFilterOptions(prev => ({
         ...prev,
-        entityId: prev.entityId === value ? undefined : value
-      }));
+        entityId: prev.entityId === value ? undefined : value,
+      }))
     } else {
       setFilterOptions(prev => ({
         ...prev,
-        relationshipType: prev.relationshipType === value ? undefined : value
-      }));
+        relationshipType: prev.relationshipType === value ? undefined : value,
+      }))
     }
-    setShowFilterMenu(false);
-  };
+    setShowFilterMenu(false)
+  }
 
   const clearFilters = () => {
-    setFilterOptions({});
-    setSearchQuery('');
-  };
+    setFilterOptions({})
+    setSearchQuery('')
+  }
 
-  const hasActiveFilters = searchQuery || filterOptions.entityId || filterOptions.relationshipType;
+  const hasActiveFilters = searchQuery || filterOptions.entityId || filterOptions.relationshipType
 
   return (
     <div className={`${styles.container} ${className || ''}`}>
@@ -283,7 +283,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
               No {mode === 'relationships' ? 'relationships' : 'connections'} to display
             </p>
             <p className={styles.emptyHint}>
-              {mode === 'relationships' 
+              {mode === 'relationships'
                 ? 'Create relationships between persons to see them here'
                 : 'Create connections between locations to see them here'}
             </p>
@@ -323,7 +323,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                 Edit {mode === 'relationships' ? 'Relationship' : 'Connection'}
               </div>
               <div className={styles.contextMenuDivider} />
-              <div 
+              <div
                 className={`${styles.contextMenuItem} ${styles.danger}`}
                 onClick={() => handleDelete((contextMenu.item as GraphLink).id)}
               >
@@ -353,7 +353,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
           <div className={styles.detailsContent}>
             <div className={styles.detailsSection}>
               <div className={styles.detailsSectionTitle}>Information</div>
-              
+
               <div className={styles.detailsField}>
                 <div className={styles.detailsLabel}>Type</div>
                 <div className={styles.detailsValue}>{selectedItem.type}</div>
@@ -412,7 +412,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                 <span>✏️</span>
                 Edit
               </button>
-              <button 
+              <button
                 className={`${styles.actionButton} ${styles.danger}`}
                 onClick={() => handleDelete(selectedItem.id)}
               >
@@ -424,7 +424,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default RelationshipEditor;
+export default RelationshipEditor
