@@ -72,15 +72,15 @@ describe('CausalityView', () => {
     initialState = {
       timestamp: 0,
       personPositions: {
-        'alice': 'room1',
-        'bob': 'room2',
+        alice: 'room1',
+        bob: 'room2',
       },
       itemOwnership: {
-        'key': 'alice',
+        key: 'alice',
       },
       knowledge: {
-        'alice': [],
-        'bob': [],
+        alice: [],
+        bob: [],
       },
       itemLocations: {},
     }
@@ -262,10 +262,7 @@ describe('CausalityView', () => {
 
   describe('interaction', () => {
     it('should handle node selection', () => {
-      let selectedNode: CausalNode | null = null
-      const onNodeSelect = vi.fn((node: CausalNode) => {
-        selectedNode = node
-      })
+      const onNodeSelect = vi.fn((_node: CausalNode) => {})
 
       const viewWithCallback = new CausalityView({
         container: document.createElement('div'),
@@ -286,10 +283,7 @@ describe('CausalityView', () => {
     })
 
     it('should handle edge selection', () => {
-      let selectedEdge: CausalEdge | null = null
-      const onEdgeSelect = vi.fn((edge: CausalEdge) => {
-        selectedEdge = edge
-      })
+      const onEdgeSelect = vi.fn((_edge: CausalEdge) => {})
 
       const viewWithCallback = new CausalityView({
         container: document.createElement('div'),

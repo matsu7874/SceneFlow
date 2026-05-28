@@ -15,20 +15,15 @@ export const LocationDisplay: React.FC<LocationDisplayProps> = ({
   personPositions,
   currentTime,
 }) => {
-  const getLocationName = (locationId: number): string => {
-    const location = locations.find(l => l.id === locationId)
-    return location ? location.name : `不明な場所 (${locationId})`
-  }
-
   const getPersonsAtLocation = (locationId: number): Person[] => {
-    return persons.filter(person =>
-      personPositions.get(person.id) === locationId,
-    )
+    return persons.filter(person => personPositions.get(person.id) === locationId)
   }
 
   return (
     <div className="location-display">
-      <h3>登場人物の現在位置 (<span>{currentTime}</span>)</h3>
+      <h3>
+        登場人物の現在位置 (<span>{currentTime}</span>)
+      </h3>
       <div className="location-output">
         {locations.map(location => {
           const personsHere = getPersonsAtLocation(location.id)

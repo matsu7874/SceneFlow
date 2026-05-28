@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Person, Location } from '../types/StoryData'
 import './LocationLayout.css'
 
@@ -33,13 +33,16 @@ export const LocationLayout: React.FC<LocationLayoutProps> = ({
   const previousPositionsRef = useRef<Map<number, number>>(new Map())
 
   // Calculate location positions on canvas
-  const getLocationPositions = () => {
+  const getLocationPositions = (): Map<number, { x: number; y: number }> => {
     const locationPositions = new Map<number, { x: number; y: number }>()
     const centerX = 300
     const centerY = 200
 
     // Find bounds of saved coordinates
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity
     let hasCoordinates = false
 
     locations.forEach(location => {
@@ -146,7 +149,7 @@ export const LocationLayout: React.FC<LocationLayoutProps> = ({
 
     const locationPositions = getLocationPositions()
 
-    const animate = () => {
+    const animate = (): void => {
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -192,7 +195,7 @@ export const LocationLayout: React.FC<LocationLayoutProps> = ({
 
       // Group persons by location for layout calculation
       const personsAtLocations = new Map<number, AnimatedPerson[]>()
-      animatedPersonsRef.current.forEach((animatedPerson) => {
+      animatedPersonsRef.current.forEach(animatedPerson => {
         if (!animatedPerson.isMoving) {
           const locationId = personPositions.get(animatedPerson.person.id)
           if (locationId !== undefined) {
@@ -226,15 +229,17 @@ export const LocationLayout: React.FC<LocationLayoutProps> = ({
       })
 
       // Update and draw animated persons
-      animatedPersonsRef.current.forEach((animatedPerson) => {
+      animatedPersonsRef.current.forEach(animatedPerson => {
         if (animatedPerson.isMoving && animatedPerson.progress < 1) {
           // Ease-out animation
           animatedPerson.progress += 0.02
           const easeProgress = 1 - Math.pow(1 - animatedPerson.progress, 3)
 
-          animatedPerson.currentX = animatedPerson.sourceX +
+          animatedPerson.currentX =
+            animatedPerson.sourceX +
             (animatedPerson.targetX - animatedPerson.sourceX) * easeProgress
-          animatedPerson.currentY = animatedPerson.sourceY +
+          animatedPerson.currentY =
+            animatedPerson.sourceY +
             (animatedPerson.targetY - animatedPerson.sourceY) * easeProgress
 
           if (animatedPerson.progress >= 1) {
@@ -325,13 +330,10 @@ export const LocationLayout: React.FC<LocationLayoutProps> = ({
 
   return (
     <div className="location-layout">
-      <h2>場所のレイアウト表示 (<span>{currentTime}</span>)</h2>
-      <canvas
-        ref={canvasRef}
-        width={600}
-        height={400}
-        className="layout-canvas"
-      />
+      <h2>
+        場所のレイアウト表示 (<span>{currentTime}</span>)
+      </h2>
+      <canvas ref={canvasRef} width={600} height={400} className="layout-canvas" />
       <div className="layout-legend">
         <p>● キャラクターは色付きの円で表示されます</p>
         <p>--- 移動中のキャラクターは点線で軌跡が表示されます</p>

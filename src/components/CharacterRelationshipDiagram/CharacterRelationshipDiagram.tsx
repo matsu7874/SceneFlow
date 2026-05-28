@@ -24,7 +24,9 @@ interface Link {
   type: string
 }
 
-export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagramProps> = ({ persons }) => {
+export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagramProps> = ({
+  persons,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const nodesRef = useRef<Node[]>([])
   const [links, setLinks] = useState<Link[]>([])
@@ -170,7 +172,7 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
         // Background for text
         const textWidth = ctx.measureText(link.type).width
         ctx.fillStyle = 'white'
-        ctx.fillRect(midX - textWidth/2 - 4, midY - 8, textWidth + 8, 16)
+        ctx.fillRect(midX - textWidth / 2 - 4, midY - 8, textWidth + 8, 16)
 
         ctx.fillStyle = '#475569'
         ctx.fillText(link.type, midX, midY)
@@ -222,7 +224,7 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
   }, [animate])
 
   // Handle mouse events
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>): void => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -244,7 +246,7 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
     canvas.style.cursor = foundNode ? 'pointer' : 'default'
   }
 
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>): void => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -265,7 +267,7 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
     setSelectedNode(clickedNode)
   }
 
-  const handleColorChange = (personId: string, color: string) => {
+  const handleColorChange = (personId: string, color: string): void => {
     if (!storyData) return
 
     const updatedPersons = storyData.persons.map(p =>
@@ -304,7 +306,7 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
           <div className={styles.colorSection}>
             <ColorPicker
               value={selectedNodeData.color || '#3B82F6'}
-              onChange={(color) => handleColorChange(selectedNode, color)}
+              onChange={color => handleColorChange(selectedNode, color)}
               label="キャラクターカラー"
             />
           </div>

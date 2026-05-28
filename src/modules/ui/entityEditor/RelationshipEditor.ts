@@ -260,7 +260,7 @@ export class RelationshipEditor {
   private setupEventHandlers(): void {
     // Mode selector
     this.container.querySelectorAll('input[name="mode"]').forEach(radio => {
-      radio.addEventListener('change', (e) => {
+      radio.addEventListener('change', e => {
         this.mode = (e.target as HTMLInputElement).value as 'relationships' | 'connections' | 'both'
         this.render()
       })
@@ -277,12 +277,12 @@ export class RelationshipEditor {
     exportBtn?.addEventListener('click', () => this.exportRelationships())
 
     // Canvas interactions
-    this.svg.addEventListener('mousedown', (e) => this.handleMouseDown(e))
-    this.svg.addEventListener('mousemove', (e) => this.handleMouseMove(e))
-    this.svg.addEventListener('mouseup', (e) => this.handleMouseUp(e))
-    this.svg.addEventListener('wheel', (e) => this.handleWheel(e))
-    this.svg.addEventListener('click', (e) => this.handleClick(e))
-    this.svg.addEventListener('dblclick', (e) => this.handleDoubleClick(e))
+    this.svg.addEventListener('mousedown', e => this.handleMouseDown(e))
+    this.svg.addEventListener('mousemove', e => this.handleMouseMove(e))
+    this.svg.addEventListener('mouseup', e => this.handleMouseUp(e))
+    this.svg.addEventListener('wheel', e => this.handleWheel(e))
+    this.svg.addEventListener('click', e => this.handleClick(e))
+    this.svg.addEventListener('dblclick', e => this.handleDoubleClick(e))
 
     // Resize handler
     window.addEventListener('resize', () => this.resizeCanvas())
@@ -363,7 +363,11 @@ export class RelationshipEditor {
   /**
    * Render a single connection
    */
-  private renderConnection(connection: Connection, fromNode: RelationshipNode, toNode: RelationshipNode): void {
+  private renderConnection(
+    connection: Connection,
+    fromNode: RelationshipNode,
+    toNode: RelationshipNode,
+  ): void {
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
 
     const fromX = (fromNode.x + this.panX) * this.zoom
@@ -428,7 +432,11 @@ export class RelationshipEditor {
   /**
    * Render a single relationship
    */
-  private renderRelationship(relationship: Relationship, fromNode: RelationshipNode, toNode: RelationshipNode): void {
+  private renderRelationship(
+    relationship: Relationship,
+    fromNode: RelationshipNode,
+    toNode: RelationshipNode,
+  ): void {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
 
     const fromX = (fromNode.x + this.panX) * this.zoom
@@ -531,16 +539,16 @@ export class RelationshipEditor {
    */
   private getNodeColor(entity: EditableEntity): string {
     switch (entity.type) {
-    case 'person':
-      return '#4caf50'
-    case 'location':
-      return '#2196f3'
-    case 'item':
-      return '#ff9800'
-    case 'information':
-      return '#9c27b0'
-    default:
-      return '#9e9e9e'
+      case 'person':
+        return '#4caf50'
+      case 'location':
+        return '#2196f3'
+      case 'item':
+        return '#ff9800'
+      case 'information':
+        return '#9c27b0'
+      default:
+        return '#9e9e9e'
     }
   }
 
@@ -549,24 +557,24 @@ export class RelationshipEditor {
    */
   private getRelationshipColor(relationship: Relationship): string {
     switch (relationship.type) {
-    case RelationshipType.FRIEND:
-      return '#4caf50'
-    case RelationshipType.ENEMY:
-      return '#f44336'
-    case RelationshipType.ALLY:
-      return '#2196f3'
-    case RelationshipType.FAMILY:
-      return '#e91e63'
-    case RelationshipType.ROMANTIC:
-      return '#e91e63'
-    case RelationshipType.PROFESSIONAL:
-      return '#607d8b'
-    case RelationshipType.MENTOR:
-      return '#ff9800'
-    case RelationshipType.STUDENT:
-      return '#ffeb3b'
-    default:
-      return '#9e9e9e'
+      case RelationshipType.FRIEND:
+        return '#4caf50'
+      case RelationshipType.ENEMY:
+        return '#f44336'
+      case RelationshipType.ALLY:
+        return '#2196f3'
+      case RelationshipType.FAMILY:
+        return '#e91e63'
+      case RelationshipType.ROMANTIC:
+        return '#e91e63'
+      case RelationshipType.PROFESSIONAL:
+        return '#607d8b'
+      case RelationshipType.MENTOR:
+        return '#ff9800'
+      case RelationshipType.STUDENT:
+        return '#ffeb3b'
+      default:
+        return '#9e9e9e'
     }
   }
 
@@ -575,24 +583,24 @@ export class RelationshipEditor {
    */
   private getConnectionColor(connection: Connection): string {
     switch (connection.type) {
-    case ConnectionType.DIRECT:
-      return '#333'
-    case ConnectionType.DOOR:
-      return '#795548'
-    case ConnectionType.PASSAGE:
-      return '#607d8b'
-    case ConnectionType.STAIRS:
-      return '#ff9800'
-    case ConnectionType.ELEVATOR:
-      return '#2196f3'
-    case ConnectionType.PORTAL:
-      return '#9c27b0'
-    case ConnectionType.HIDDEN:
-      return '#9e9e9e'
-    case ConnectionType.LOCKED:
-      return '#f44336'
-    default:
-      return '#333'
+      case ConnectionType.DIRECT:
+        return '#333'
+      case ConnectionType.DOOR:
+        return '#795548'
+      case ConnectionType.PASSAGE:
+        return '#607d8b'
+      case ConnectionType.STAIRS:
+        return '#ff9800'
+      case ConnectionType.ELEVATOR:
+        return '#2196f3'
+      case ConnectionType.PORTAL:
+        return '#9c27b0'
+      case ConnectionType.HIDDEN:
+        return '#9e9e9e'
+      case ConnectionType.LOCKED:
+        return '#f44336'
+      default:
+        return '#333'
     }
   }
 
@@ -603,7 +611,9 @@ export class RelationshipEditor {
     const container = this.container.querySelector('.entity-items')
     if (!container) return
 
-    container.innerHTML = Array.from(this.entities.values()).map(entity => `
+    container.innerHTML = Array.from(this.entities.values())
+      .map(
+        entity => `
       <div class="entity-item ${this.selectedEntity === entity.id ? 'selected' : ''}" data-entity-id="${entity.id}">
         <div class="entity-type-indicator" style="background-color: ${this.getNodeColor(entity)}"></div>
         <div class="entity-info">
@@ -611,11 +621,13 @@ export class RelationshipEditor {
           <div class="entity-type">${entity.type}</div>
         </div>
       </div>
-    `).join('')
+    `,
+      )
+      .join('')
 
     // Add click handlers
     container.querySelectorAll('.entity-item').forEach(item => {
-      item.addEventListener('click', (e) => {
+      item.addEventListener('click', _e => {
         const entityId = (item as HTMLElement).dataset.entityId!
         this.selectEntity(entityId)
       })
@@ -820,7 +832,7 @@ export class RelationshipEditor {
   /**
    * Handle double click for creating relationships/connections
    */
-  private handleDoubleClick(e: MouseEvent): void {
+  private handleDoubleClick(_e: MouseEvent): void {
     if (this.selectedEntity) {
       this.showCreateDialog()
     }
@@ -896,14 +908,22 @@ export class RelationshipEditor {
     // For now, just show a simple prompt
     if (this.mode === 'relationships' || this.mode === 'both') {
       const targetEntityId = prompt('Enter target entity ID for relationship:')
-      if (targetEntityId && this.entities.has(targetEntityId) && targetEntityId !== this.selectedEntity) {
+      if (
+        targetEntityId &&
+        this.entities.has(targetEntityId) &&
+        targetEntityId !== this.selectedEntity
+      ) {
         this.createRelationship(this.selectedEntity!, targetEntityId)
       }
     }
 
     if (this.mode === 'connections' || this.mode === 'both') {
       const targetLocationId = prompt('Enter target location ID for connection:')
-      if (targetLocationId && this.entities.has(targetLocationId) && targetLocationId !== this.selectedEntity) {
+      if (
+        targetLocationId &&
+        this.entities.has(targetLocationId) &&
+        targetLocationId !== this.selectedEntity
+      ) {
         this.createConnection(this.selectedEntity!, targetLocationId)
       }
     }

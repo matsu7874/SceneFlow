@@ -29,11 +29,7 @@ interface ValidationFix {
   apply: () => void
 }
 
-export const ValidationReporter: React.FC<ValidationReporterProps> = ({
-  storyData,
-  onAutoFix,
-  className,
-}) => {
+export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyData, className }) => {
   const [issues, setIssues] = useState<ValidationIssue[]>([])
   const [isValidating, setIsValidating] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
@@ -47,7 +43,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({
   }, [storyData])
 
   // Run validation
-  const runValidation = useCallback(async () => {
+  const runValidation = useCallback(() => {
     setIsValidating(true)
     const newIssues: ValidationIssue[] = []
     let issueId = 0
@@ -93,7 +89,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({
         events: new Set<string>(),
       }
 
-      const checkDuplicates = (items: any[], type: string, set: Set<string>) => {
+      const checkDuplicates = (items: any[], type: string, set: Set<string>): void => {
         items.forEach(item => {
           const itemId = String(item.id)
           if (set.has(itemId)) {
@@ -150,7 +146,10 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({
       })
 
       // 4. Check for timing conflicts
-      const personSchedules = new Map<string, Array<{start: number, end: number, actId: string}>>()
+      const personSchedules = new Map<
+        string,
+        Array<{ start: number; end: number; actId: string }>
+      >()
 
       storyData.acts.forEach(act => {
         if (act.personId && act.startTime !== undefined && act.endTime !== undefined) {
@@ -213,7 +212,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({
       const visited = new Set<string>()
       const components: string[][] = []
 
-      const dfs = (locationId: string, component: string[]) => {
+      const dfs = (locationId: string, component: string[]): void => {
         if (visited.has(locationId)) return
         visited.add(locationId)
         component.push(locationId)
@@ -242,7 +241,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({
       // Only report isolated locations if there are multiple components
       // and one of them is a single location
       if (components.length > 1) {
-        components.forEach((component, index) => {
+        components.forEach(component => {
           if (component.length === 1) {
             // Check if this location has no connections at all
             const locationId = component[0]
@@ -332,7 +331,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({
     return counts
   }, [issues])
 
-  const toggleExpanded = (issueId: string) => {
+  const toggleExpanded = (issueId: string): void => {
     setExpandedIssues(prev => {
       const next = new Set(prev)
       if (next.has(issueId)) {
@@ -348,11 +347,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({
     <div className={`${styles.container} ${className || ''}`}>
       <div className={styles.header}>
         <h3>Validation Report</h3>
-        <button
-          className={styles.refreshButton}
-          onClick={runValidation}
-          disabled={isValidating}
-        >
+        <button className={styles.refreshButton} onClick={runValidation} disabled={isValidating}>
           {isValidating ? 'Validating...' : 'Refresh'}
         </button>
       </div>
@@ -375,7 +370,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({
       <div className={styles.filters}>
         <select
           value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
+          onChange={e => setSelectedCategory(e.target.value)}
           className={styles.filterSelect}
         >
           {categories.map(cat => (
@@ -387,7 +382,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({
 
         <select
           value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
+          onChange={e => setSelectedType(e.target.value)}
           className={styles.filterSelect}
         >
           <option value="all">All Types</option>
@@ -402,8 +397,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({
           <div className={styles.noIssues}>
             {issues.length === 0
               ? '✅ No validation issues found!'
-              : 'No issues match the selected filters'
-            }
+              : 'No issues match the selected filters'}
           </div>
         ) : (
           filteredIssues.map(issue => (

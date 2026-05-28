@@ -5,9 +5,9 @@ import { useRelationshipEditor, EditorMode, GraphNode, GraphLink } from './useRe
 import { Relationship, Connection } from '../../types'
 
 export interface RelationshipEditorProps {
-  initialMode?: EditorMode;
-  onItemSelect?: (item: Relationship | Connection) => void;
-  className?: string;
+  initialMode?: EditorMode
+  onItemSelect?: (item: Relationship | Connection) => void
+  className?: string
 }
 
 const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
@@ -61,16 +61,18 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
     const nodesGroup = g.append('g').attr('class', 'nodes')
 
     // Add zoom behavior
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
-      .on('zoom', (event) => {
+      .on('zoom', event => {
         g.attr('transform', event.transform)
       })
 
     svg.call(zoom)
 
     // Create links
-    const links = linksGroup.selectAll<SVGLineElement, GraphLink>('line')
+    linksGroup
+      .selectAll<SVGLineElement, GraphLink>('line')
       .data(graphData.links)
       .join('line')
       .attr('class', d => `${styles.link} ${hoveredLink === d.id ? styles.highlighted : ''}`)
@@ -86,14 +88,18 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
       .on('mouseleave', () => setHoveredLink(null))
 
     // Create nodes
-    const nodes = nodesGroup.selectAll<SVGGElement, GraphNode>('g')
+    const nodes = nodesGroup
+      .selectAll<SVGGElement, GraphNode>('g')
       .data(graphData.nodes)
       .join('g')
       .attr('class', d => `${styles.node} ${hoveredNode === d.id ? styles.highlighted : ''}`)
-      .call(d3.drag<SVGGElement, GraphNode>()
-        .on('start', handleDragStart)
-        .on('drag', handleDrag)
-        .on('end', handleDragEnd) as any)
+      .call(
+        d3
+          .drag<SVGGElement, GraphNode>()
+          .on('start', handleDragStart)
+          .on('drag', handleDrag)
+          .on('end', handleDragEnd) as any,
+      )
       .on('click', (event, d) => {
         event.stopPropagation()
         handleNodeClick(d)
@@ -105,33 +111,43 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
       .on('mouseleave', () => setHoveredNode(null))
 
     // Add circles to nodes
-    nodes.append('circle')
-      .attr('class', styles.nodeCircle)
-      .attr('r', 20)
+    nodes.append('circle').attr('class', styles.nodeCircle).attr('r', 20)
 
     // Add labels to nodes
-    nodes.append('text')
+    nodes
+      .append('text')
       .attr('class', styles.nodeLabel)
       .attr('dy', 35)
       .text(d => d.name)
       .style('font-size', '12px')
 
     // Add icons to nodes
-    nodes.append('text')
+    nodes
+      .append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', 5)
       .style('font-size', '14px')
       .style('fill', 'white')
-      .text(d => d.type === 'person' ? '👤' : '📍')
-
-  }, [graphData, hoveredNode, hoveredLink, handleNodeClick, handleLinkClick,
-    handleNodeContextMenu, handleLinkContextMenu, handleDragStart, handleDrag, handleDragEnd,
-    setHoveredNode, setHoveredLink])
+      .text(d => (d.type === 'person' ? '👤' : '📍'))
+  }, [
+    graphData,
+    hoveredNode,
+    hoveredLink,
+    handleNodeClick,
+    handleLinkClick,
+    handleNodeContextMenu,
+    handleLinkContextMenu,
+    handleDragStart,
+    handleDrag,
+    handleDragEnd,
+    setHoveredNode,
+    setHoveredLink,
+  ])
 
   // Handle clicks outside context menu
   useEffect(() => {
     if (contextMenu) {
-      const handleClick = () => handleCloseContextMenu()
+      const handleClick = (): void => handleCloseContextMenu()
       document.addEventListener('click', handleClick)
       return () => document.removeEventListener('click', handleClick)
     }
@@ -144,7 +160,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
     }
   }, [selectedItem, onItemSelect])
 
-  const handleFilterSelect = (type: 'entity' | 'type', value: string) => {
+  const handleFilterSelect = (type: 'entity' | 'type', value: string): void => {
     if (type === 'entity') {
       setFilterOptions(prev => ({
         ...prev,
@@ -159,7 +175,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
     setShowFilterMenu(false)
   }
 
-  const clearFilters = () => {
+  const clearFilters = (): void => {
     setFilterOptions({})
     setSearchQuery('')
   }
@@ -183,7 +199,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
               className={styles.searchInput}
               placeholder="Search..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
 
@@ -240,10 +256,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                 {hasActiveFilters && (
                   <>
                     <div className={styles.filterMenuDivider} />
-                    <div
-                      className={styles.filterOption}
-                      onClick={clearFilters}
-                    >
+                    <div className={styles.filterOption} onClick={clearFilters}>
                       Clear Filters
                     </div>
                   </>
@@ -303,7 +316,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
         <div
           className={styles.contextMenu}
           style={{ left: contextMenu.x, top: contextMenu.y }}
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
           {contextMenu.type === 'node' ? (
             <>
@@ -342,10 +355,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
             <h3 className={styles.detailsTitle}>
               {mode === 'relationships' ? 'Relationship Details' : 'Connection Details'}
             </h3>
-            <button
-              className={styles.closeButton}
-              onClick={() => setSelectedItem(null)}
-            >
+            <button className={styles.closeButton} onClick={() => setSelectedItem(null)}>
               <span style={{ fontSize: '20px' }}>✕</span>
             </button>
           </div>
@@ -364,8 +374,11 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                   <div className={styles.detailsField}>
                     <div className={styles.detailsLabel}>Between</div>
                     <div className={styles.detailsValue}>
-                      {graphData.nodes.find(n => n.id === selectedItem.person1Id)?.name || 'Unknown'} & {' '}
-                      {graphData.nodes.find(n => n.id === selectedItem.person2Id)?.name || 'Unknown'}
+                      {graphData.nodes.find(n => n.id === selectedItem.person1Id)?.name ||
+                        'Unknown'}{' '}
+                      &{' '}
+                      {graphData.nodes.find(n => n.id === selectedItem.person2Id)?.name ||
+                        'Unknown'}
                     </div>
                   </div>
                 </>
@@ -376,8 +389,11 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                   <div className={styles.detailsField}>
                     <div className={styles.detailsLabel}>Between</div>
                     <div className={styles.detailsValue}>
-                      {graphData.nodes.find(n => n.id === selectedItem.location1Id)?.name || 'Unknown'} & {' '}
-                      {graphData.nodes.find(n => n.id === selectedItem.location2Id)?.name || 'Unknown'}
+                      {graphData.nodes.find(n => n.id === selectedItem.location1Id)?.name ||
+                        'Unknown'}{' '}
+                      &{' '}
+                      {graphData.nodes.find(n => n.id === selectedItem.location2Id)?.name ||
+                        'Unknown'}
                     </div>
                   </div>
                 </>
@@ -392,7 +408,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                   max="1"
                   step="0.1"
                   value={selectedItem.strength || 0.5}
-                  onChange={(e) => handleUpdateStrength(selectedItem.id, parseFloat(e.target.value))}
+                  onChange={e => handleUpdateStrength(selectedItem.id, parseFloat(e.target.value))}
                 />
                 <div className={styles.detailsValue}>
                   {((selectedItem.strength || 0.5) * 100).toFixed(0)}%

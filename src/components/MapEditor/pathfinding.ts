@@ -1,11 +1,11 @@
 import { Location, Connection } from './types'
 
 interface Node {
-  id: string;
-  g: number; // Cost from start
-  h: number; // Heuristic cost to end
-  f: number; // Total cost (g + h)
-  parent: Node | null;
+  id: string
+  g: number // Cost from start
+  h: number // Heuristic cost to end
+  f: number // Total cost (g + h)
+  parent: Node | null
 }
 
 export class AStar {
@@ -227,5 +227,5 @@ export function forceDirectedLayout(
     })
   }
 
-  return nodes.map(({ vx, vy, ...loc }) => loc)
+  return nodes.map(({ vx: _vx, vy: _vy, ...loc }) => loc)
 }

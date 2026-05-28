@@ -29,11 +29,7 @@ interface ViewState {
   offsetY: number
 }
 
-export const CausalityView: React.FC<CausalityViewProps> = ({
-  storyData,
-  currentTime = 0,
-  onTimeSeek,
-}) => {
+export const CausalityView: React.FC<CausalityViewProps> = ({ storyData, onTimeSeek }) => {
   const [error, setError] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -58,7 +54,9 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
       return new CausalityEngine(storyData)
     } catch (err) {
       console.error('Error initializing CausalityEngine:', err)
-      setError(`Failed to initialize causality engine: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      setError(
+        `Failed to initialize causality engine: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      )
       return null
     }
   }, [storyData])
@@ -81,7 +79,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
     times.forEach((time, timeIndex) => {
       const nodesAtTime = timeGroups.get(time)!
       const spacing = 120
-      const yStart = -(nodesAtTime.length - 1) * spacing / 2
+      const yStart = (-(nodesAtTime.length - 1) * spacing) / 2
 
       nodesAtTime.forEach((node, nodeIndex) => {
         node.x = timeIndex * 200 + 100
@@ -99,7 +97,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
       const relationships = causalityEngine.getCausalRelationships()
 
       // Create nodes for acts
-      storyData.acts.forEach((act, index) => {
+      storyData.acts.forEach((act, _index) => {
         const node: Node = {
           id: `act-${act.id}`,
           type: 'act',
@@ -115,7 +113,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
 
       // Create nodes for events (generated from acts)
       const events = generateEventsFromActs(storyData.acts || [])
-      events.forEach((event, index) => {
+      events.forEach((event, _index) => {
         const node: Node = {
           id: `event-${event.id}`,
           type: 'event',
@@ -145,25 +143,33 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
       return Array.from(nodeMap.values())
     } catch (err) {
       console.error('Error building node graph:', err)
-      setError(`Failed to build node graph: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      setError(
+        `Failed to build node graph: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      )
       return []
     }
   }, [storyData, causalityEngine, layoutNodes])
 
   // Convert coordinates
-  const worldToScreen = useCallback((x: number, y: number) => {
-    return {
-      x: (x - viewState.offsetX) * viewState.scale,
-      y: (y - viewState.offsetY) * viewState.scale,
-    }
-  }, [viewState])
+  const worldToScreen = useCallback(
+    (x: number, y: number) => {
+      return {
+        x: (x - viewState.offsetX) * viewState.scale,
+        y: (y - viewState.offsetY) * viewState.scale,
+      }
+    },
+    [viewState],
+  )
 
-  const screenToWorld = useCallback((x: number, y: number) => {
-    return {
-      x: x / viewState.scale + viewState.offsetX,
-      y: y / viewState.scale + viewState.offsetY,
-    }
-  }, [viewState])
+  const screenToWorld = useCallback(
+    (x: number, y: number) => {
+      return {
+        x: x / viewState.scale + viewState.offsetX,
+        y: y / viewState.scale + viewState.offsetY,
+      }
+    },
+    [viewState],
+  )
 
   // Render canvas
   const renderCanvas = useCallback(() => {
@@ -227,83 +233,92 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
   }, [nodes, viewState])
 
   // Handle mouse events
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault()
-    const delta = e.deltaY > 0 ? 0.9 : 1.1
-    const newScale = Math.min(Math.max(viewState.scale * delta, 0.1), 5)
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      e.preventDefault()
+      const delta = e.deltaY > 0 ? 0.9 : 1.1
+      const newScale = Math.min(Math.max(viewState.scale * delta, 0.1), 5)
 
-    const rect = containerRef.current?.getBoundingClientRect()
-    if (rect) {
-      const mouseX = e.clientX - rect.left
-      const mouseY = e.clientY - rect.top
-      const worldPos = screenToWorld(mouseX, mouseY)
+      const rect = containerRef.current?.getBoundingClientRect()
+      if (rect) {
+        const mouseX = e.clientX - rect.left
+        const mouseY = e.clientY - rect.top
+        const worldPos = screenToWorld(mouseX, mouseY)
 
-      setViewState(prev => ({
-        scale: newScale,
-        offsetX: worldPos.x - mouseX / newScale,
-        offsetY: worldPos.y - mouseY / newScale,
-      }))
-    }
-  }, [viewState.scale, screenToWorld])
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    const rect = containerRef.current?.getBoundingClientRect()
-    if (rect) {
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      const worldPos = screenToWorld(x, y)
-
-      // Check if clicking on a node
-      const clickedNode = nodes.find(node => {
-        const dx = worldPos.x - node.x
-        const dy = worldPos.y - node.y
-        return Math.sqrt(dx * dx + dy * dy) < 40
-      })
-
-      if (clickedNode) {
-        setSelectedNode(clickedNode.id)
-        showNotification(`Selected: ${clickedNode.data.id}`, { type: 'info' })
-
-        if (onTimeSeek && clickedNode.type === 'act') {
-          const act = clickedNode.data as Act
-          onTimeSeek(timeToMinutes(act.time) || 0)
-        }
-      } else {
-        setIsPanning(true)
-        setPanStart({ x: e.clientX, y: e.clientY })
+        setViewState(_prev => ({
+          scale: newScale,
+          offsetX: worldPos.x - mouseX / newScale,
+          offsetY: worldPos.y - mouseY / newScale,
+        }))
       }
-    }
-  }, [nodes, screenToWorld, showNotification, onTimeSeek])
+    },
+    [viewState.scale, screenToWorld],
+  )
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (isPanning) {
-      const dx = e.clientX - panStart.x
-      const dy = e.clientY - panStart.y
-
-      setViewState(prev => ({
-        ...prev,
-        offsetX: prev.offsetX - dx / prev.scale,
-        offsetY: prev.offsetY - dy / prev.scale,
-      }))
-
-      setPanStart({ x: e.clientX, y: e.clientY })
-    } else {
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
       const rect = containerRef.current?.getBoundingClientRect()
       if (rect) {
         const x = e.clientX - rect.left
         const y = e.clientY - rect.top
         const worldPos = screenToWorld(x, y)
 
-        const hoveredNode = nodes.find(node => {
+        // Check if clicking on a node
+        const clickedNode = nodes.find(node => {
           const dx = worldPos.x - node.x
           const dy = worldPos.y - node.y
           return Math.sqrt(dx * dx + dy * dy) < 40
         })
 
-        setHoveredNode(hoveredNode?.id || null)
+        if (clickedNode) {
+          setSelectedNode(clickedNode.id)
+          showNotification(`Selected: ${clickedNode.data.id}`, { type: 'info' })
+
+          if (onTimeSeek && clickedNode.type === 'act') {
+            const act = clickedNode.data as Act
+            onTimeSeek(timeToMinutes(act.time) || 0)
+          }
+        } else {
+          setIsPanning(true)
+          setPanStart({ x: e.clientX, y: e.clientY })
+        }
       }
-    }
-  }, [isPanning, panStart, screenToWorld, nodes])
+    },
+    [nodes, screenToWorld, showNotification, onTimeSeek],
+  )
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (isPanning) {
+        const dx = e.clientX - panStart.x
+        const dy = e.clientY - panStart.y
+
+        setViewState(prev => ({
+          ...prev,
+          offsetX: prev.offsetX - dx / prev.scale,
+          offsetY: prev.offsetY - dy / prev.scale,
+        }))
+
+        setPanStart({ x: e.clientX, y: e.clientY })
+      } else {
+        const rect = containerRef.current?.getBoundingClientRect()
+        if (rect) {
+          const x = e.clientX - rect.left
+          const y = e.clientY - rect.top
+          const worldPos = screenToWorld(x, y)
+
+          const hoveredNode = nodes.find(node => {
+            const dx = worldPos.x - node.x
+            const dy = worldPos.y - node.y
+            return Math.sqrt(dx * dx + dy * dy) < 40
+          })
+
+          setHoveredNode(hoveredNode?.id || null)
+        }
+      }
+    },
+    [isPanning, panStart, screenToWorld, nodes],
+  )
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false)
@@ -311,7 +326,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
 
   // Update canvas size
   useEffect(() => {
-    const updateSize = () => {
+    const updateSize = (): void => {
       const container = containerRef.current
       const canvas = canvasRef.current
       const svg = svgRef.current
@@ -356,14 +371,8 @@ export const CausalityView: React.FC<CausalityViewProps> = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      <canvas
-        ref={canvasRef}
-        className={styles.canvas}
-      />
-      <svg
-        ref={svgRef}
-        className={styles.svg}
-      >
+      <canvas ref={canvasRef} className={styles.canvas} />
+      <svg ref={svgRef} className={styles.svg}>
         {nodes.map(node => {
           const pos = worldToScreen(node.x, node.y)
           const isSelected = node.id === selectedNode

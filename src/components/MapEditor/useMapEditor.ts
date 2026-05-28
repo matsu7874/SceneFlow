@@ -49,93 +49,114 @@ const INITIAL_STATE: MapEditorState = {
   },
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useMapEditor() {
   const [state, setState] = useState<MapEditorState>(INITIAL_STATE)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const minimapCanvasRef = useRef<HTMLCanvasElement | null>(null)
-  const animationFrameRef = useRef<number | null>(null)
   const nodeIdCounterRef = useRef<number>(100)
 
   // Helper functions
-  const screenToWorld = useCallback((screenX: number, screenY: number): Point => {
-    const { zoom, panX, panY } = state.viewState
-    return {
-      x: (screenX - panX) / zoom,
-      y: (screenY - panY) / zoom,
-    }
-  }, [state.viewState])
-
-  const worldToScreen = useCallback((worldX: number, worldY: number): Point => {
-    const { zoom, panX, panY } = state.viewState
-    return {
-      x: worldX * zoom + panX,
-      y: worldY * zoom + panY,
-    }
-  }, [state.viewState])
-
-  const snapToGrid = useCallback((value: number): number => {
-    if (!state.showGrid) return value
-    return Math.round(value / state.gridSize) * state.gridSize
-  }, [state.showGrid, state.gridSize])
-
-  const getNodeAt = useCallback((worldX: number, worldY: number): Location | null => {
-    const nodeRadius = 20
-    for (const location of state.mapData.locations) {
-      const dx = location.x - worldX
-      const dy = location.y - worldY
-      if (dx * dx + dy * dy <= nodeRadius * nodeRadius) {
-        return location
+  const screenToWorld = useCallback(
+    (screenX: number, screenY: number): Point => {
+      const { zoom, panX, panY } = state.viewState
+      return {
+        x: (screenX - panX) / zoom,
+        y: (screenY - panY) / zoom,
       }
-    }
-    return null
-  }, [state.mapData.locations])
+    },
+    [state.viewState],
+  )
 
-  const getConnectionAt = useCallback((worldX: number, worldY: number): Connection | null => {
-    const threshold = 10
-
-    for (const conn of state.mapData.connections) {
-      const from = state.mapData.locations.find(loc => loc.id === conn.from)
-      const to = state.mapData.locations.find(loc => loc.id === conn.to)
-
-      if (!from || !to) continue
-
-      // Check distance from point to line segment
-      const dx = to.x - from.x
-      const dy = to.y - from.y
-      const lengthSquared = dx * dx + dy * dy
-
-      if (lengthSquared === 0) continue
-
-      const t = Math.max(0, Math.min(1, ((worldX - from.x) * dx + (worldY - from.y) * dy) / lengthSquared))
-      const projX = from.x + t * dx
-      const projY = from.y + t * dy
-
-      const distance = Math.sqrt((worldX - projX) ** 2 + (worldY - projY) ** 2)
-
-      if (distance <= threshold) {
-        return conn
+  const worldToScreen = useCallback(
+    (worldX: number, worldY: number): Point => {
+      const { zoom, panX, panY } = state.viewState
+      return {
+        x: worldX * zoom + panX,
+        y: worldY * zoom + panY,
       }
-    }
+    },
+    [state.viewState],
+  )
 
-    return null
-  }, [state.mapData])
+  const snapToGrid = useCallback(
+    (value: number): number => {
+      if (!state.showGrid) return value
+      return Math.round(value / state.gridSize) * state.gridSize
+    },
+    [state.showGrid, state.gridSize],
+  )
 
-  const getNodesInRectangle = useCallback((rect: Rectangle): Set<string> => {
-    const nodes = new Set<string>()
-
-    for (const location of state.mapData.locations) {
-      if (
-        location.x >= rect.x &&
-        location.x <= rect.x + rect.width &&
-        location.y >= rect.y &&
-        location.y <= rect.y + rect.height
-      ) {
-        nodes.add(location.id)
+  const getNodeAt = useCallback(
+    (worldX: number, worldY: number): Location | null => {
+      const nodeRadius = 20
+      for (const location of state.mapData.locations) {
+        const dx = location.x - worldX
+        const dy = location.y - worldY
+        if (dx * dx + dy * dy <= nodeRadius * nodeRadius) {
+          return location
+        }
       }
-    }
+      return null
+    },
+    [state.mapData.locations],
+  )
 
-    return nodes
-  }, [state.mapData.locations])
+  const getConnectionAt = useCallback(
+    (worldX: number, worldY: number): Connection | null => {
+      const threshold = 10
+
+      for (const conn of state.mapData.connections) {
+        const from = state.mapData.locations.find(loc => loc.id === conn.from)
+        const to = state.mapData.locations.find(loc => loc.id === conn.to)
+
+        if (!from || !to) continue
+
+        // Check distance from point to line segment
+        const dx = to.x - from.x
+        const dy = to.y - from.y
+        const lengthSquared = dx * dx + dy * dy
+
+        if (lengthSquared === 0) continue
+
+        const t = Math.max(
+          0,
+          Math.min(1, ((worldX - from.x) * dx + (worldY - from.y) * dy) / lengthSquared),
+        )
+        const projX = from.x + t * dx
+        const projY = from.y + t * dy
+
+        const distance = Math.sqrt((worldX - projX) ** 2 + (worldY - projY) ** 2)
+
+        if (distance <= threshold) {
+          return conn
+        }
+      }
+
+      return null
+    },
+    [state.mapData],
+  )
+
+  const getNodesInRectangle = useCallback(
+    (rect: Rectangle): Set<string> => {
+      const nodes = new Set<string>()
+
+      for (const location of state.mapData.locations) {
+        if (
+          location.x >= rect.x &&
+          location.x <= rect.x + rect.width &&
+          location.y >= rect.y &&
+          location.y <= rect.y + rect.height
+        ) {
+          nodes.add(location.id)
+        }
+      }
+
+      return nodes
+    },
+    [state.mapData.locations],
+  )
 
   // State update with history
   const updateMapData = useCallback((updater: MapData | ((prev: MapData) => MapData)) => {
@@ -202,102 +223,117 @@ export function useMapEditor() {
   }, [state.mapData.locations])
 
   // Node operations
-  const addNode = useCallback((x: number, y: number, name?: string) => {
-    const snappedX = snapToGrid(x)
-    const snappedY = snapToGrid(y)
+  const addNode = useCallback(
+    (x: number, y: number, name?: string) => {
+      const snappedX = snapToGrid(x)
+      const snappedY = snapToGrid(y)
 
-    // Generate new ID
-    const newId = (++nodeIdCounterRef.current).toString()
+      // Generate new ID
+      const newId = (++nodeIdCounterRef.current).toString()
 
-    updateMapData(prev => {
-      const newLocation: Location = {
-        id: newId,
-        name: name || `Location ${prev.locations.length + 1}`,
-        x: snappedX,
-        y: snappedY,
-        description: '',
-        tags: [],
-      }
+      updateMapData(prev => {
+        const newLocation: Location = {
+          id: newId,
+          name: name || `Location ${prev.locations.length + 1}`,
+          x: snappedX,
+          y: snappedY,
+          description: '',
+          tags: [],
+        }
 
-      return {
+        return {
+          ...prev,
+          locations: [...prev.locations, newLocation],
+        }
+      })
+
+      return newId
+    },
+    [snapToGrid, updateMapData],
+  )
+
+  const deleteNode = useCallback(
+    (nodeId: string) => {
+      updateMapData(prev => ({
+        locations: prev.locations.filter(loc => loc.id !== nodeId),
+        connections: prev.connections.filter(conn => conn.from !== nodeId && conn.to !== nodeId),
+      }))
+
+      setState(prev => ({
         ...prev,
-        locations: [...prev.locations, newLocation],
-      }
-    })
+        selection: {
+          ...prev.selection,
+          selectedNodes: new Set([...prev.selection.selectedNodes].filter(id => id !== nodeId)),
+        },
+      }))
+    },
+    [updateMapData],
+  )
 
-    return newId
-  }, [snapToGrid, updateMapData])
-
-  const deleteNode = useCallback((nodeId: string) => {
-    updateMapData(prev => ({
-      locations: prev.locations.filter(loc => loc.id !== nodeId),
-      connections: prev.connections.filter(
-        conn => conn.from !== nodeId && conn.to !== nodeId,
-      ),
-    }))
-
-    setState(prev => ({
-      ...prev,
-      selection: {
-        ...prev.selection,
-        selectedNodes: new Set([...prev.selection.selectedNodes].filter(id => id !== nodeId)),
-      },
-    }))
-  }, [updateMapData])
-
-  const updateNode = useCallback((nodeId: string, updates: Partial<Location>) => {
-    updateMapData(prev => ({
-      ...prev,
-      locations: prev.locations.map(loc =>
-        loc.id === nodeId ? { ...loc, ...updates } : loc,
-      ),
-    }))
-  }, [updateMapData])
+  const updateNode = useCallback(
+    (nodeId: string, updates: Partial<Location>) => {
+      updateMapData(prev => ({
+        ...prev,
+        locations: prev.locations.map(loc => (loc.id === nodeId ? { ...loc, ...updates } : loc)),
+      }))
+    },
+    [updateMapData],
+  )
 
   // Connection operations
-  const addConnection = useCallback((fromId: string, toId: string, weight: number = 1, bidirectional: boolean = true) => {
-    updateMapData(prev => {
-      // Check if connection already exists
-      const exists = prev.connections.some(
-        conn => (conn.from === fromId && conn.to === toId) ||
-                (bidirectional && conn.from === toId && conn.to === fromId),
-      )
+  const addConnection = useCallback(
+    (fromId: string, toId: string, weight: number = 1, bidirectional: boolean = true) => {
+      updateMapData(prev => {
+        // Check if connection already exists
+        const exists = prev.connections.some(
+          conn =>
+            (conn.from === fromId && conn.to === toId) ||
+            (bidirectional && conn.from === toId && conn.to === fromId),
+        )
 
-      if (exists) return prev
+        if (exists) return prev
 
-      const newConnection: Connection = {
-        from: fromId,
-        to: toId,
-        weight,
-        bidirectional,
-      }
+        const newConnection: Connection = {
+          from: fromId,
+          to: toId,
+          weight,
+          bidirectional,
+        }
 
-      return {
+        return {
+          ...prev,
+          connections: [...prev.connections, newConnection],
+        }
+      })
+    },
+    [updateMapData],
+  )
+
+  const deleteConnection = useCallback(
+    (connection: Connection) => {
+      updateMapData(prev => ({
         ...prev,
-        connections: [...prev.connections, newConnection],
-      }
-    })
-  }, [updateMapData])
+        connections: prev.connections.filter(
+          conn => !(conn.from === connection.from && conn.to === connection.to),
+        ),
+      }))
+    },
+    [updateMapData],
+  )
 
-  const deleteConnection = useCallback((connection: Connection) => {
-    updateMapData(prev => ({
-      ...prev,
-      connections: prev.connections.filter(
-        conn => !(conn.from === connection.from && conn.to === connection.to),
-      ),
-    }))
-  }, [updateMapData])
-
-  const updateConnection = useCallback((connection: Connection, updates: Partial<Connection>) => {
-    updateMapData(prev => ({
-      ...prev,
-      connections: prev.connections.map(conn =>
-        conn.from === connection.from && conn.to === connection.to
-          ? { ...conn, ...updates }
-          : conn,
-      ),
-    }))
-  }, [updateMapData])
+  const updateConnection = useCallback(
+    (connection: Connection, updates: Partial<Connection>) => {
+      updateMapData(prev => ({
+        ...prev,
+        connections: prev.connections.map(conn =>
+          conn.from === connection.from && conn.to === connection.to
+            ? { ...conn, ...updates }
+            : conn,
+        ),
+      }))
+    },
+    [updateMapData],
+  )
 
   // Selection operations
   const selectNode = useCallback((nodeId: string, addToSelection: boolean = false) => {
@@ -351,53 +387,59 @@ export function useMapEditor() {
   }, [])
 
   // Layout operations
-  const applyLayout = useCallback((algorithm: LayoutAlgorithm) => {
-    updateMapData(prev => {
-      let newLocations: Location[]
+  const applyLayout = useCallback(
+    (algorithm: LayoutAlgorithm) => {
+      updateMapData(prev => {
+        let newLocations: Location[]
 
-      switch (algorithm) {
-      case 'grid':
-        newLocations = gridLayout(prev.locations)
-        break
-      case 'circle':
-        newLocations = circleLayout(prev.locations)
-        break
-      case 'force':
-        newLocations = forceDirectedLayout(prev.locations, prev.connections)
-        break
-      default:
-        return prev
-      }
+        switch (algorithm) {
+          case 'grid':
+            newLocations = gridLayout(prev.locations)
+            break
+          case 'circle':
+            newLocations = circleLayout(prev.locations)
+            break
+          case 'force':
+            newLocations = forceDirectedLayout(prev.locations, prev.connections)
+            break
+          default:
+            return prev
+        }
 
-      return {
+        return {
+          ...prev,
+          locations: newLocations,
+        }
+      })
+
+      setState(prev => ({
         ...prev,
-        locations: newLocations,
-      }
-    })
-
-    setState(prev => ({
-      ...prev,
-      layoutAlgorithm: algorithm,
-    }))
-  }, [updateMapData])
+        layoutAlgorithm: algorithm,
+      }))
+    },
+    [updateMapData],
+  )
 
   // Pathfinding operations
-  const findPath = useCallback((startId: string, endId: string) => {
-    const pathfinder = new AStar(state.mapData.locations, state.mapData.connections)
-    const path = pathfinder.findPath(startId, endId)
+  const findPath = useCallback(
+    (startId: string, endId: string) => {
+      const pathfinder = new AStar(state.mapData.locations, state.mapData.connections)
+      const path = pathfinder.findPath(startId, endId)
 
-    setState(prev => ({
-      ...prev,
-      pathfinding: {
-        active: true,
-        start: startId,
-        end: endId,
-        path,
-      },
-    }))
+      setState(prev => ({
+        ...prev,
+        pathfinding: {
+          active: true,
+          start: startId,
+          end: endId,
+          path,
+        },
+      }))
 
-    return path
-  }, [state.mapData])
+      return path
+    },
+    [state.mapData],
+  )
 
   const clearPathfinding = useCallback(() => {
     setState(prev => ({
@@ -464,16 +506,19 @@ export function useMapEditor() {
     return JSON.stringify(state.mapData, null, 2)
   }, [state.mapData])
 
-  const importMapData = useCallback((jsonString: string) => {
-    try {
-      const data = JSON.parse(jsonString) as MapData
-      updateMapData(data)
-      return true
-    } catch (error) {
-      console.error('Failed to import map data:', error)
-      return false
-    }
-  }, [updateMapData])
+  const importMapData = useCallback(
+    (jsonString: string) => {
+      try {
+        const data = JSON.parse(jsonString) as MapData
+        updateMapData(data)
+        return true
+      } catch (error) {
+        console.error('Failed to import map data:', error)
+        return false
+      }
+    },
+    [updateMapData],
+  )
 
   return {
     // State

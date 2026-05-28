@@ -3,8 +3,6 @@ import {
   ValidationReporter,
   ValidationSeverity,
   ValidationIssueType,
-  type ValidationReport,
-  type ValidationIssue,
 } from '../../src/modules/validation/reporter'
 import { CausalityEngine } from '../../src/modules/causality/engine'
 import { MoveAct, GiveItemAct, TakeItemAct } from '../../src/modules/causality/acts'
@@ -19,16 +17,16 @@ describe('ValidationReporter', () => {
     initialState = {
       timestamp: 0,
       personPositions: {
-        'alice': 'room1',
-        'bob': 'room2',
+        alice: 'room1',
+        bob: 'room2',
       },
       itemOwnership: {
-        'key': 'alice',
-        'book': 'bob',
+        key: 'alice',
+        book: 'bob',
       },
       knowledge: {
-        'alice': [],
-        'bob': [],
+        alice: [],
+        bob: [],
       },
       itemLocations: {},
     }
@@ -65,9 +63,9 @@ describe('ValidationReporter', () => {
       const report = await reporter.generateReport(initialState)
 
       expect(report.totalIssues).toBeGreaterThan(0)
-      expect(report.issues.some(issue =>
-        issue.type === ValidationIssueType.PRECONDITION_VIOLATED,
-      )).toBe(true)
+      expect(
+        report.issues.some(issue => issue.type === ValidationIssueType.PRECONDITION_VIOLATED),
+      ).toBe(true)
     })
 
     it('should categorize issues by severity', async () => {
@@ -386,8 +384,10 @@ describe('ValidationReporter', () => {
       expect(report.issuesBySeverity).toBeDefined()
       expect(report.issuesByType).toBeDefined()
 
-      const totalCounted = Object.values(report.issuesBySeverity)
-        .reduce((sum, count) => sum + count, 0)
+      const totalCounted = Object.values(report.issuesBySeverity).reduce(
+        (sum, count) => sum + count,
+        0,
+      )
       expect(totalCounted).toBe(report.totalIssues)
     })
   })

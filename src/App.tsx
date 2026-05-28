@@ -15,7 +15,7 @@ import './App.css'
 /**
  * Scene-Flow メインアプリケーションコンポーネント
  */
-function App() {
+function App(): React.ReactNode {
   return (
     <BrowserRouter>
       <AppProvider>

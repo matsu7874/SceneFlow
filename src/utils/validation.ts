@@ -46,8 +46,8 @@ export function validateStoryData(data: unknown): ValidationResult {
   // Initial Statesの検証
   const initialStates = dataObj.initialStates as Array<Record<string, unknown>>
   if (initialStates && Array.isArray(initialStates)) {
-    const personIds = new Set(persons?.map((p) => p.id) || [])
-    const locationIds = new Set(locations?.map((l) => l.id) || [])
+    const personIds = new Set(persons?.map(p => p.id) || [])
+    const locationIds = new Set(locations?.map(l => l.id) || [])
 
     initialStates.forEach((state, index: number) => {
       if (!personIds.has(state.personId)) {
@@ -64,10 +64,10 @@ export function validateStoryData(data: unknown): ValidationResult {
   const props = dataObj.props as Array<Record<string, unknown>> | undefined
   const informations = dataObj.informations as Array<Record<string, unknown>> | undefined
 
-  const personIds = new Set(persons?.map((p) => p.id) || [])
-  const locationIds = new Set(locations?.map((l) => l.id) || [])
-  const propIds = new Set(props?.map((p) => p.id) || [])
-  const infoIds = new Set(informations?.map((i) => i.id) || [])
+  const personIds = new Set(persons?.map(p => p.id) || [])
+  const locationIds = new Set(locations?.map(l => l.id) || [])
+  const propIds = new Set(props?.map(p => p.id) || [])
+  const infoIds = new Set(informations?.map(i => i.id) || [])
 
   acts?.forEach((act, index: number) => {
     if (!act.id || !act.personId || !act.locationId || !act.time || !act.description) {
@@ -80,23 +80,34 @@ export function validateStoryData(data: unknown): ValidationResult {
       errors.push(`acts[${index}]: 存在しないlocationId: ${String(act.locationId)}`)
     }
     if (act.propId && !propIds.has(act.propId)) {
-      errors.push(`acts[${index}]: 存在しないpropId: ${String(act.propId)}`)
+      errors.push(`acts[${index}]: 存在しないpropId: ${String(act.propId as string | number)}`)
     }
     if (act.informationId && !infoIds.has(act.informationId)) {
-      errors.push(`acts[${index}]: 存在しないinformationId: ${String(act.informationId)}`)
+      errors.push(
+        `acts[${index}]: 存在しないinformationId: ${String(act.informationId as string | number)}`,
+      )
     }
     if (act.interactedPersonId && !personIds.has(act.interactedPersonId)) {
-      errors.push(`acts[${index}]: 存在しないinteractedPersonId: ${String(act.interactedPersonId)}`)
+      errors.push(
+        `acts[${index}]: 存在しないinteractedPersonId: ${String(act.interactedPersonId as string | number)}`,
+      )
     }
   })
 
   // Eventsの検証（eventsフィールドがある場合のみ）
   const events = dataObj.events as Array<Record<string, unknown>> | undefined
   if (events && Array.isArray(events)) {
-    const actIds = new Set(acts?.map((a) => a.id) || [])
+    const actIds = new Set(acts?.map(a => a.id) || [])
 
     events.forEach((event, index: number) => {
-      if (!event.id || !event.triggerType || !event.triggerValue || !event.eventTime || !event.personId || !event.actId) {
+      if (
+        !event.id ||
+        !event.triggerType ||
+        !event.triggerValue ||
+        !event.eventTime ||
+        !event.personId ||
+        !event.actId
+      ) {
         errors.push(`events[${index}]: すべてのフィールドは必須です`)
       }
       if (!personIds.has(event.personId)) {

@@ -1,16 +1,17 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import styles from './MapEditor.module.css'
 import { useMapEditor } from './useMapEditor'
+import { AStar } from './pathfinding'
 import { Location, Connection, Point } from './types'
 
 interface MapEditorProps {
   initialData?: {
-    locations: Location[];
-    connections: Connection[];
-  };
-  onSave?: (data: { locations: Location[]; connections: Connection[] }) => void;
-  width?: number;
-  height?: number;
+    locations: Location[]
+    connections: Connection[]
+  }
+  onSave?: (data: { locations: Location[]; connections: Connection[] }) => void
+  width?: number
+  height?: number
 }
 
 export const MapEditor: React.FC<MapEditorProps> = ({
@@ -28,7 +29,14 @@ export const MapEditor: React.FC<MapEditorProps> = ({
   const [showNodeEditor, setShowNodeEditor] = useState<Location | null>(null)
   const [showConnectionEditor, setShowConnectionEditor] = useState<Connection | null>(null)
   const [showLayoutMenu, setShowLayoutMenu] = useState(false)
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; worldX: number; worldY: number; type: 'node' | 'connection' | 'canvas'; target?: any } | null>(null)
+  const [contextMenu, setContextMenu] = useState<{
+    x: number
+    y: number
+    worldX: number
+    worldY: number
+    type: 'node' | 'connection' | 'canvas'
+    target?: any
+  } | null>(null)
 
   // Initialize with provided data
   useEffect(() => {
@@ -49,7 +57,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     canvas.width = width
     canvas.height = height
 
-    const render = () => {
+    const render = (): void => {
       // Clear canvas
       ctx.fillStyle = '#1a1a1a'
       ctx.fillRect(0, 0, width, height)
@@ -125,235 +133,280 @@ export const MapEditor: React.FC<MapEditorProps> = ({
   }, [editor.state, width, height, isConnecting, connectingFrom, mousePos])
 
   // Mouse event handlers
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = e.currentTarget
-    const rect = canvas.getBoundingClientRect()
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const canvas = e.currentTarget
+      const rect = canvas.getBoundingClientRect()
 
-    // Calculate the actual canvas position considering CSS scaling
-    const scaleX = rect.width ? canvas.width / rect.width : 1
-    const scaleY = rect.height ? canvas.height / rect.height : 1
+      // Calculate the actual canvas position considering CSS scaling
+      const scaleX = rect.width ? canvas.width / rect.width : 1
+      const scaleY = rect.height ? canvas.height / rect.height : 1
 
-    const x = (e.clientX - rect.left) * scaleX
-    const y = (e.clientY - rect.top) * scaleY
-    const worldPos = editor.screenToWorld(x, y)
+      const x = (e.clientX - rect.left) * scaleX
+      const y = (e.clientY - rect.top) * scaleY
+      const worldPos = editor.screenToWorld(x, y)
 
-    // Right click - show context menu
-    if (e.button === 2) {
-      e.preventDefault()
-      const node = editor.getNodeAt(worldPos.x, worldPos.y)
-      const connection = editor.getConnectionAt(worldPos.x, worldPos.y)
+      // Right click - show context menu
+      if (e.button === 2) {
+        e.preventDefault()
+        const node = editor.getNodeAt(worldPos.x, worldPos.y)
+        const connection = editor.getConnectionAt(worldPos.x, worldPos.y)
 
-      // Get container position to calculate relative position
-      const containerRect = e.currentTarget.parentElement?.getBoundingClientRect()
-      const menuX = containerRect ? e.clientX - containerRect.left : e.clientX
-      const menuY = containerRect ? e.clientY - containerRect.top : e.clientY
+        // Get container position to calculate relative position
+        const containerRect = e.currentTarget.parentElement?.getBoundingClientRect()
+        const menuX = containerRect ? e.clientX - containerRect.left : e.clientX
+        const menuY = containerRect ? e.clientY - containerRect.top : e.clientY
 
-      if (node) {
-        setContextMenu({ x: menuX, y: menuY, worldX: worldPos.x, worldY: worldPos.y, type: 'node', target: node })
-      } else if (connection) {
-        setContextMenu({ x: menuX, y: menuY, worldX: worldPos.x, worldY: worldPos.y, type: 'connection', target: connection })
-      } else {
-        setContextMenu({ x: menuX, y: menuY, worldX: worldPos.x, worldY: worldPos.y, type: 'canvas' })
-      }
-      return
-    }
-
-    // Left click
-    if (e.button === 0) {
-      const node = editor.getNodeAt(worldPos.x, worldPos.y)
-
-      if (isConnecting && connectingFrom && node && node.id !== connectingFrom) {
-        // Complete connection
-        editor.addConnection(connectingFrom, node.id)
-        setIsConnecting(false)
-        setConnectingFrom(null)
-      } else if (node) {
-        if (e.shiftKey) {
-          // Add to selection (toggle)
-          editor.selectNode(node.id, true)
-        } else if (e.ctrlKey || e.metaKey) {
-          // Start connecting
-          setIsConnecting(true)
-          setConnectingFrom(node.id)
-        } else {
-          // Select node and start dragging
-          editor.selectNode(node.id)
-          editor.setState(prev => ({
-            ...prev,
-            dragState: {
-              active: true,
-              nodeId: node.id,
-              offsetX: worldPos.x - node.x,
-              offsetY: worldPos.y - node.y,
-              startX: node.x,
-              startY: node.y,
-            },
-          }))
-        }
-      } else {
-        // Start panning or rubber band selection
-        if (e.shiftKey) {
-          // Start rubber band selection
-          editor.setState(prev => ({
-            ...prev,
-            selection: {
-              ...prev.selection,
-              rubberBand: {
-                active: true,
-                startX: worldPos.x,
-                startY: worldPos.y,
-                endX: worldPos.x,
-                endY: worldPos.y,
-              },
-            },
-          }))
-        } else {
-          // Start panning
-          setIsPanning(true)
-          setPanStart({ x: e.clientX, y: e.clientY })
-          editor.deselectAll()
-        }
-      }
-    }
-
-    // Middle click - reset view
-    if (e.button === 1) {
-      editor.resetView()
-    }
-  }, [editor, isConnecting, connectingFrom])
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = e.currentTarget
-    const rect = canvas.getBoundingClientRect()
-
-    // Calculate the actual canvas position considering CSS scaling
-    const scaleX = rect.width ? canvas.width / rect.width : 1
-    const scaleY = rect.height ? canvas.height / rect.height : 1
-
-    const x = (e.clientX - rect.left) * scaleX
-    const y = (e.clientY - rect.top) * scaleY
-    setMousePos({ x, y })
-    const worldPos = editor.screenToWorld(x, y)
-
-    if (isPanning) {
-      const dx = e.clientX - panStart.x
-      const dy = e.clientY - panStart.y
-      editor.pan(dx, dy)
-      setPanStart({ x: e.clientX, y: e.clientY })
-    } else if (editor.state.dragState.active && editor.state.dragState.nodeId) {
-      // Drag selected nodes
-      const snappedX = editor.snapToGrid(worldPos.x - editor.state.dragState.offsetX)
-      const snappedY = editor.snapToGrid(worldPos.y - editor.state.dragState.offsetY)
-
-      const dx = snappedX - editor.state.dragState.startX
-      const dy = snappedY - editor.state.dragState.startY
-
-      // Move all selected nodes
-      editor.state.selection.selectedNodes.forEach(nodeId => {
-        const node = editor.state.mapData.locations.find(loc => loc.id === nodeId)
         if (node) {
-          editor.updateNode(nodeId, {
-            x: node.x + dx,
-            y: node.y + dy,
+          setContextMenu({
+            x: menuX,
+            y: menuY,
+            worldX: worldPos.x,
+            worldY: worldPos.y,
+            type: 'node',
+            target: node,
+          })
+        } else if (connection) {
+          setContextMenu({
+            x: menuX,
+            y: menuY,
+            worldX: worldPos.x,
+            worldY: worldPos.y,
+            type: 'connection',
+            target: connection,
+          })
+        } else {
+          setContextMenu({
+            x: menuX,
+            y: menuY,
+            worldX: worldPos.x,
+            worldY: worldPos.y,
+            type: 'canvas',
           })
         }
-      })
+        return
+      }
 
+      // Left click
+      if (e.button === 0) {
+        const node = editor.getNodeAt(worldPos.x, worldPos.y)
+
+        if (isConnecting && connectingFrom && node && node.id !== connectingFrom) {
+          // Complete connection
+          editor.addConnection(connectingFrom, node.id)
+          setIsConnecting(false)
+          setConnectingFrom(null)
+        } else if (node) {
+          if (e.shiftKey) {
+            // Add to selection (toggle)
+            editor.selectNode(node.id, true)
+          } else if (e.ctrlKey || e.metaKey) {
+            // Start connecting
+            setIsConnecting(true)
+            setConnectingFrom(node.id)
+          } else {
+            // Select node and start dragging
+            editor.selectNode(node.id)
+            editor.setState(prev => ({
+              ...prev,
+              dragState: {
+                active: true,
+                nodeId: node.id,
+                offsetX: worldPos.x - node.x,
+                offsetY: worldPos.y - node.y,
+                startX: node.x,
+                startY: node.y,
+              },
+            }))
+          }
+        } else {
+          // Start panning or rubber band selection
+          if (e.shiftKey) {
+            // Start rubber band selection
+            editor.setState(prev => ({
+              ...prev,
+              selection: {
+                ...prev.selection,
+                rubberBand: {
+                  active: true,
+                  startX: worldPos.x,
+                  startY: worldPos.y,
+                  endX: worldPos.x,
+                  endY: worldPos.y,
+                },
+              },
+            }))
+          } else {
+            // Start panning
+            setIsPanning(true)
+            setPanStart({ x: e.clientX, y: e.clientY })
+            editor.deselectAll()
+          }
+        }
+      }
+
+      // Middle click - reset view
+      if (e.button === 1) {
+        editor.resetView()
+      }
+    },
+    [editor, isConnecting, connectingFrom],
+  )
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const canvas = e.currentTarget
+      const rect = canvas.getBoundingClientRect()
+
+      // Calculate the actual canvas position considering CSS scaling
+      const scaleX = rect.width ? canvas.width / rect.width : 1
+      const scaleY = rect.height ? canvas.height / rect.height : 1
+
+      const x = (e.clientX - rect.left) * scaleX
+      const y = (e.clientY - rect.top) * scaleY
+      setMousePos({ x, y })
+      const worldPos = editor.screenToWorld(x, y)
+
+      if (isPanning) {
+        const dx = e.clientX - panStart.x
+        const dy = e.clientY - panStart.y
+        editor.pan(dx, dy)
+        setPanStart({ x: e.clientX, y: e.clientY })
+      } else if (editor.state.dragState.active && editor.state.dragState.nodeId) {
+        // Drag selected nodes
+        const snappedX = editor.snapToGrid(worldPos.x - editor.state.dragState.offsetX)
+        const snappedY = editor.snapToGrid(worldPos.y - editor.state.dragState.offsetY)
+
+        const dx = snappedX - editor.state.dragState.startX
+        const dy = snappedY - editor.state.dragState.startY
+
+        // Move all selected nodes
+        editor.state.selection.selectedNodes.forEach(nodeId => {
+          const node = editor.state.mapData.locations.find(loc => loc.id === nodeId)
+          if (node) {
+            editor.updateNode(nodeId, {
+              x: node.x + dx,
+              y: node.y + dy,
+            })
+          }
+        })
+
+        editor.setState(prev => ({
+          ...prev,
+          dragState: {
+            ...prev.dragState,
+            startX: snappedX,
+            startY: snappedY,
+          },
+        }))
+      } else if (editor.state.selection.rubberBand?.active) {
+        // Update rubber band
+        editor.setState(prev => ({
+          ...prev,
+          selection: {
+            ...prev.selection,
+            rubberBand: {
+              ...prev.selection.rubberBand!,
+              endX: worldPos.x,
+              endY: worldPos.y,
+            },
+          },
+        }))
+      }
+    },
+    [editor, isPanning, panStart],
+  )
+
+  const handleMouseUp = useCallback(
+    (_e: React.MouseEvent<HTMLCanvasElement>) => {
+      setIsPanning(false)
+
+      // Complete rubber band selection
+      if (editor.state.selection.rubberBand?.active) {
+        const rect = {
+          x: Math.min(
+            editor.state.selection.rubberBand.startX,
+            editor.state.selection.rubberBand.endX,
+          ),
+          y: Math.min(
+            editor.state.selection.rubberBand.startY,
+            editor.state.selection.rubberBand.endY,
+          ),
+          width: Math.abs(
+            editor.state.selection.rubberBand.endX - editor.state.selection.rubberBand.startX,
+          ),
+          height: Math.abs(
+            editor.state.selection.rubberBand.endY - editor.state.selection.rubberBand.startY,
+          ),
+        }
+
+        const selectedNodes = editor.getNodesInRectangle(rect)
+        editor.setState(prev => ({
+          ...prev,
+          selection: {
+            selectedNodes,
+            selectedConnection: null,
+            rubberBand: null,
+          },
+        }))
+      }
+
+      // End dragging
       editor.setState(prev => ({
         ...prev,
         dragState: {
-          ...prev.dragState,
-          startX: snappedX,
-          startY: snappedY,
+          active: false,
+          nodeId: null,
+          offsetX: 0,
+          offsetY: 0,
+          startX: 0,
+          startY: 0,
         },
       }))
-    } else if (editor.state.selection.rubberBand?.active) {
-      // Update rubber band
-      editor.setState(prev => ({
-        ...prev,
-        selection: {
-          ...prev.selection,
-          rubberBand: {
-            ...prev.selection.rubberBand!,
-            endX: worldPos.x,
-            endY: worldPos.y,
-          },
-        },
-      }))
-    }
-  }, [editor, isPanning, panStart])
+    },
+    [editor],
+  )
 
-  const handleMouseUp = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    setIsPanning(false)
+  const handleWheel = useCallback(
+    (e: React.WheelEvent<HTMLCanvasElement>) => {
+      e.preventDefault()
+      const delta = e.deltaY > 0 ? 0.9 : 1.1
+      editor.setZoom(editor.state.viewState.zoom * delta)
+    },
+    [editor],
+  )
 
-    // Complete rubber band selection
-    if (editor.state.selection.rubberBand?.active) {
-      const rect = {
-        x: Math.min(editor.state.selection.rubberBand.startX, editor.state.selection.rubberBand.endX),
-        y: Math.min(editor.state.selection.rubberBand.startY, editor.state.selection.rubberBand.endY),
-        width: Math.abs(editor.state.selection.rubberBand.endX - editor.state.selection.rubberBand.startX),
-        height: Math.abs(editor.state.selection.rubberBand.endY - editor.state.selection.rubberBand.startY),
+  const handleDoubleClick = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const canvas = e.currentTarget
+      const rect = canvas.getBoundingClientRect()
+
+      // Calculate the actual canvas position considering CSS scaling
+      const scaleX = rect.width ? canvas.width / rect.width : 1
+      const scaleY = rect.height ? canvas.height / rect.height : 1
+
+      const x = (e.clientX - rect.left) * scaleX
+      const y = (e.clientY - rect.top) * scaleY
+      const worldPos = editor.screenToWorld(x, y)
+
+      const node = editor.getNodeAt(worldPos.x, worldPos.y)
+      const connection = editor.getConnectionAt(worldPos.x, worldPos.y)
+
+      if (node) {
+        setShowNodeEditor(node)
+      } else if (connection) {
+        setShowConnectionEditor(connection)
+      } else {
+        // Create new node
+        editor.addNode(worldPos.x, worldPos.y)
       }
-
-      const selectedNodes = editor.getNodesInRectangle(rect)
-      editor.setState(prev => ({
-        ...prev,
-        selection: {
-          selectedNodes,
-          selectedConnection: null,
-          rubberBand: null,
-        },
-      }))
-    }
-
-    // End dragging
-    editor.setState(prev => ({
-      ...prev,
-      dragState: {
-        active: false,
-        nodeId: null,
-        offsetX: 0,
-        offsetY: 0,
-        startX: 0,
-        startY: 0,
-      },
-    }))
-  }, [editor])
-
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
-    e.preventDefault()
-    const delta = e.deltaY > 0 ? 0.9 : 1.1
-    editor.setZoom(editor.state.viewState.zoom * delta)
-  }, [editor])
-
-  const handleDoubleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = e.currentTarget
-    const rect = canvas.getBoundingClientRect()
-
-    // Calculate the actual canvas position considering CSS scaling
-    const scaleX = rect.width ? canvas.width / rect.width : 1
-    const scaleY = rect.height ? canvas.height / rect.height : 1
-
-    const x = (e.clientX - rect.left) * scaleX
-    const y = (e.clientY - rect.top) * scaleY
-    const worldPos = editor.screenToWorld(x, y)
-
-    const node = editor.getNodeAt(worldPos.x, worldPos.y)
-    const connection = editor.getConnectionAt(worldPos.x, worldPos.y)
-
-    if (node) {
-      setShowNodeEditor(node)
-    } else if (connection) {
-      setShowConnectionEditor(connection)
-    } else {
-      // Create new node
-      editor.addNode(worldPos.x, worldPos.y)
-    }
-  }, [editor])
+    },
+    [editor],
+  )
 
   // Close context menu on outside click
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (_e: MouseEvent): void => {
       if (contextMenu) {
         setContextMenu(null)
       }
@@ -373,7 +426,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
 
   // Keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent): void => {
       // Delete selected nodes
       if (e.key === 'Delete' || e.key === 'Backspace') {
         editor.state.selection.selectedNodes.forEach(nodeId => {
@@ -414,7 +467,13 @@ export const MapEditor: React.FC<MapEditorProps> = ({
   }, [editor])
 
   // Helper rendering functions
-  const drawGrid = (ctx: CanvasRenderingContext2D, width: number, height: number, gridSize: number, viewState: any) => {
+  const drawGrid = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    gridSize: number,
+    viewState: any,
+  ): void => {
     ctx.strokeStyle = '#2a2a2a'
     ctx.lineWidth = 1
 
@@ -438,17 +497,24 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     }
   }
 
-  const drawConnection = (ctx: CanvasRenderingContext2D, connection: Connection, state: any) => {
+  const drawConnection = (
+    ctx: CanvasRenderingContext2D,
+    connection: Connection,
+    state: any,
+  ): void => {
     const from = state.mapData.locations.find((loc: Location) => loc.id === connection.from)
     const to = state.mapData.locations.find((loc: Location) => loc.id === connection.to)
 
     if (!from || !to) return
 
-    const isSelected = state.selection.selectedConnection?.from === connection.from &&
-                      state.selection.selectedConnection?.to === connection.to
-    const isInPath = state.pathfinding.active && state.pathfinding.path &&
-                     state.pathfinding.path.includes(from.id) &&
-                     state.pathfinding.path.includes(to.id)
+    const isSelected =
+      state.selection.selectedConnection?.from === connection.from &&
+      state.selection.selectedConnection?.to === connection.to
+    const isInPath =
+      state.pathfinding.active &&
+      state.pathfinding.path &&
+      state.pathfinding.path.includes(from.id) &&
+      state.pathfinding.path.includes(to.id)
 
     ctx.strokeStyle = isSelected ? '#ffc107' : isInPath ? '#28a745' : '#666'
     ctx.lineWidth = isSelected ? 3 : isInPath ? 2.5 : 2
@@ -500,7 +566,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     }
   }
 
-  const drawNode = (ctx: CanvasRenderingContext2D, location: Location, state: any) => {
+  const drawNode = (ctx: CanvasRenderingContext2D, location: Location, state: any): void => {
     const isSelected = state.selection.selectedNodes.has(location.id)
     const isStart = state.pathfinding.start === location.id
     const isEnd = state.pathfinding.end === location.id
@@ -527,7 +593,12 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     ctx.fillText(location.name, location.x, location.y)
   }
 
-  const drawMinimap = (canvas: HTMLCanvasElement, state: any, mainWidth: number, mainHeight: number) => {
+  const drawMinimap = (
+    canvas: HTMLCanvasElement,
+    state: any,
+    mainWidth: number,
+    mainHeight: number,
+  ): void => {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
@@ -541,7 +612,10 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     ctx.fillRect(0, 0, minimapWidth, minimapHeight)
 
     // Calculate bounds
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity
     state.mapData.locations.forEach((loc: Location) => {
       minX = Math.min(minX, loc.x)
       minY = Math.min(minY, loc.y)
@@ -577,14 +651,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
       if (!from || !to) return
 
       ctx.beginPath()
-      ctx.moveTo(
-        (from.x - minX) * scale + offsetX,
-        (from.y - minY) * scale + offsetY,
-      )
-      ctx.lineTo(
-        (to.x - minX) * scale + offsetX,
-        (to.y - minY) * scale + offsetY,
-      )
+      ctx.moveTo((from.x - minX) * scale + offsetX, (from.y - minY) * scale + offsetY)
+      ctx.lineTo((to.x - minX) * scale + offsetX, (to.y - minY) * scale + offsetY)
       ctx.stroke()
     })
 
@@ -592,13 +660,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     ctx.fillStyle = '#666'
     state.mapData.locations.forEach((loc: Location) => {
       ctx.beginPath()
-      ctx.arc(
-        (loc.x - minX) * scale + offsetX,
-        (loc.y - minY) * scale + offsetY,
-        3,
-        0,
-        Math.PI * 2,
-      )
+      ctx.arc((loc.x - minX) * scale + offsetX, (loc.y - minY) * scale + offsetY, 3, 0, Math.PI * 2)
       ctx.fill()
     })
 
@@ -613,7 +675,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     )
   }
 
-  const getCursorStyle = () => {
+  const getCursorStyle = (): string => {
     if (isPanning) return styles.grabbing
     if (isConnecting) return styles.crosshair
     if (editor.state.dragState.active) return styles.grabbing
@@ -651,10 +713,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
           </button>
           <div className={styles.separator} />
           <div className={styles.layoutMenu}>
-            <button
-              className={styles.button}
-              onClick={() => setShowLayoutMenu(!showLayoutMenu)}
-            >
+            <button className={styles.button} onClick={() => setShowLayoutMenu(!showLayoutMenu)}>
               レイアウト ▼
             </button>
             {showLayoutMenu && (
@@ -713,18 +772,10 @@ export const MapEditor: React.FC<MapEditorProps> = ({
         </div>
 
         <div className={styles.controlGroup}>
-          <button
-            className={styles.button}
-            onClick={editor.undo}
-            disabled={!editor.canUndo}
-          >
+          <button className={styles.button} onClick={editor.undo} disabled={!editor.canUndo}>
             元に戻す
           </button>
-          <button
-            className={styles.button}
-            onClick={editor.redo}
-            disabled={!editor.canRedo}
-          >
+          <button className={styles.button} onClick={editor.redo} disabled={!editor.canRedo}>
             やり直し
           </button>
           <div className={styles.separator} />
@@ -732,7 +783,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
             className={styles.button}
             onClick={() => {
               const data = editor.exportMapData()
-              navigator.clipboard.writeText(data)
+              void navigator.clipboard.writeText(data)
             }}
           >
             エクスポート
@@ -770,19 +821,14 @@ export const MapEditor: React.FC<MapEditorProps> = ({
         >
           +
         </button>
-        <div className={styles.zoomLevel}>
-          {Math.round(editor.state.viewState.zoom * 100)}%
-        </div>
+        <div className={styles.zoomLevel}>{Math.round(editor.state.viewState.zoom * 100)}%</div>
         <button
           className={`${styles.button} ${styles.iconButton}`}
           onClick={() => editor.setZoom(editor.state.viewState.zoom * 0.8)}
         >
           -
         </button>
-        <button
-          className={`${styles.button} ${styles.iconButton}`}
-          onClick={editor.resetView}
-        >
+        <button className={`${styles.button} ${styles.iconButton}`} onClick={editor.resetView}>
           ⟲
         </button>
       </div>
@@ -807,8 +853,9 @@ export const MapEditor: React.FC<MapEditorProps> = ({
           <h4>パスが見つかりました</h4>
           <div>ステップ数: {editor.state.pathfinding.path.length}</div>
           <div>
-            コスト: {(() => {
-              const pathfinder = new (require('./pathfinding').AStar)(
+            コスト:{' '}
+            {(() => {
+              const pathfinder = new AStar(
                 editor.state.mapData.locations,
                 editor.state.mapData.connections,
               )
@@ -849,17 +896,19 @@ export const MapEditor: React.FC<MapEditorProps> = ({
             <input
               type="text"
               value={showNodeEditor.tags?.join(', ') || ''}
-              onChange={e => setShowNodeEditor({
-                ...showNodeEditor,
-                tags: e.target.value.split(',').map(t => t.trim()).filter(t => t),
-              })}
+              onChange={e =>
+                setShowNodeEditor({
+                  ...showNodeEditor,
+                  tags: e.target.value
+                    .split(',')
+                    .map(t => t.trim())
+                    .filter(t => t),
+                })
+              }
             />
           </div>
           <div className={styles.formActions}>
-            <button
-              className={styles.button}
-              onClick={() => setShowNodeEditor(null)}
-            >
+            <button className={styles.button} onClick={() => setShowNodeEditor(null)}>
               キャンセル
             </button>
             <button
@@ -891,10 +940,12 @@ export const MapEditor: React.FC<MapEditorProps> = ({
             <input
               type="number"
               value={showConnectionEditor.weight}
-              onChange={e => setShowConnectionEditor({
-                ...showConnectionEditor,
-                weight: parseFloat(e.target.value) || 1,
-              })}
+              onChange={e =>
+                setShowConnectionEditor({
+                  ...showConnectionEditor,
+                  weight: parseFloat(e.target.value) || 1,
+                })
+              }
             />
           </div>
           <div className={styles.checkbox}>
@@ -902,18 +953,17 @@ export const MapEditor: React.FC<MapEditorProps> = ({
               type="checkbox"
               id="bidirectional"
               checked={showConnectionEditor.bidirectional}
-              onChange={e => setShowConnectionEditor({
-                ...showConnectionEditor,
-                bidirectional: e.target.checked,
-              })}
+              onChange={e =>
+                setShowConnectionEditor({
+                  ...showConnectionEditor,
+                  bidirectional: e.target.checked,
+                })
+              }
             />
             <label htmlFor="bidirectional">双方向</label>
           </div>
           <div className={styles.formActions}>
-            <button
-              className={styles.button}
-              onClick={() => setShowConnectionEditor(null)}
-            >
+            <button className={styles.button} onClick={() => setShowConnectionEditor(null)}>
               キャンセル
             </button>
             <button
@@ -962,7 +1012,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
                 className={styles.contextMenuItem}
                 onClick={() => {
                   const data = editor.exportMapData()
-                  navigator.clipboard.writeText(data)
+                  void navigator.clipboard.writeText(data)
                   setContextMenu(null)
                 }}
               >
@@ -993,14 +1043,20 @@ export const MapEditor: React.FC<MapEditorProps> = ({
                         start: contextMenu.target.id,
                       },
                     }))
-                  } else if (!editor.state.pathfinding.end && contextMenu.target.id !== editor.state.pathfinding.start) {
+                  } else if (
+                    !editor.state.pathfinding.end &&
+                    contextMenu.target.id !== editor.state.pathfinding.start
+                  ) {
                     editor.findPath(editor.state.pathfinding.start, contextMenu.target.id)
                   }
                   setContextMenu(null)
                 }}
               >
-                {!editor.state.pathfinding.start ? 'パス開始点に設定' :
-                  editor.state.pathfinding.start === contextMenu.target.id ? 'パス開始点' : 'パス終了点に設定'}
+                {!editor.state.pathfinding.start
+                  ? 'パス開始点に設定'
+                  : editor.state.pathfinding.start === contextMenu.target.id
+                    ? 'パス開始点'
+                    : 'パス終了点に設定'}
               </div>
               <div className={styles.contextMenuSeparator} />
               <div
@@ -1037,10 +1093,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
             </>
           )}
           <div className={styles.contextMenuSeparator} />
-          <div
-            className={styles.contextMenuItem}
-            onClick={() => setContextMenu(null)}
-          >
+          <div className={styles.contextMenuItem} onClick={() => setContextMenu(null)}>
             キャンセル
           </div>
         </div>

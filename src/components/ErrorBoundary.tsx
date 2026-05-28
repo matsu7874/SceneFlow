@@ -22,7 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error, errorInfo: null }
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('ErrorBoundary caught an error:', error, errorInfo)
     this.setState({
       error,
@@ -30,14 +30,21 @@ export class ErrorBoundary extends Component<Props, State> {
     })
   }
 
-  public render() {
+  public render(): React.ReactNode {
     if (this.state.hasError && this.state.error) {
       if (this.props.fallback) {
         return this.props.fallback(this.state.error, this.state.errorInfo!)
       }
 
       return (
-        <div style={{ padding: '20px', backgroundColor: '#fee', border: '1px solid #fcc', borderRadius: '4px' }}>
+        <div
+          style={{
+            padding: '20px',
+            backgroundColor: '#fee',
+            border: '1px solid #fcc',
+            borderRadius: '4px',
+          }}
+        >
           <h2>エラーが発生しました</h2>
           <details style={{ whiteSpace: 'pre-wrap' }}>
             <summary>エラー詳細</summary>

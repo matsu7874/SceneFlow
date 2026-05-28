@@ -3,32 +3,33 @@ import * as d3 from 'd3'
 import { useAppContext } from '../../contexts/AppContext'
 import { Relationship, Connection } from '../../types'
 
-export type EditorMode = 'relationships' | 'connections';
+export type EditorMode = 'relationships' | 'connections'
 
 export interface GraphNode {
-  id: string;
-  name: string;
-  type: 'person' | 'location';
-  x?: number;
-  y?: number;
-  fx?: number | null;
-  fy?: number | null;
+  id: string
+  name: string
+  type: 'person' | 'location'
+  x?: number
+  y?: number
+  fx?: number | null
+  fy?: number | null
 }
 
 export interface GraphLink {
-  source: string | GraphNode;
-  target: string | GraphNode;
-  id: string;
-  type: string;
-  strength: number;
-  details?: Relationship | Connection;
+  source: string | GraphNode
+  target: string | GraphNode
+  id: string
+  type: string
+  strength: number
+  details?: Relationship | Connection
 }
 
 export interface FilterOptions {
-  entityId?: string;
-  relationshipType?: string;
+  entityId?: string
+  relationshipType?: string
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useRelationshipEditor(mode: EditorMode) {
   const { storyData } = useAppContext()
 
@@ -95,10 +96,10 @@ export function useRelationshipEditor(mode: EditorMode) {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null)
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
   const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-    type: 'node' | 'link';
-    item: GraphNode | GraphLink;
+    x: number
+    y: number
+    type: 'node' | 'link'
+    item: GraphNode | GraphLink
   } | null>(null)
 
   const svgRef = useRef<SVGSVGElement>(null)
@@ -169,20 +170,22 @@ export function useRelationshipEditor(mode: EditorMode) {
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
-      filteredNodes = nodes.filter(node =>
-        node.name.toLowerCase().includes(query),
-      )
+      filteredNodes = nodes.filter(node => node.name.toLowerCase().includes(query))
       const nodeIds = new Set(filteredNodes.map(n => n.id))
-      filteredLinks = links.filter(link =>
-        nodeIds.has(typeof link.source === 'string' ? link.source : link.source.id) &&
-        nodeIds.has(typeof link.target === 'string' ? link.target : link.target.id),
+      filteredLinks = links.filter(
+        link =>
+          nodeIds.has(typeof link.source === 'string' ? link.source : link.source.id) &&
+          nodeIds.has(typeof link.target === 'string' ? link.target : link.target.id),
       )
     }
 
     if (filterOptions.entityId) {
-      filteredLinks = filteredLinks.filter(link =>
-        (typeof link.source === 'string' ? link.source : link.source.id) === filterOptions.entityId ||
-        (typeof link.target === 'string' ? link.target : link.target.id) === filterOptions.entityId,
+      filteredLinks = filteredLinks.filter(
+        link =>
+          (typeof link.source === 'string' ? link.source : link.source.id) ===
+            filterOptions.entityId ||
+          (typeof link.target === 'string' ? link.target : link.target.id) ===
+            filterOptions.entityId,
       )
       const connectedNodeIds = new Set<string>()
       filteredLinks.forEach(link => {
@@ -214,11 +217,16 @@ export function useRelationshipEditor(mode: EditorMode) {
     const { width, height } = dimensions
 
     // Create simulation
-    const simulation = d3.forceSimulation<GraphNode>(graphData.nodes)
-      .force('link', d3.forceLink<GraphNode, GraphLink>(graphData.links)
-        .id(d => d.id)
-        .distance(100)
-        .strength(d => d.strength))
+    const simulation = d3
+      .forceSimulation<GraphNode>(graphData.nodes)
+      .force(
+        'link',
+        d3
+          .forceLink<GraphNode, GraphLink>(graphData.links)
+          .id(d => d.id)
+          .distance(100)
+          .strength(d => d.strength),
+      )
       .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide().radius(30))
@@ -228,14 +236,16 @@ export function useRelationshipEditor(mode: EditorMode) {
     // Update positions on tick
     simulation.on('tick', () => {
       // Update link positions
-      svg.selectAll<SVGLineElement, GraphLink>('.link')
+      svg
+        .selectAll<SVGLineElement, GraphLink>('.link')
         .attr('x1', d => (d.source as GraphNode).x || 0)
         .attr('y1', d => (d.source as GraphNode).y || 0)
         .attr('x2', d => (d.target as GraphNode).x || 0)
         .attr('y2', d => (d.target as GraphNode).y || 0)
 
       // Update node positions
-      svg.selectAll<SVGGElement, GraphNode>('.node')
+      svg
+        .selectAll<SVGGElement, GraphNode>('.node')
         .attr('transform', d => `translate(${d.x || 0},${d.y || 0})`)
     })
 
@@ -246,7 +256,7 @@ export function useRelationshipEditor(mode: EditorMode) {
 
   // Handle window resize
   useEffect(() => {
-    const handleResize = () => {
+    const handleResize = (): void => {
       if (svgRef.current) {
         const rect = svgRef.current.getBoundingClientRect()
         setDimensions({ width: rect.width, height: rect.height })
@@ -305,20 +315,24 @@ export function useRelationshipEditor(mode: EditorMode) {
   }, [])
 
   // Selection handlers
-  const handleNodeClick = useCallback((node: GraphNode) => {
-    // Find all relationships/connections involving this node
-    const relatedItems = graphData.links
-      .filter(link =>
-        (typeof link.source === 'string' ? link.source : link.source.id) === node.id ||
-        (typeof link.target === 'string' ? link.target : link.target.id) === node.id,
-      )
-      .map(link => link.details)
-      .filter(Boolean)
+  const handleNodeClick = useCallback(
+    (node: GraphNode) => {
+      // Find all relationships/connections involving this node
+      const relatedItems = graphData.links
+        .filter(
+          link =>
+            (typeof link.source === 'string' ? link.source : link.source.id) === node.id ||
+            (typeof link.target === 'string' ? link.target : link.target.id) === node.id,
+        )
+        .map(link => link.details)
+        .filter(Boolean)
 
-    if (relatedItems.length === 1 && relatedItems[0]) {
-      setSelectedItem(relatedItems[0])
-    }
-  }, [graphData.links])
+      if (relatedItems.length === 1 && relatedItems[0]) {
+        setSelectedItem(relatedItems[0])
+      }
+    },
+    [graphData.links],
+  )
 
   const handleLinkClick = useCallback((link: GraphLink) => {
     if (link.details) {
@@ -327,38 +341,43 @@ export function useRelationshipEditor(mode: EditorMode) {
   }, [])
 
   // Update handlers
-  const handleUpdateStrength = useCallback((id: string, strength: number) => {
-    if (mode === 'relationships') {
-      const relationship = relationships.find(r => r.id === id)
-      if (relationship) {
-        updateRelationship(id, { ...relationship, strength })
+  const handleUpdateStrength = useCallback(
+    (id: string, strength: number) => {
+      if (mode === 'relationships') {
+        const relationship = relationships.find(r => r.id === id)
+        if (relationship) {
+          updateRelationship(id, { ...relationship, strength })
+        }
+      } else {
+        const connection = connections.find(c => c.id === id)
+        if (connection) {
+          updateConnection(id, { ...connection, strength })
+        }
       }
-    } else {
-      const connection = connections.find(c => c.id === id)
-      if (connection) {
-        updateConnection(id, { ...connection, strength })
-      }
-    }
-  }, [mode, relationships, connections, updateRelationship, updateConnection])
+    },
+    [mode, relationships, connections, updateRelationship, updateConnection],
+  )
 
-  const handleDelete = useCallback((id: string) => {
-    if (mode === 'relationships') {
-      deleteRelationship(id)
-    } else {
-      deleteConnection(id)
-    }
-    setSelectedItem(null)
-  }, [mode, deleteRelationship, deleteConnection])
+  const handleDelete = useCallback(
+    (id: string) => {
+      if (mode === 'relationships') {
+        deleteRelationship(id)
+      } else {
+        deleteConnection(id)
+      }
+      setSelectedItem(null)
+    },
+    [mode, deleteRelationship, deleteConnection],
+  )
 
   // Get available filter options
   const availableFilters = useMemo(() => {
-    const entityOptions = mode === 'relationships'
-      ? persons.map(p => ({ id: p.id, name: p.name }))
-      : locations.map(l => ({ id: l.id, name: l.name }))
+    const entityOptions =
+      mode === 'relationships'
+        ? persons.map(p => ({ id: p.id, name: p.name }))
+        : locations.map(l => ({ id: l.id, name: l.name }))
 
-    const typeOptions = Array.from(new Set(
-      graphData.links.map(link => link.type),
-    )).filter(Boolean)
+    const typeOptions = Array.from(new Set(graphData.links.map(link => link.type))).filter(Boolean)
 
     return { entityOptions, typeOptions }
   }, [mode, persons, locations, graphData.links])
