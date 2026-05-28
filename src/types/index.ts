@@ -55,6 +55,24 @@ export interface StoryData {
   acts: Act[];
 }
 
+export interface Relationship {
+  id: string;
+  person1Id: string;
+  person2Id: string;
+  type: string;
+  strength?: number;
+  description?: string;
+}
+
+export interface Connection {
+  id: string;
+  location1Id: string;
+  location2Id: string;
+  type: string;
+  strength?: number;
+  description?: string;
+}
+
 export interface IndexedData {
   personMap: Map<number, Person>;
   locationMap: Map<number, Location>;

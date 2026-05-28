@@ -199,7 +199,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
         disabled={disabled}
         className={styles.addButton}
       >
-        + 追加
+        + Add Item
       </button>
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>

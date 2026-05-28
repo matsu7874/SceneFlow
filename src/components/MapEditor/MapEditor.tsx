@@ -130,8 +130,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     const rect = canvas.getBoundingClientRect()
 
     // Calculate the actual canvas position considering CSS scaling
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
+    const scaleX = rect.width ? canvas.width / rect.width : 1
+    const scaleY = rect.height ? canvas.height / rect.height : 1
 
     const x = (e.clientX - rect.left) * scaleX
     const y = (e.clientY - rect.top) * scaleY
@@ -227,8 +227,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     const rect = canvas.getBoundingClientRect()
 
     // Calculate the actual canvas position considering CSS scaling
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
+    const scaleX = rect.width ? canvas.width / rect.width : 1
+    const scaleY = rect.height ? canvas.height / rect.height : 1
 
     const x = (e.clientX - rect.left) * scaleX
     const y = (e.clientY - rect.top) * scaleY
@@ -331,8 +331,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     const rect = canvas.getBoundingClientRect()
 
     // Calculate the actual canvas position considering CSS scaling
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
+    const scaleX = rect.width ? canvas.width / rect.width : 1
+    const scaleY = rect.height ? canvas.height / rect.height : 1
 
     const x = (e.clientX - rect.left) * scaleX
     const y = (e.clientY - rect.top) * scaleY

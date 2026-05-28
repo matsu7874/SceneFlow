@@ -18,30 +18,6 @@ export const RelationshipsPage: React.FC = () => {
     )
   }
 
-  // Convert story data to entities format expected by RelationshipEditor
-  const entities = [
-    ...storyData.persons.map(person => ({
-      id: person.id,
-      type: 'person' as const,
-      name: person.name,
-      description: person.name,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      attributes: {},
-      relationships: [],
-    })),
-    ...storyData.locations.map(location => ({
-      id: location.id,
-      type: 'location' as const,
-      name: location.name,
-      description: location.name,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      attributes: {},
-      relationships: [],
-    })),
-  ]
-
   return (
     <div className="page relationships-page">
       <h2>関係性</h2>
@@ -63,7 +39,7 @@ export const RelationshipsPage: React.FC = () => {
         {viewMode === 'diagram' ? (
           <CharacterRelationshipDiagram persons={storyData.persons} />
         ) : (
-          <RelationshipEditor entities={entities} />
+          <RelationshipEditor initialMode="relationships" />
         )}
       </div>
     </div>

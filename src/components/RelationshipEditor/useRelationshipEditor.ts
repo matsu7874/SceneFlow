@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import * as d3 from 'd3'
 import { useAppContext } from '../../contexts/AppContext'
-import { Person, Location, Relationship, Connection } from '../../types'
+import { Relationship, Connection } from '../../types'
 
 export type EditorMode = 'relationships' | 'connections';
 
@@ -30,16 +30,64 @@ export interface FilterOptions {
 }
 
 export function useRelationshipEditor(mode: EditorMode) {
-  const {
-    persons,
-    locations,
-    relationships,
-    connections,
-    updateRelationship,
-    deleteRelationship,
-    updateConnection,
-    deleteConnection,
-  } = useAppContext()
+  const { storyData } = useAppContext()
+
+  // Derive graph entities from the loaded story data. The relationship/
+  // connection model lives on the story entities themselves, so we flatten
+  // it here rather than relying on dedicated context state.
+  const persons = useMemo(
+    () => (storyData?.persons ?? []).map(p => ({ id: String(p.id), name: p.name })),
+    [storyData],
+  )
+
+  const locations = useMemo(
+    () => (storyData?.locations ?? []).map(l => ({ id: String(l.id), name: l.name })),
+    [storyData],
+  )
+
+  const relationships = useMemo<Relationship[]>(() => {
+    const result: Relationship[] = []
+    ;(storyData?.persons ?? []).forEach(person => {
+      person.relationships?.forEach((rel, index) => {
+        result.push({
+          id: `rel-${person.id}-${rel.targetId}-${index}`,
+          person1Id: String(person.id),
+          person2Id: rel.targetId,
+          type: rel.type,
+          strength: 0.5,
+        })
+      })
+    })
+    return result
+  }, [storyData])
+
+  const connections = useMemo<Connection[]>(() => {
+    const result: Connection[] = []
+    const seen = new Set<string>()
+    ;(storyData?.locations ?? []).forEach(location => {
+      ;(location.connections ?? []).forEach(targetId => {
+        // Avoid duplicating the reverse of an already-seen undirected edge.
+        const key = [location.id, targetId].sort((a, b) => a - b).join('-')
+        if (seen.has(key)) return
+        seen.add(key)
+        result.push({
+          id: `conn-${key}`,
+          location1Id: String(location.id),
+          location2Id: String(targetId),
+          type: 'connected',
+          strength: 0.5,
+        })
+      })
+    })
+    return result
+  }, [storyData])
+
+  // Mutations are not persisted back to the story model yet; keep them as
+  // safe no-ops so the editor UI stays interactive without crashing.
+  const updateRelationship = useCallback((_id: string, _data: Partial<Relationship>) => {}, [])
+  const deleteRelationship = useCallback((_id: string) => {}, [])
+  const updateConnection = useCallback((_id: string, _data: Partial<Connection>) => {}, [])
+  const deleteConnection = useCallback((_id: string) => {}, [])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({})
