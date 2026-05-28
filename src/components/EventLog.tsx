@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react'
-import { Person, Act } from '../types/StoryData'
+import { Person } from '../types/StoryData'
 import './EventLog.css'
 
 interface LogEntry {
@@ -14,11 +14,7 @@ interface EventLogProps {
   currentTime: string
 }
 
-export const EventLog: React.FC<EventLogProps> = ({
-  logEntries,
-  persons,
-  currentTime,
-}) => {
+export const EventLog: React.FC<EventLogProps> = ({ logEntries, persons, currentTime }) => {
   const logRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -39,7 +35,9 @@ export const EventLog: React.FC<EventLogProps> = ({
 
   return (
     <div className="event-log">
-      <h3>実行ログ (<span>{currentTime}</span>まで)</h3>
+      <h3>
+        実行ログ (<span>{currentTime}</span>まで)
+      </h3>
       <div className="log-output" ref={logRef}>
         {logEntries.length === 0 ? (
           <div className="empty-message">ログはありません</div>
@@ -47,10 +45,7 @@ export const EventLog: React.FC<EventLogProps> = ({
           logEntries.map((entry, index) => (
             <div key={index} className="log-entry">
               <span className="log-time">[{entry.time}]</span>
-              <strong
-                className="log-person"
-                style={{ color: getPersonColor(entry.personId) }}
-              >
+              <strong className="log-person" style={{ color: getPersonColor(entry.personId) }}>
                 {getPersonName(entry.personId)}
               </strong>
               <span className="log-text">{entry.text}</span>

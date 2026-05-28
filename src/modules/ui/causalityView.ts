@@ -4,7 +4,7 @@
  * Provides visual representation of causal relationships in the timeline
  */
 
-import type { Act, WorldState, EntityId, CausalLink, ValidationResult } from '../../types/causality'
+import type { Act, EntityId, ValidationResult } from '../../types/causality'
 import { CausalityEngine } from '../causality/engine'
 import type { VisualFeedbackManager } from './visualFeedback'
 import { FeedbackType } from './visualFeedback'
@@ -163,17 +163,18 @@ export class CausalityView {
     window.addEventListener('resize', () => this.resizeCanvas())
 
     // Mouse events for interaction
-    this.svg.addEventListener('click', (e) => this.handleClick(e))
-    this.svg.addEventListener('mousemove', (e) => this.handleMouseMove(e))
-    this.svg.addEventListener('wheel', (e) => this.handleWheel(e))
+    this.svg.addEventListener('click', e => this.handleClick(e))
+    this.svg.addEventListener('mousemove', e => this.handleMouseMove(e))
+    this.svg.addEventListener('wheel', e => this.handleWheel(e))
 
     // Pan and zoom
     let isPanning = false
     let lastPanX = 0
     let lastPanY = 0
 
-    this.svg.addEventListener('mousedown', (e) => {
-      if (e.button === 1 || (e.button === 0 && e.ctrlKey)) { // Middle mouse or Ctrl+click
+    this.svg.addEventListener('mousedown', e => {
+      if (e.button === 1 || (e.button === 0 && e.ctrlKey)) {
+        // Middle mouse or Ctrl+click
         isPanning = true
         lastPanX = e.clientX
         lastPanY = e.clientY
@@ -181,7 +182,7 @@ export class CausalityView {
       }
     })
 
-    this.svg.addEventListener('mousemove', (e) => {
+    this.svg.addEventListener('mousemove', e => {
       if (isPanning) {
         const deltaX = e.clientX - lastPanX
         const deltaY = e.clientY - lastPanY
@@ -267,8 +268,9 @@ export class CausalityView {
    * Detect implicit causality relationships between acts
    */
   private detectImplicitCausality(): void {
-    const sortedActs = Array.from(this.nodes.values())
-      .sort((a, b) => a.act.timestamp - b.act.timestamp)
+    const sortedActs = Array.from(this.nodes.values()).sort(
+      (a, b) => a.act.timestamp - b.act.timestamp,
+    )
 
     for (let i = 0; i < sortedActs.length; i++) {
       const currentAct = sortedActs[i]
@@ -504,7 +506,7 @@ export class CausalityView {
       line.setAttribute('stroke-width', '3')
     }
 
-    line.addEventListener('click', (e) => {
+    line.addEventListener('click', e => {
       e.stopPropagation()
       this.selectEdge(edge.id)
     })
@@ -557,7 +559,7 @@ export class CausalityView {
     group.appendChild(text)
 
     // Event handlers
-    group.addEventListener('click', (e) => {
+    group.addEventListener('click', e => {
       e.stopPropagation()
       this.selectNode(node.id)
     })
@@ -587,22 +589,22 @@ export class CausalityView {
 
     // Color by act type
     switch (node.act.type) {
-    case 'MOVE':
-      return '#4caf50'
-    case 'GIVE_ITEM':
-      return '#ff9800'
-    case 'TAKE_ITEM':
-      return '#2196f3'
-    case 'PLACE_ITEM':
-      return '#9c27b0'
-    case 'SPEAK':
-      return '#ffeb3b'
-    case 'USE_ITEM':
-      return '#00bcd4'
-    case 'COMBINE_ITEMS':
-      return '#795548'
-    default:
-      return '#9e9e9e'
+      case 'MOVE':
+        return '#4caf50'
+      case 'GIVE_ITEM':
+        return '#ff9800'
+      case 'TAKE_ITEM':
+        return '#2196f3'
+      case 'PLACE_ITEM':
+        return '#9c27b0'
+      case 'SPEAK':
+        return '#ffeb3b'
+      case 'USE_ITEM':
+        return '#00bcd4'
+      case 'COMBINE_ITEMS':
+        return '#795548'
+      default:
+        return '#9e9e9e'
     }
   }
 
@@ -611,14 +613,14 @@ export class CausalityView {
    */
   private getEdgeColor(edge: CausalEdge): string {
     switch (edge.type) {
-    case 'enables':
-      return '#4caf50'
-    case 'requires':
-      return '#ff9800'
-    case 'prevents':
-      return '#f44336'
-    default:
-      return '#9e9e9e'
+      case 'enables':
+        return '#4caf50'
+      case 'requires':
+        return '#ff9800'
+      case 'prevents':
+        return '#f44336'
+      default:
+        return '#9e9e9e'
     }
   }
 
@@ -688,7 +690,7 @@ export class CausalityView {
   /**
    * Handle click events
    */
-  private handleClick(e: MouseEvent): void {
+  private handleClick(_e: MouseEvent): void {
     // Clear selection if clicking on empty space
     this.selectedNode = null
     this.selectedEdge = null
@@ -849,8 +851,10 @@ export class CausalityView {
     if (this.nodes.size === 0) return
 
     const rect = this.container.getBoundingClientRect()
-    let minX = Infinity, maxX = -Infinity
-    let minY = Infinity, maxY = -Infinity
+    let minX = Infinity,
+      maxX = -Infinity
+    let minY = Infinity,
+      maxY = -Infinity
 
     for (const node of this.nodes.values()) {
       minX = Math.min(minX, node.x)

@@ -18,12 +18,17 @@ interface VisualFeedbackContextType {
   clearNotifications: () => void
   notifications: Notification[]
   highlightElement: (element: HTMLElement, options?: FeedbackOptions) => void
-  animateTransition: (element: HTMLElement, from: DOMRect, to: DOMRect, duration?: number) => Promise<void>
+  animateTransition: (
+    element: HTMLElement,
+    from: DOMRect,
+    to: DOMRect,
+    duration?: number,
+  ) => Promise<void>
 }
 
 const VisualFeedbackContext = createContext<VisualFeedbackContextType | undefined>(undefined)
 
-export const useVisualFeedback = () => {
+export const useVisualFeedback = (): VisualFeedbackContextType => {
   const context = useContext(VisualFeedbackContext)
   if (!context) {
     throw new Error('useVisualFeedback must be used within a VisualFeedbackProvider')
@@ -83,25 +88,28 @@ export const VisualFeedbackProvider: React.FC<{ children: ReactNode }> = ({ chil
     }, duration)
   }, [])
 
-  const animateTransition = useCallback((element: HTMLElement, from: DOMRect, to: DOMRect, duration = 300): Promise<void> => {
-    return new Promise(resolve => {
-      const deltaX = to.left - from.left
-      const deltaY = to.top - from.top
-      const scaleX = to.width / from.width
-      const scaleY = to.height / from.height
+  const animateTransition = useCallback(
+    (element: HTMLElement, from: DOMRect, to: DOMRect, duration = 300): Promise<void> => {
+      return new Promise(resolve => {
+        const deltaX = to.left - from.left
+        const deltaY = to.top - from.top
+        const scaleX = to.width / from.width
+        const scaleY = to.height / from.height
 
-      element.style.transformOrigin = 'top left'
-      element.style.transition = `transform ${duration}ms ease-in-out`
-      element.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`
+        element.style.transformOrigin = 'top left'
+        element.style.transition = `transform ${duration}ms ease-in-out`
+        element.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`
 
-      setTimeout(() => {
-        element.style.transform = ''
-        element.style.transition = ''
-        element.style.transformOrigin = ''
-        resolve()
-      }, duration)
-    })
-  }, [])
+        setTimeout(() => {
+          element.style.transform = ''
+          element.style.transition = ''
+          element.style.transformOrigin = ''
+          resolve()
+        }, duration)
+      })
+    },
+    [],
+  )
 
   const value: VisualFeedbackContextType = {
     showNotification,
@@ -111,9 +119,5 @@ export const VisualFeedbackProvider: React.FC<{ children: ReactNode }> = ({ chil
     animateTransition,
   }
 
-  return (
-    <VisualFeedbackContext.Provider value={value}>
-      {children}
-    </VisualFeedbackContext.Provider>
-  )
+  return <VisualFeedbackContext.Provider value={value}>{children}</VisualFeedbackContext.Provider>
 }

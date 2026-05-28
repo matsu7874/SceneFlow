@@ -33,68 +33,90 @@ vi.mock('../../src/components/CausalityView', async () => {
   const actual = await vi.importActual('../../src/components/CausalityView')
   return {
     ...actual,
-    CausalityView: vi.fn().mockImplementation((props) => {
-      const React = require('react')
+    CausalityView: vi.fn().mockImplementation(props => {
       const { useState, useRef } = React
 
       const [scale, setScale] = useState(1)
       const canvasRef = useRef(null)
 
-      return React.createElement('div', {
-        onWheel: (e) => {
-          const delta = e.deltaY > 0 ? 0.9 : 1.1
-          setScale(prev => Math.min(Math.max(prev * delta, 0.1), 5))
+      return React.createElement(
+        'div',
+        {
+          onWheel: e => {
+            const delta = e.deltaY > 0 ? 0.9 : 1.1
+            setScale(prev => Math.min(Math.max(prev * delta, 0.1), 5))
+          },
+          onMouseDown: e => {
+            if (props.onTimeSeek && e.clientX < 150 && e.clientY < 150) {
+              props.onTimeSeek(60) // Mock click on first act
+            }
+          },
+          onMouseMove: () => {},
+          onMouseUp: () => {},
+          onMouseLeave: () => {},
         },
-        onMouseDown: (e) => {
-          if (props.onTimeSeek && e.clientX < 150 && e.clientY < 150) {
-            props.onTimeSeek(60) // Mock click on first act
-          }
-        },
-        onMouseMove: () => {},
-        onMouseUp: () => {},
-        onMouseLeave: () => {},
-      },
-      React.createElement('canvas', { role: 'img', ref: canvasRef }),
-      React.createElement('svg', null,
-        props.storyData.acts.map((act, i) =>
-          React.createElement('g', { key: act.id },
-            React.createElement('circle', {
-              cx: 100 + i * 200,
-              cy: 100,
-              r: 35,
-              className: 'node act',
-            }),
-            React.createElement('text', {
-              x: 100 + i * 200,
-              y: 100,
-              textAnchor: 'middle',
-              dominantBaseline: 'middle',
-            }, act.id.toString().slice(0, 8)),
+        React.createElement('canvas', { role: 'img', ref: canvasRef }),
+        React.createElement(
+          'svg',
+          null,
+          props.storyData.acts.map((act, i) =>
+            React.createElement(
+              'g',
+              { key: act.id },
+              React.createElement('circle', {
+                cx: 100 + i * 200,
+                cy: 100,
+                r: 35,
+                className: 'node act',
+              }),
+              React.createElement(
+                'text',
+                {
+                  x: 100 + i * 200,
+                  y: 100,
+                  textAnchor: 'middle',
+                  dominantBaseline: 'middle',
+                },
+                act.id.toString().slice(0, 8),
+              ),
+            ),
           ),
+          props.storyData.events &&
+            props.storyData.events.map((event, i) =>
+              React.createElement(
+                'g',
+                { key: event.id },
+                React.createElement('circle', {
+                  cx: 100 + (props.storyData.acts.length + i) * 200,
+                  cy: 100,
+                  r: 35,
+                  className: 'node event',
+                }),
+                React.createElement(
+                  'text',
+                  {
+                    x: 100 + (props.storyData.acts.length + i) * 200,
+                    y: 100,
+                    textAnchor: 'middle',
+                    dominantBaseline: 'middle',
+                  },
+                  event.id.slice(0, 8),
+                ),
+              ),
+            ),
         ),
-        props.storyData.events && props.storyData.events.map((event, i) =>
-          React.createElement('g', { key: event.id },
-            React.createElement('circle', {
-              cx: 100 + (props.storyData.acts.length + i) * 200,
-              cy: 100,
-              r: 35,
-              className: 'node event',
-            }),
-            React.createElement('text', {
-              x: 100 + (props.storyData.acts.length + i) * 200,
-              y: 100,
-              textAnchor: 'middle',
-              dominantBaseline: 'middle',
-            }, event.id.slice(0, 8)),
+        React.createElement(
+          'div',
+          { className: 'controls' },
+          React.createElement(
+            'button',
+            {
+              onClick: () => setScale(1),
+            },
+            'Reset View',
           ),
+          React.createElement('span', null, `Scale: ${scale.toFixed(2)}x`),
         ),
-      ),
-      React.createElement('div', { className: 'controls' },
-        React.createElement('button', {
-          onClick: () => setScale(1),
-        }, 'Reset View'),
-        React.createElement('span', null, `Scale: ${scale.toFixed(2)}x`),
-      ),
       )
     }),
   }
@@ -110,9 +132,7 @@ const mockStoryData: StoryData = {
     { id: 1, name: 'Room A', connections: [2] },
     { id: 2, name: 'Room B', connections: [1] },
   ],
-  props: [
-    { id: 1, name: 'Key', type: 'prop' },
-  ],
+  props: [{ id: 1, name: 'Key', type: 'prop' }],
   information: [],
   acts: [
     {
@@ -158,13 +178,7 @@ describe('CausalityView', () => {
 
   // Helper to render CausalityView with props
   const renderCausalityView = (props = {}) => {
-    return render(
-      <CausalityView
-        storyData={mockStoryData}
-        currentTime={0}
-        {...props}
-      />,
-    )
+    return render(<CausalityView storyData={mockStoryData} currentTime={0} {...props} />)
   }
 
   it('renders causality view canvas and controls', () => {
@@ -299,12 +313,7 @@ describe('CausalityView', () => {
       acts: [],
     }
 
-    render(
-      <CausalityView
-        storyData={emptyStoryData}
-        currentTime={0}
-      />,
-    )
+    render(<CausalityView storyData={emptyStoryData} currentTime={0} />)
 
     // Should still render canvas and controls
     expect(screen.getByRole('img', { hidden: true })).toBeInTheDocument()
@@ -315,7 +324,6 @@ describe('CausalityView', () => {
     renderCausalityView()
 
     const canvas = screen.getByRole('img', { hidden: true })
-    const initialWidth = canvas.width
 
     // Trigger window resize
     fireEvent(window, new Event('resize'))
@@ -386,12 +394,7 @@ describe('CausalityView', () => {
       ],
     }
 
-    render(
-      <CausalityView
-        storyData={storyDataWithEvents}
-        currentTime={0}
-      />,
-    )
+    render(<CausalityView storyData={storyDataWithEvents} currentTime={0} />)
 
     // Should render nodes for both acts and events
     const circles = document.querySelectorAll('circle')
@@ -420,15 +423,18 @@ describe('CausalityView', () => {
       { from: 'act-2', to: 'act-3', type: 'causes' },
     ]
 
-    vi.mocked(CausalityEngine).mockImplementation(() => ({
-      getCausalRelationships: vi.fn(() => mockRelationships),
-      analyzeAct: vi.fn(() => ({ dependencies: [], dependents: [] })),
-      getErrors: vi.fn(() => []),
-      getWarnings: vi.fn(() => []),
-      validateAct: vi.fn(() => ({ valid: true, errors: [] })),
-      getActDependencies: vi.fn(() => []),
-      getActDependents: vi.fn(() => []),
-    }) as any)
+    vi.mocked(CausalityEngine).mockImplementation(
+      () =>
+        ({
+          getCausalRelationships: vi.fn(() => mockRelationships),
+          analyzeAct: vi.fn(() => ({ dependencies: [], dependents: [] })),
+          getErrors: vi.fn(() => []),
+          getWarnings: vi.fn(() => []),
+          validateAct: vi.fn(() => ({ valid: true, errors: [] })),
+          getActDependencies: vi.fn(() => []),
+          getActDependents: vi.fn(() => []),
+        }) as any,
+    )
 
     renderCausalityView()
 

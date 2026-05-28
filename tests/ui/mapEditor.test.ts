@@ -1,7 +1,14 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { MapEditor, type MapEditorConfig, LayoutAlgorithm } from '../../src/modules/ui/mapEditor/MapEditor'
+import {
+  MapEditor,
+  type MapEditorConfig,
+  LayoutAlgorithm,
+} from '../../src/modules/ui/mapEditor/MapEditor'
 import type { EditableEntity } from '../../src/modules/ui/entityEditor/EntityEditor'
-import type { Connection, ConnectionType } from '../../src/modules/ui/entityEditor/RelationshipEditor'
+import type {
+  Connection,
+  ConnectionType,
+} from '../../src/modules/ui/entityEditor/RelationshipEditor'
 
 // Mock canvas and SVG APIs
 Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
@@ -261,7 +268,6 @@ describe('MapEditor', () => {
 
       // Get initial positions
       const initialNodes = mapEditor.getNodes()
-      const initialPositions = initialNodes.map(n => ({ x: n.x, y: n.y }))
 
       // Trigger auto layout
       autoLayoutBtn.click()

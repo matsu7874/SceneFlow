@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test('ロード機能のデバッグ', async ({ page }) => {
   // ページ遷移のデバッグ
@@ -76,14 +76,20 @@ test('ロード機能のデバッグ', async ({ page }) => {
   await textarea.fill(JSON.stringify(minimalJson))
 
   console.log('10. Clicking load button...')
-  const loadButton = page.getByRole('button').filter({ hasText: /ロード|load/i }).first()
+  const loadButton = page
+    .getByRole('button')
+    .filter({ hasText: /ロード|load/i })
+    .first()
   await loadButton.click()
 
   console.log('11. Waiting for response...')
   await page.waitForTimeout(1000)
 
   // エラー確認
-  const errorOutput = await page.locator('.error-output').textContent().catch(() => null)
+  const errorOutput = await page
+    .locator('.error-output')
+    .textContent()
+    .catch(() => null)
   if (errorOutput) {
     console.log('12. Error output:', errorOutput)
   } else {

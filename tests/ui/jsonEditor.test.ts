@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { JSONEditor, type JSONSchema, type ValidationError, type JSONChangeEvent } from '../../src/modules/ui/entityEditor/JSONEditor'
+import { JSONEditor, type JSONSchema } from '../../src/modules/ui/entityEditor/JSONEditor'
 
 // Mock clipboard API
 Object.defineProperty(navigator, 'clipboard', {
@@ -60,12 +60,12 @@ describe('JSONEditor', () => {
     })
 
     it('should support dark theme', () => {
-      const darkEditor = new JSONEditor(container, { theme: 'dark' })
+      new JSONEditor(container, { theme: 'dark' })
       expect(container.querySelector('.dark-theme')).toBeTruthy()
     })
 
     it('should support line numbers configuration', () => {
-      const editorWithoutLines = new JSONEditor(container, { lineNumbers: false })
+      new JSONEditor(container, { lineNumbers: false })
       expect(container.querySelector('.line-numbers')).toBeFalsy()
     })
   })
@@ -339,7 +339,7 @@ describe('JSONEditor', () => {
 
   describe('readonly mode', () => {
     it('should disable editing in readonly mode', () => {
-      const readonlyEditor = new JSONEditor(container, { readOnly: true })
+      new JSONEditor(container, { readOnly: true })
 
       const textarea = container.querySelector('.json-textarea') as HTMLTextAreaElement
       expect(textarea.readOnly).toBe(true)
@@ -401,7 +401,9 @@ describe('JSONEditor', () => {
     })
 
     it('should handle very large JSON', () => {
-      const largeObject = { data: new Array(1000).fill(0).map((_, i) => ({ id: i, value: `item-${i}` })) }
+      const largeObject = {
+        data: new Array(1000).fill(0).map((_, i) => ({ id: i, value: `item-${i}` })),
+      }
       const largeJSON = JSON.stringify(largeObject)
 
       editor.setValue(largeJSON)

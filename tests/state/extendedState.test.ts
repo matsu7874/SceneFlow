@@ -30,8 +30,14 @@ describe('Extended State Management', () => {
       { id: 'key', name: 'Key', description: 'A small key' },
     ],
     acts: [
-      { id: 1, personId: 1, locationId: 1, time: '00:01:40', description: 'Alice enters' },
-      { id: 2, personId: 2, locationId: 2, time: '00:03:20', description: 'Bob enters' },
+      {
+        id: 1,
+        personId: 'alice',
+        locationId: 'room1',
+        time: '00:01:40',
+        description: 'Alice enters',
+      },
+      { id: 2, personId: 'bob', locationId: 'room2', time: '00:03:20', description: 'Bob enters' },
     ],
     initialStates: [],
   })
@@ -42,27 +48,27 @@ describe('Extended State Management', () => {
       const worldState = storyDataToWorldState(storyData, 5) // 5分 = 300秒
 
       expect(worldState.timestamp).toBe(5)
-      expect(worldState.personPositions[1]).toBe(1) // alice in room1
-      expect(worldState.personPositions[2]).toBe(2) // bob in room2
-      expect(worldState.knowledge[1]).toEqual([]) // alice
-      expect(worldState.knowledge[2]).toEqual([]) // bob
+      expect(worldState.personPositions['alice']).toBe('room1')
+      expect(worldState.personPositions['bob']).toBe('room2')
+      expect(worldState.knowledge['alice']).toEqual([])
+      expect(worldState.knowledge['bob']).toEqual([])
     })
 
     it('should track person positions at specific timestamp', () => {
       const storyData = createSampleStoryData()
       storyData.acts.push({
         id: 3,
-        personId: 1,
-        locationId: 2,
+        personId: 'alice',
+        locationId: 'room2',
         time: '00:06:40', // 400秒 = 6分40秒
         description: 'Alice moves',
       })
 
       const worldState1 = storyDataToWorldState(storyData, 2.5) // 150秒 = 2.5分
-      expect(worldState1.personPositions[1]).toBe(1) // alice in room1
+      expect(worldState1.personPositions['alice']).toBe('room1')
 
       const worldState2 = storyDataToWorldState(storyData, 7.5) // 450秒 = 7.5分
-      expect(worldState2.personPositions[1]).toBe(2) // alice in room2
+      expect(worldState2.personPositions['alice']).toBe('room2')
     })
   })
 

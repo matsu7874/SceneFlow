@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { EntityEditor, type EditableEntity, type EntityChangeEvent } from '../../src/modules/ui/entityEditor/EntityEditor'
+import { EntityEditor, type EditableEntity } from '../../src/modules/ui/entityEditor/EntityEditor'
 
 describe('EntityEditor', () => {
   let container: HTMLElement
@@ -105,7 +105,9 @@ describe('EntityEditor', () => {
       const validation = editor.validateEntity(person)
 
       expect(validation.valid).toBe(false)
-      expect(validation.errors.some(e => e.field === 'id' && e.message.includes('letters, numbers'))).toBe(true)
+      expect(
+        validation.errors.some(e => e.field === 'id' && e.message.includes('letters, numbers')),
+      ).toBe(true)
     })
 
     it('should validate name length', () => {
@@ -115,7 +117,9 @@ describe('EntityEditor', () => {
       const validation = editor.validateEntity(person)
 
       expect(validation.valid).toBe(false)
-      expect(validation.errors.some(e => e.field === 'name' && e.message.includes('100 characters'))).toBe(true)
+      expect(
+        validation.errors.some(e => e.field === 'name' && e.message.includes('100 characters')),
+      ).toBe(true)
     })
 
     it('should validate information content requirement', () => {
@@ -234,7 +238,7 @@ describe('EntityEditor', () => {
     it('should validate with custom validators', () => {
       const customEditor = new EntityEditor(container, {
         customValidators: {
-          name: (value) => {
+          name: value => {
             if (typeof value === 'string' && value.includes('test')) {
               return 'Name cannot contain "test"'
             }

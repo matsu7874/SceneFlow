@@ -38,7 +38,7 @@ test('eventsなしJSONロードテスト', async ({ page }) => {
   }
 
   // データがロードされたことを確認
-  const personName = await page.locator('text=Test').first()
+  const personName = page.locator('text=Test').first()
   await expect(personName).toBeVisible({ timeout: 5000 })
 
   console.log('✅ eventsフィールドなしのJSONが正常にロードされました')

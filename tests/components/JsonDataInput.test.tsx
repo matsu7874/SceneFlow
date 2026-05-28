@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { JsonDataInput } from '../../src/components/JsonDataInput'
 import { VisualFeedbackProvider } from '../../src/contexts/VisualFeedbackContext'
 import React from 'react'
@@ -12,7 +11,6 @@ vi.mock('../../src/utils/validation', () => ({
 
 describe('JsonDataInput', () => {
   const mockOnDataLoad = vi.fn()
-  const user = userEvent.setup()
 
   const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <VisualFeedbackProvider>{children}</VisualFeedbackProvider>

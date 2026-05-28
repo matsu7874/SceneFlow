@@ -7,10 +7,8 @@
 import type {
   Act,
   WorldState,
-  ValidationResult,
   TimelineValidation,
   ConflictInfo,
-  SuggestionInfo,
   EntityId,
 } from '../../types/causality'
 import { CausalityEngine } from '../causality/engine'
@@ -129,19 +127,19 @@ export class ValidationReporter {
 
       // Additional validation checks
       if (this.config.enableTemporalParadoxDetection) {
-        issues.push(...await this.detectTemporalParadoxes())
+        issues.push(...(await this.detectTemporalParadoxes()))
       }
 
       if (this.config.enableDeadlockDetection) {
-        issues.push(...await this.detectDeadlocks(initialState))
+        issues.push(...(await this.detectDeadlocks(initialState)))
       }
 
       if (this.config.enableRedundancyDetection) {
-        issues.push(...await this.detectRedundantActs())
+        issues.push(...(await this.detectRedundantActs()))
       }
 
       if (this.config.enableStateConsistencyCheck) {
-        issues.push(...await this.checkStateConsistency(initialState))
+        issues.push(...(await this.checkStateConsistency(initialState)))
       }
 
       // Generate suggestions for each issue
@@ -168,7 +166,7 @@ export class ValidationReporter {
         validationDuration,
         recommendations: this.generateRecommendations(issues, filteredSuggestions),
       }
-    } catch (error) {
+    } catch {
       // Validation timeout or error
       return {
         timestamp: Date.now(),
@@ -200,7 +198,9 @@ export class ValidationReporter {
         severity: ValidationSeverity.ERROR,
         title: 'Timeline Conflict',
         description: conflict.description,
-        affectedActIds: [conflict.actId1, conflict.actId2].filter((id, index, arr) => arr.indexOf(id) === index),
+        affectedActIds: [conflict.actId1, conflict.actId2].filter(
+          (id, index, arr) => arr.indexOf(id) === index,
+        ),
         affectedEntities: [],
         timestamp: conflict.timestamp,
         suggestions: [],
@@ -218,8 +218,9 @@ export class ValidationReporter {
    */
   private async detectTemporalParadoxes(): Promise<ValidationIssue[]> {
     const issues: ValidationIssue[] = []
-    const acts = Array.from(this.engine.getActs().values())
-      .sort((a, b) => a.timestamp - b.timestamp)
+    const acts = Array.from(this.engine.getActs().values()).sort(
+      (a, b) => a.timestamp - b.timestamp,
+    )
 
     // Check for circular dependencies
     const dependencies = this.buildDependencyGraph(acts)
@@ -333,7 +334,7 @@ export class ValidationReporter {
     }
 
     // Check for redundant acts in each group
-    for (const [key, groupActs] of actGroups) {
+    for (const [, groupActs] of actGroups) {
       if (groupActs.length > 1) {
         const redundantActs = this.findRedundantActsInGroup(groupActs)
 
@@ -364,8 +365,9 @@ export class ValidationReporter {
    */
   private async checkStateConsistency(initialState: WorldState): Promise<ValidationIssue[]> {
     const issues: ValidationIssue[] = []
-    const acts = Array.from(this.engine.getActs().values())
-      .sort((a, b) => a.timestamp - b.timestamp)
+    const acts = Array.from(this.engine.getActs().values()).sort(
+      (a, b) => a.timestamp - b.timestamp,
+    )
 
     let currentState = { ...initialState }
 
@@ -416,35 +418,35 @@ export class ValidationReporter {
     const suggestions: ValidationSuggestion[] = []
 
     switch (issue.type) {
-    case ValidationIssueType.PRECONDITION_VIOLATED:
-      suggestions.push(...this.generatePreconditionFixSuggestions(issue, initialState))
-      break
+      case ValidationIssueType.PRECONDITION_VIOLATED:
+        suggestions.push(...this.generatePreconditionFixSuggestions(issue, initialState))
+        break
 
-    case ValidationIssueType.CIRCULAR_DEPENDENCY:
-      suggestions.push(...this.generateCircularDependencyFixSuggestions(issue))
-      break
+      case ValidationIssueType.CIRCULAR_DEPENDENCY:
+        suggestions.push(...this.generateCircularDependencyFixSuggestions(issue))
+        break
 
-    case ValidationIssueType.DEADLOCK:
-      suggestions.push(...this.generateDeadlockFixSuggestions(issue, initialState))
-      break
+      case ValidationIssueType.DEADLOCK:
+        suggestions.push(...this.generateDeadlockFixSuggestions(issue, initialState))
+        break
 
-    case ValidationIssueType.REDUNDANT_ACT:
-      suggestions.push(...this.generateRedundancyFixSuggestions(issue))
-      break
+      case ValidationIssueType.REDUNDANT_ACT:
+        suggestions.push(...this.generateRedundancyFixSuggestions(issue))
+        break
 
-    case ValidationIssueType.TEMPORAL_PARADOX:
-      suggestions.push(...this.generateTemporalParadoxFixSuggestions(issue))
-      break
+      case ValidationIssueType.TEMPORAL_PARADOX:
+        suggestions.push(...this.generateTemporalParadoxFixSuggestions(issue))
+        break
 
-    default:
-      // Generic suggestions
-      suggestions.push({
-        id: this.generateSuggestionId(),
-        description: 'Review the affected acts manually',
-        actionType: 'modify_act',
-        confidence: 0.3,
-        estimatedEffort: 'medium',
-      })
+      default:
+        // Generic suggestions
+        suggestions.push({
+          id: this.generateSuggestionId(),
+          description: 'Review the affected acts manually',
+          actionType: 'modify_act',
+          confidence: 0.3,
+          estimatedEffort: 'medium',
+        })
     }
 
     return suggestions
@@ -617,10 +619,10 @@ export class ValidationReporter {
 
   private getIssueTypeFromConflict(conflict: ConflictInfo): ValidationIssueType {
     switch (conflict.type) {
-    case 'precondition_violated':
-      return ValidationIssueType.PRECONDITION_VIOLATED
-    default:
-      return ValidationIssueType.INCONSISTENT_STATE
+      case 'precondition_violated':
+        return ValidationIssueType.PRECONDITION_VIOLATED
+      default:
+        return ValidationIssueType.INCONSISTENT_STATE
     }
   }
 
@@ -648,7 +650,10 @@ export class ValidationReporter {
     return counts as Record<ValidationIssueType, number>
   }
 
-  private generateRecommendations(issues: ValidationIssue[], suggestions: ValidationSuggestion[]): string[] {
+  private generateRecommendations(
+    issues: ValidationIssue[],
+    suggestions: ValidationSuggestion[],
+  ): string[] {
     const recommendations: string[] = []
 
     if (issues.length === 0) {
@@ -664,12 +669,16 @@ export class ValidationReporter {
     }
 
     if (warningCount > 0) {
-      recommendations.push(`Consider reviewing ${warningCount} warning${warningCount > 1 ? 's' : ''}`)
+      recommendations.push(
+        `Consider reviewing ${warningCount} warning${warningCount > 1 ? 's' : ''}`,
+      )
     }
 
     const autoFixCount = suggestions.filter(s => s.confidence > 0.8).length
     if (autoFixCount > 0) {
-      recommendations.push(`${autoFixCount} issue${autoFixCount > 1 ? 's' : ''} can be auto-fixed with high confidence`)
+      recommendations.push(
+        `${autoFixCount} issue${autoFixCount > 1 ? 's' : ''} can be auto-fixed with high confidence`,
+      )
     }
 
     return recommendations
@@ -750,7 +759,7 @@ export class ValidationReporter {
     return false
   }
 
-  private isDeadlock(act: Act, blockedActs: Act[], currentState: WorldState): boolean {
+  private isDeadlock(act: Act, blockedActs: Act[], _currentState: WorldState): boolean {
     // Simplified deadlock detection
     // Check if this act is blocking others and no other acts can unblock it
     const requiredEntities = act.getAffectedEntities()
@@ -785,14 +794,14 @@ export class ValidationReporter {
     return (
       actA.type === actB.type &&
       JSON.stringify(actA.getAffectedEntities().sort()) ===
-      JSON.stringify(actB.getAffectedEntities().sort())
+        JSON.stringify(actB.getAffectedEntities().sort())
     )
   }
 
   private findStateInconsistencies(
-    oldState: WorldState,
-    newState: WorldState,
-    act: Act,
+    _oldState: WorldState,
+    _newState: WorldState,
+    _act: Act,
   ): ValidationIssue[] {
     const issues: ValidationIssue[] = []
 
@@ -817,7 +826,7 @@ export class ValidationReporter {
   }
 
   private findMissingPrerequisites(
-    act: Act,
+    _act: Act,
     _initialState: WorldState,
   ): Array<{ type: string; entities: EntityId[] }> {
     // This would analyze the act's preconditions and suggest what's missing

@@ -4,7 +4,7 @@
  * Node-based visual editor for location connections and spatial relationships
  */
 
-import type { EntityId } from '../../types/causality'
+import type { EntityId } from '../../../types/causality'
 import type { EditableEntity } from '../entityEditor/EntityEditor'
 import type { Connection, ConnectionType } from '../entityEditor/RelationshipEditor'
 import { VisualFeedbackManager, FeedbackType } from '../visualFeedback'
@@ -109,18 +109,21 @@ export class MapEditor {
   ) {
     this.container = container
     this.feedbackManager = feedbackManager || new VisualFeedbackManager(container)
-    this.config = Object.assign({
-      width: 800,
-      height: 600,
-      enableGrid: true,
-      gridSize: 50,
-      enable3D: false,
-      autoLayout: true,
-      showMinimap: false,
-      pathfindingEnabled: true,
-      maxZoom: 3,
-      minZoom: 0.1,
-    }, config)
+    this.config = Object.assign(
+      {
+        width: 800,
+        height: 600,
+        enableGrid: true,
+        gridSize: 50,
+        enable3D: false,
+        autoLayout: true,
+        showMinimap: false,
+        pathfindingEnabled: true,
+        maxZoom: 3,
+        minZoom: 0.1,
+      },
+      config,
+    )
 
     this.pathfinding = new PathfindingManager()
     this.setupCanvas()
@@ -237,7 +240,9 @@ export class MapEditor {
       this.toggleMinimap()
     })
 
-    const pathfindingToggle = this.container.querySelector('.toggle-pathfinding') as HTMLInputElement
+    const pathfindingToggle = this.container.querySelector(
+      '.toggle-pathfinding',
+    ) as HTMLInputElement
     pathfindingToggle.addEventListener('change', () => {
       this.config.pathfindingEnabled = pathfindingToggle.checked
       if (!this.config.pathfindingEnabled) {
@@ -246,15 +251,15 @@ export class MapEditor {
     })
 
     // Canvas interactions
-    this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e))
-    this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e))
-    this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e))
-    this.canvas.addEventListener('wheel', (e) => this.handleWheel(e))
-    this.canvas.addEventListener('click', (e) => this.handleClick(e))
-    this.canvas.addEventListener('dblclick', (e) => this.handleDoubleClick(e))
+    this.canvas.addEventListener('mousedown', e => this.handleMouseDown(e))
+    this.canvas.addEventListener('mousemove', e => this.handleMouseMove(e))
+    this.canvas.addEventListener('mouseup', e => this.handleMouseUp(e))
+    this.canvas.addEventListener('wheel', e => this.handleWheel(e))
+    this.canvas.addEventListener('click', e => this.handleClick(e))
+    this.canvas.addEventListener('dblclick', e => this.handleDoubleClick(e))
 
     // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => this.handleKeyDown(e))
+    document.addEventListener('keydown', e => this.handleKeyDown(e))
 
     // Resize handling
     window.addEventListener('resize', () => this.handleResize())
@@ -377,7 +382,7 @@ export class MapEditor {
     this.ctx.lineWidth = 1
 
     // Vertical lines
-    for (let x = (this.panX % gridSize); x < this.viewportWidth; x += gridSize) {
+    for (let x = this.panX % gridSize; x < this.viewportWidth; x += gridSize) {
       this.ctx.beginPath()
       this.ctx.moveTo(x, 0)
       this.ctx.lineTo(x, this.viewportHeight)
@@ -385,7 +390,7 @@ export class MapEditor {
     }
 
     // Horizontal lines
-    for (let y = (this.panY % gridSize); y < this.viewportHeight; y += gridSize) {
+    for (let y = this.panY % gridSize; y < this.viewportHeight; y += gridSize) {
       this.ctx.beginPath()
       this.ctx.moveTo(0, y)
       this.ctx.lineTo(this.viewportWidth, y)
@@ -494,22 +499,14 @@ export class MapEditor {
     this.ctx.font = `bold ${Math.max(10, 12 * this.zoom)}px Arial`
     this.ctx.textAlign = 'center'
     this.ctx.textBaseline = 'middle'
-    this.ctx.fillText(
-      node.entity.name.slice(0, 8),
-      pos.x,
-      pos.y,
-    )
+    this.ctx.fillText(node.entity.name.slice(0, 8), pos.x, pos.y)
 
     // Node capacity indicator
     if (node.entity.type === 'location' && (node.entity as any).capacity) {
       const capacity = (node.entity as any).capacity as number
       this.ctx.fillStyle = '#333'
       this.ctx.font = `${8 * this.zoom}px Arial`
-      this.ctx.fillText(
-        `(${capacity})`,
-        pos.x,
-        pos.y + size / 2 + 15,
-      )
+      this.ctx.fillText(`(${capacity})`, pos.x, pos.y + size / 2 + 15)
     }
 
     // Connection count indicator
@@ -520,11 +517,7 @@ export class MapEditor {
       this.ctx.fillStyle = '#fff'
       this.ctx.font = `${8 * this.zoom}px Arial`
       this.ctx.textAlign = 'center'
-      this.ctx.fillText(
-        connectionCount.toString(),
-        pos.x + size / 2,
-        pos.y - size / 2 + 6,
-      )
+      this.ctx.fillText(connectionCount.toString(), pos.x + size / 2, pos.y - size / 2 + 6)
     }
   }
 
@@ -573,7 +566,11 @@ export class MapEditor {
   /**
    * Draw arrowhead for connections
    */
-  private drawArrowhead(from: { x: number; y: number }, to: { x: number; y: number }, color: string): void {
+  private drawArrowhead(
+    from: { x: number; y: number },
+    to: { x: number; y: number },
+    color: string,
+  ): void {
     const angle = Math.atan2(to.y - from.y, to.x - from.x)
     const size = 10 * this.zoom
 
@@ -634,14 +631,22 @@ export class MapEditor {
    */
   private getConnectionColor(connection: Connection): string {
     switch (connection.type) {
-    case 'DOOR': return '#4caf50'
-    case 'PASSAGE': return '#2196f3'
-    case 'STAIRS': return '#ff9800'
-    case 'ELEVATOR': return '#9c27b0'
-    case 'PORTAL': return '#e91e63'
-    case 'HIDDEN': return '#9e9e9e'
-    case 'LOCKED': return '#f44336'
-    default: return '#333'
+      case 'DOOR':
+        return '#4caf50'
+      case 'PASSAGE':
+        return '#2196f3'
+      case 'STAIRS':
+        return '#ff9800'
+      case 'ELEVATOR':
+        return '#9c27b0'
+      case 'PORTAL':
+        return '#e91e63'
+      case 'HIDDEN':
+        return '#9e9e9e'
+      case 'LOCKED':
+        return '#f44336'
+      default:
+        return '#333'
     }
   }
 
@@ -652,10 +657,14 @@ export class MapEditor {
     const baseWidth = 2 * this.zoom
 
     switch (connection.type) {
-    case 'PASSAGE': return baseWidth * 1.5
-    case 'DOOR': return baseWidth
-    case 'HIDDEN': return baseWidth * 0.7
-    default: return baseWidth
+      case 'PASSAGE':
+        return baseWidth * 1.5
+      case 'DOOR':
+        return baseWidth
+      case 'HIDDEN':
+        return baseWidth * 0.7
+      default:
+        return baseWidth
     }
   }
 
@@ -795,7 +804,10 @@ export class MapEditor {
     const mouseY = e.clientY - rect.top
 
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1
-    const newZoom = Math.max(this.config.minZoom, Math.min(this.config.maxZoom, this.zoom * zoomFactor))
+    const newZoom = Math.max(
+      this.config.minZoom,
+      Math.min(this.config.maxZoom, this.zoom * zoomFactor),
+    )
 
     // Zoom towards mouse position
     this.panX = mouseX - (mouseX - this.panX) * (newZoom / this.zoom)
@@ -808,7 +820,7 @@ export class MapEditor {
   /**
    * Handle click events
    */
-  private handleClick(e: MouseEvent): void {
+  private handleClick(_e: MouseEvent): void {
     // Click handling is done in mousedown for better responsiveness
   }
 
@@ -836,32 +848,32 @@ export class MapEditor {
     if (!this.container.contains(document.activeElement)) return
 
     switch (e.key) {
-    case 'Delete':
-    case 'Backspace':
-      this.deleteSelectedNodes()
-      break
-    case 'a':
-      if (e.ctrlKey) {
-        e.preventDefault()
-        this.selectAllNodes()
-      }
-      break
-    case 'Escape':
-      this.clearSelection()
-      this.clearPath()
-      break
-    case '1':
-      this.applyLayout(LayoutAlgorithm.FORCE_DIRECTED)
-      break
-    case '2':
-      this.applyLayout(LayoutAlgorithm.CIRCULAR)
-      break
-    case '3':
-      this.applyLayout(LayoutAlgorithm.GRID)
-      break
-    case '0':
-      this.resetView()
-      break
+      case 'Delete':
+      case 'Backspace':
+        this.deleteSelectedNodes()
+        break
+      case 'a':
+        if (e.ctrlKey) {
+          e.preventDefault()
+          this.selectAllNodes()
+        }
+        break
+      case 'Escape':
+        this.clearSelection()
+        this.clearPath()
+        break
+      case '1':
+        this.applyLayout(LayoutAlgorithm.FORCE_DIRECTED)
+        break
+      case '2':
+        this.applyLayout(LayoutAlgorithm.CIRCULAR)
+        break
+      case '3':
+        this.applyLayout(LayoutAlgorithm.GRID)
+        break
+      case '0':
+        this.resetView()
+        break
     }
   }
 
@@ -986,10 +998,7 @@ export class MapEditor {
           FeedbackType.SUCCESS,
         )
       } else {
-        this.feedbackManager.showNotification(
-          result.reason || 'No path found',
-          FeedbackType.ERROR,
-        )
+        this.feedbackManager.showNotification(result.reason || 'No path found', FeedbackType.ERROR)
       }
       this.connectionStart = null
       this.render()
@@ -1020,7 +1029,11 @@ export class MapEditor {
   /**
    * Create a new connection between nodes
    */
-  private createConnection(fromId: EntityId, toId: EntityId, type: ConnectionType = 'DIRECT'): void {
+  private createConnection(
+    fromId: EntityId,
+    toId: EntityId,
+    type: ConnectionType = 'DIRECT',
+  ): void {
     const connection: Connection = {
       id: `conn-${Date.now()}`,
       fromLocationId: fromId,
@@ -1080,10 +1093,10 @@ export class MapEditor {
     const nodes = Array.from(this.nodes.values())
     const xCoords = nodes.map(n => n.x)
     const yCoords = nodes.map(n => n.y)
-    const minX = Math.min.apply(Math, xCoords)
-    const maxX = Math.max.apply(Math, xCoords)
-    const minY = Math.min.apply(Math, yCoords)
-    const maxY = Math.max.apply(Math, yCoords)
+    const minX = Math.min(...xCoords)
+    const maxX = Math.max(...xCoords)
+    const minY = Math.min(...yCoords)
+    const maxY = Math.max(...yCoords)
 
     const padding = 50
     const contentWidth = maxX - minX + padding * 2
@@ -1110,18 +1123,18 @@ export class MapEditor {
     const layoutManager = new LayoutManager(this.nodes, this.connections)
 
     switch (algorithm) {
-    case LayoutAlgorithm.FORCE_DIRECTED:
-      layoutManager.applyForceDirectedLayout()
-      break
-    case LayoutAlgorithm.HIERARCHICAL:
-      layoutManager.applyHierarchicalLayout()
-      break
-    case LayoutAlgorithm.CIRCULAR:
-      layoutManager.applyCircularLayout()
-      break
-    case LayoutAlgorithm.GRID:
-      layoutManager.applyGridLayout()
-      break
+      case LayoutAlgorithm.FORCE_DIRECTED:
+        layoutManager.applyForceDirectedLayout()
+        break
+      case LayoutAlgorithm.HIERARCHICAL:
+        layoutManager.applyHierarchicalLayout()
+        break
+      case LayoutAlgorithm.CIRCULAR:
+        layoutManager.applyCircularLayout()
+        break
+      case LayoutAlgorithm.GRID:
+        layoutManager.applyGridLayout()
+        break
     }
 
     this.render()
@@ -1447,7 +1460,8 @@ class LayoutManager {
       // Calculate repulsive forces between nodes
       for (let j = 0; j < nodeList.length; j++) {
         const nodeA = nodeList[j]
-        let fx = 0, fy = 0
+        let fx = 0,
+          fy = 0
 
         for (let k = 0; k < nodeList.length; k++) {
           if (j === k) continue
@@ -1527,7 +1541,6 @@ class LayoutManager {
    */
   applyHierarchicalLayout(): void {
     // Simple hierarchical layout - could be enhanced with proper layer assignment
-    const nodeList = Array.from(this.nodes.values())
     const layers = this.assignLayers()
     const spacing = { x: 120, y: 100 }
 
@@ -1565,7 +1578,11 @@ class LayoutManager {
 
           if (connection.fromLocationId === nodeId && !visited.has(connection.toLocationId)) {
             connectedId = connection.toLocationId
-          } else if (connection.toLocationId === nodeId && connection.bidirectional && !visited.has(connection.fromLocationId)) {
+          } else if (
+            connection.toLocationId === nodeId &&
+            connection.bidirectional &&
+            !visited.has(connection.fromLocationId)
+          ) {
             connectedId = connection.fromLocationId
           }
 

@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { RelationshipEditor, RelationshipType, ConnectionType, type Relationship, type Connection } from '../../src/modules/ui/entityEditor/RelationshipEditor'
+import {
+  RelationshipEditor,
+  RelationshipType,
+  ConnectionType,
+  type Relationship,
+  type Connection,
+} from '../../src/modules/ui/entityEditor/RelationshipEditor'
 import type { EditableEntity } from '../../src/modules/ui/entityEditor/EntityEditor'
 
 // Mock canvas and SVG APIs
@@ -127,8 +133,8 @@ describe('RelationshipEditor', () => {
       const entityItems = container.querySelectorAll('.entity-item')
       expect(entityItems).toHaveLength(4)
 
-      const names = Array.from(entityItems).map(item =>
-        item.querySelector('.entity-name')?.textContent,
+      const names = Array.from(entityItems).map(
+        item => item.querySelector('.entity-name')?.textContent,
       )
       expect(names).toContain('Alice')
       expect(names).toContain('Bob')
@@ -137,14 +143,17 @@ describe('RelationshipEditor', () => {
     })
 
     it('should update entities', () => {
-      const newEntities = [...testEntities, {
-        id: 'person3',
-        type: 'person' as const,
-        name: 'Charlie',
-        description: 'Third test person',
-        tags: [],
-        metadata: {},
-      }]
+      const newEntities = [
+        ...testEntities,
+        {
+          id: 'person3',
+          type: 'person' as const,
+          name: 'Charlie',
+          description: 'Third test person',
+          tags: [],
+          metadata: {},
+        },
+      ]
 
       editor.updateEntities(newEntities)
 
@@ -210,14 +219,18 @@ describe('RelationshipEditor', () => {
 
   describe('mode switching', () => {
     it('should switch to relationships mode', () => {
-      const relationshipsRadio = container.querySelector('input[value="relationships"]') as HTMLInputElement
+      const relationshipsRadio = container.querySelector(
+        'input[value="relationships"]',
+      ) as HTMLInputElement
       relationshipsRadio.click()
 
       expect(relationshipsRadio.checked).toBe(true)
     })
 
     it('should switch to connections mode', () => {
-      const connectionsRadio = container.querySelector('input[value="connections"]') as HTMLInputElement
+      const connectionsRadio = container.querySelector(
+        'input[value="connections"]',
+      ) as HTMLInputElement
       connectionsRadio.click()
 
       expect(connectionsRadio.checked).toBe(true)
@@ -265,7 +278,7 @@ describe('RelationshipEditor', () => {
     it('should call relationship change callback', () => {
       const onRelationshipChange = vi.fn()
 
-      const editorWithCallback = new RelationshipEditor({
+      new RelationshipEditor({
         container: document.createElement('div'),
         entities: testEntities,
         onRelationshipChange,
@@ -277,7 +290,7 @@ describe('RelationshipEditor', () => {
     it('should call connection change callback', () => {
       const onConnectionChange = vi.fn()
 
-      const editorWithCallback = new RelationshipEditor({
+      new RelationshipEditor({
         container: document.createElement('div'),
         entities: testEntities,
         onConnectionChange,

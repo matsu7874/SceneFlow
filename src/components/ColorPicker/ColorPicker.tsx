@@ -23,10 +23,26 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 
   // Default color palette
   const colorPalette = [
-    '#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16',
-    '#22C55E', '#10B981', '#14B8A6', '#06B6D4', '#0EA5E9',
-    '#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#D946EF',
-    '#EC4899', '#F43F5E', '#6B7280', '#374151', '#1F2937',
+    '#EF4444',
+    '#F97316',
+    '#F59E0B',
+    '#EAB308',
+    '#84CC16',
+    '#22C55E',
+    '#10B981',
+    '#14B8A6',
+    '#06B6D4',
+    '#0EA5E9',
+    '#3B82F6',
+    '#6366F1',
+    '#8B5CF6',
+    '#A855F7',
+    '#D946EF',
+    '#EC4899',
+    '#F43F5E',
+    '#6B7280',
+    '#374151',
+    '#1F2937',
   ]
 
   useEffect(() => {
@@ -34,7 +50,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   }, [value])
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (
         pickerRef.current &&
         !pickerRef.current.contains(event.target as Node) &&
@@ -62,7 +78,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     }
   }, [isOpen])
 
-  const handleColorChange = (color: string) => {
+  const handleColorChange = (color: string): void => {
     setTempColor(color)
     onChange(color)
   }
@@ -71,7 +87,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     return /^#[0-9A-F]{6}$/i.test(color)
   }
 
-  const handleTextInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTextInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const newValue = e.target.value
     setTempColor(newValue)
 
@@ -93,7 +109,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
       <div className={styles.paletteSection}>
         <h4>プリセットカラー</h4>
         <div className={styles.colorGrid}>
-          {colorPalette.map((color) => (
+          {colorPalette.map(color => (
             <button
               key={color}
               type="button"
@@ -111,7 +127,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         <input
           type="color"
           value={tempColor}
-          onChange={(e) => handleColorChange(e.target.value)}
+          onChange={e => handleColorChange(e.target.value)}
           className={styles.nativeColorPicker}
         />
       </div>
@@ -143,10 +159,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
           />
         </div>
       </div>
-      {popoverContent && ReactDOM.createPortal(
-        popoverContent,
-        document.body,
-      )}
+      {popoverContent && ReactDOM.createPortal(popoverContent, document.body)}
     </>
   )
 }

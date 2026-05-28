@@ -168,7 +168,9 @@ export class JSONEditor {
     this.textarea = this.container.querySelector('.json-textarea') as HTMLTextAreaElement
     this.lineNumbersElement = this.container.querySelector('.line-numbers') as HTMLElement
     this.highlightElement = this.container.querySelector('.syntax-highlight') as HTMLElement
-    this.suggestionsElement = this.container.querySelector('.auto-complete-suggestions') as HTMLElement
+    this.suggestionsElement = this.container.querySelector(
+      '.auto-complete-suggestions',
+    ) as HTMLElement
 
     // Initialize with empty content
     this.setValue('{}', false)
@@ -180,7 +182,7 @@ export class JSONEditor {
   private setupEventHandlers(): void {
     // Textarea events
     this.textarea.addEventListener('input', () => this.handleInput())
-    this.textarea.addEventListener('keydown', (e) => this.handleKeyDown(e))
+    this.textarea.addEventListener('keydown', e => this.handleKeyDown(e))
     this.textarea.addEventListener('keyup', () => this.updateCursorInfo())
     this.textarea.addEventListener('click', () => this.updateCursorInfo())
     this.textarea.addEventListener('scroll', () => this.syncScroll())
@@ -199,10 +201,11 @@ export class JSONEditor {
     copyBtn?.addEventListener('click', () => this.copyToClipboard())
 
     // Auto-complete suggestion clicks
-    this.suggestionsElement.addEventListener('click', (e) => {
+    this.suggestionsElement.addEventListener('click', e => {
       const suggestion = (e.target as HTMLElement).closest('.suggestion-item')
       if (suggestion) {
-        const text = (suggestion as HTMLElement).dataset.insertText || (suggestion as HTMLElement).textContent
+        const text =
+          (suggestion as HTMLElement).dataset.insertText || (suggestion as HTMLElement).textContent
         if (text) {
           this.insertSuggestion(text)
         }
@@ -210,7 +213,7 @@ export class JSONEditor {
     })
 
     // Close suggestions when clicking outside
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       if (!this.container.contains(e.target as Node)) {
         this.hideSuggestions()
       }
@@ -251,9 +254,7 @@ export class JSONEditor {
       const spaces = ' '.repeat(this.config.tabSize || 2)
 
       this.textarea.value =
-        this.textarea.value.substring(0, start) +
-        spaces +
-        this.textarea.value.substring(end)
+        this.textarea.value.substring(0, start) + spaces + this.textarea.value.substring(end)
 
       this.textarea.selectionStart = this.textarea.selectionEnd = start + spaces.length
       this.handleInput()
@@ -277,7 +278,8 @@ export class JSONEditor {
         e.preventDefault()
         const selected = this.suggestionsElement.querySelector('.suggestion-item.selected')
         if (selected) {
-          const text = (selected as HTMLElement).dataset.insertText || (selected as HTMLElement).textContent
+          const text =
+            (selected as HTMLElement).dataset.insertText || (selected as HTMLElement).textContent
           if (text) {
             this.insertSuggestion(text)
           }
@@ -309,7 +311,9 @@ export class JSONEditor {
 
     this.textarea.value =
       this.textarea.value.substring(0, start) +
-      open + selectedText + close +
+      open +
+      selectedText +
+      close +
       this.textarea.value.substring(end)
 
     // Position cursor inside brackets if no text was selected
@@ -333,8 +337,9 @@ export class JSONEditor {
 
     // Apply syntax highlighting patterns
     this.syntaxPatterns.forEach(pattern => {
-      highlighted = highlighted.replace(pattern.pattern, (match) =>
-        `<span class="${pattern.className}">${match}</span>`,
+      highlighted = highlighted.replace(
+        pattern.pattern,
+        match => `<span class="${pattern.className}">${match}</span>`,
       )
     })
 
@@ -461,7 +466,11 @@ export class JSONEditor {
   /**
    * Validate against JSON schema
    */
-  private validateAgainstSchema(value: unknown, schema: JSONSchema, path: string): ValidationError[] {
+  private validateAgainstSchema(
+    value: unknown,
+    schema: JSONSchema,
+    path: string,
+  ): ValidationError[] {
     const errors: ValidationError[] = []
 
     // Type validation
@@ -478,7 +487,12 @@ export class JSONEditor {
     }
 
     // Object validation
-    if (schema.type === 'object' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    if (
+      schema.type === 'object' &&
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value)
+    ) {
       const obj = value as Record<string, unknown>
 
       // Required properties
@@ -611,12 +625,16 @@ export class JSONEditor {
         errorListElement.style.display = 'none'
       } else {
         errorListElement.style.display = 'block'
-        errorListElement.innerHTML = this.currentErrors.map(error => `
+        errorListElement.innerHTML = this.currentErrors
+          .map(
+            error => `
           <div class="error-item ${error.severity}">
             <span class="error-location">${error.path || 'root'}${error.line ? ` (line ${error.line})` : ''}</span>
             <span class="error-message">${error.message}</span>
           </div>
-        `).join('')
+        `,
+          )
+          .join('')
       }
     }
   }
@@ -640,9 +658,12 @@ export class JSONEditor {
   /**
    * Get auto-complete context
    */
-  private getAutoCompleteContext(): { type: 'key' | 'value' | 'unknown'; path: string; currentToken: string } {
+  private getAutoCompleteContext(): {
+    type: 'key' | 'value' | 'unknown'
+    path: string
+    currentToken: string
+  } {
     const beforeCursor = this.currentValue.substring(0, this.cursorPosition)
-    const afterCursor = this.currentValue.substring(this.cursorPosition)
 
     // Simple context detection - in a real implementation this would be more sophisticated
     const inString = (beforeCursor.match(/"/g) || []).length % 2 === 1
@@ -665,7 +686,11 @@ export class JSONEditor {
   /**
    * Generate auto-complete suggestions
    */
-  private generateSuggestions(context: { type: 'key' | 'value' | 'unknown'; path: string; currentToken: string }): AutoCompleteSuggestion[] {
+  private generateSuggestions(context: {
+    type: 'key' | 'value' | 'unknown'
+    path: string
+    currentToken: string
+  }): AutoCompleteSuggestion[] {
     const suggestions: AutoCompleteSuggestion[] = []
 
     if (!this.config.schema) return suggestions
@@ -678,15 +703,19 @@ export class JSONEditor {
       this.addValueSuggestions(this.config.schema, suggestions, context.currentToken)
     }
 
-    return suggestions.filter(s =>
-      s.text.toLowerCase().includes(context.currentToken.toLowerCase()),
-    ).slice(0, 10)
+    return suggestions
+      .filter(s => s.text.toLowerCase().includes(context.currentToken.toLowerCase()))
+      .slice(0, 10)
   }
 
   /**
    * Add property suggestions from schema
    */
-  private addPropertySuggestions(schema: JSONSchema, suggestions: AutoCompleteSuggestion[], filter: string): void {
+  private addPropertySuggestions(
+    schema: JSONSchema,
+    suggestions: AutoCompleteSuggestion[],
+    filter: string,
+  ): void {
     if (schema.type === 'object' && schema.properties) {
       Object.entries(schema.properties).forEach(([key, propSchema]) => {
         if (key.toLowerCase().includes(filter.toLowerCase())) {
@@ -705,7 +734,11 @@ export class JSONEditor {
   /**
    * Add value suggestions from schema
    */
-  private addValueSuggestions(schema: JSONSchema, suggestions: AutoCompleteSuggestion[], filter: string): void {
+  private addValueSuggestions(
+    schema: JSONSchema,
+    suggestions: AutoCompleteSuggestion[],
+    filter: string,
+  ): void {
     // Suggest enum values
     if (schema.enum) {
       schema.enum.forEach(value => {
@@ -723,7 +756,7 @@ export class JSONEditor {
 
     // Suggest type-based values
     if (schema.type === 'boolean') {
-      ['true', 'false'].forEach(value => {
+      ;['true', 'false'].forEach(value => {
         if (value.includes(filter.toLowerCase())) {
           suggestions.push({
             text: value,
@@ -753,13 +786,17 @@ export class JSONEditor {
   private showSuggestions(): void {
     if (this.currentSuggestions.length === 0) return
 
-    this.suggestionsElement.innerHTML = this.currentSuggestions.map((suggestion, index) => `
+    this.suggestionsElement.innerHTML = this.currentSuggestions
+      .map(
+        (suggestion, index) => `
       <div class="suggestion-item ${index === 0 ? 'selected' : ''}" data-insert-text="${suggestion.insertText || suggestion.text}">
         <span class="suggestion-text">${suggestion.displayText}</span>
         <span class="suggestion-type">${suggestion.type}</span>
         ${suggestion.description ? `<span class="suggestion-description">${suggestion.description}</span>` : ''}
       </div>
-    `).join('')
+    `,
+      )
+      .join('')
 
     // Position suggestions near cursor
     const rect = this.textarea.getBoundingClientRect()
@@ -807,9 +844,7 @@ export class JSONEditor {
     const tokenStart = beforeCursor.lastIndexOf('"') + 1
 
     this.textarea.value =
-      this.currentValue.substring(0, tokenStart) +
-      text +
-      this.currentValue.substring(end)
+      this.currentValue.substring(0, tokenStart) + text + this.currentValue.substring(end)
 
     this.textarea.selectionStart = this.textarea.selectionEnd = tokenStart + text.length
     this.hideSuggestions()
@@ -828,7 +863,7 @@ export class JSONEditor {
       const formatted = JSON.stringify(parsed, null, this.config.tabSize || 2)
       this.setValue(formatted)
       this.feedbackManager.showNotification('JSON formatted', FeedbackType.SUCCESS)
-    } catch (error) {
+    } catch {
       this.feedbackManager.showNotification('Cannot format invalid JSON', FeedbackType.ERROR)
     }
   }
@@ -844,7 +879,7 @@ export class JSONEditor {
       const minified = JSON.stringify(parsed)
       this.setValue(minified)
       this.feedbackManager.showNotification('JSON minified', FeedbackType.SUCCESS)
-    } catch (error) {
+    } catch {
       this.feedbackManager.showNotification('Cannot minify invalid JSON', FeedbackType.ERROR)
     }
   }
@@ -853,11 +888,14 @@ export class JSONEditor {
    * Copy to clipboard
    */
   private copyToClipboard(): void {
-    navigator.clipboard.writeText(this.currentValue).then(() => {
-      this.feedbackManager.showNotification('Copied to clipboard', FeedbackType.SUCCESS)
-    }).catch(() => {
-      this.feedbackManager.showNotification('Failed to copy', FeedbackType.ERROR)
-    })
+    navigator.clipboard
+      .writeText(this.currentValue)
+      .then(() => {
+        this.feedbackManager.showNotification('Copied to clipboard', FeedbackType.SUCCESS)
+      })
+      .catch(() => {
+        this.feedbackManager.showNotification('Failed to copy', FeedbackType.ERROR)
+      })
   }
 
   /**
