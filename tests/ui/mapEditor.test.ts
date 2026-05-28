@@ -61,7 +61,7 @@ Object.defineProperty(document, 'createElementNS', {
     element.appendChild = vi.fn()
     element.removeChild = vi.fn()
     element.querySelector = vi.fn()
-    element.querySelectorAll = vi.fn(() => [])
+    element.querySelectorAll = vi.fn(() => []) as unknown as typeof element.querySelectorAll
 
     Object.defineProperty(element, 'firstChild', {
       value: null,

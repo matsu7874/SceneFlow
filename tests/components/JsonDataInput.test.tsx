@@ -130,7 +130,7 @@ describe('JsonDataInput', () => {
       </TestWrapper>,
     )
 
-    const textarea = screen.getByRole('textbox')
+    const textarea = screen.getByRole<HTMLTextAreaElement>('textbox')
     const value = textarea.value
 
     // Check that default data contains Momotaro

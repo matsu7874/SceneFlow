@@ -32,7 +32,7 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
   const [links, setLinks] = useState<Link[]>([])
   const [selectedNode, setSelectedNode] = useState<string | null>(null)
   const [hoveredNode, setHoveredNode] = useState<string | null>(null)
-  const animationFrameRef = useRef<number>()
+  const animationFrameRef = useRef<number | undefined>(undefined)
   const { storyData, setStoryData } = useAppContext()
 
   // Initialize nodes and links

@@ -77,10 +77,10 @@ export interface JSONChangeEvent {
  */
 export class JSONEditor {
   private container: HTMLElement
-  private textarea: HTMLTextAreaElement
-  private lineNumbersElement: HTMLElement
-  private highlightElement: HTMLElement
-  private suggestionsElement: HTMLElement
+  private textarea!: HTMLTextAreaElement
+  private lineNumbersElement!: HTMLElement
+  private highlightElement!: HTMLElement
+  private suggestionsElement!: HTMLElement
   private feedbackManager: VisualFeedbackManager
   private config: JSONEditorConfig
 
@@ -397,7 +397,7 @@ export class JSONEditor {
   /**
    * Validate JSON
    */
-  private validateJSON(): void {
+  private validateJSON(): { isValid: boolean; parsed: unknown; errors: ValidationError[] } {
     this.currentErrors = []
     let parsed: unknown = undefined
     let isValid = false
@@ -606,7 +606,7 @@ export class JSONEditor {
    */
   private updateValidationDisplay(): void {
     const statusElement = this.container.querySelector('.validation-status')
-    const errorListElement = this.container.querySelector('.error-list')
+    const errorListElement = this.container.querySelector<HTMLElement>('.error-list')
 
     if (statusElement) {
       if (this.currentErrors.length === 0) {

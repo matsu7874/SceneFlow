@@ -1,9 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import {
-  VisualFeedbackManager,
-  FeedbackType,
-} from '../../src/modules/ui/visualFeedback'
+import { VisualFeedbackManager, FeedbackType } from '../../src/modules/ui/visualFeedback'
 import type { ActionValidation } from '../../src/modules/ui/interactiveActions'
+import type { EntityId } from '../../src/types/causality'
 
 describe('VisualFeedbackManager', () => {
   let manager: VisualFeedbackManager
@@ -25,12 +23,7 @@ describe('VisualFeedbackManager', () => {
       const element = document.createElement('div')
       container.appendChild(element)
 
-      manager.showEntityFeedback(
-        'entity1',
-        element,
-        FeedbackType.VALID,
-        'This is valid',
-      )
+      manager.showEntityFeedback('entity1', element, FeedbackType.VALID, 'This is valid')
 
       expect(element.classList.contains('feedback-valid')).toBe(true)
       expect(container.querySelector('.feedback-tooltip')).toBeTruthy()
@@ -41,17 +34,13 @@ describe('VisualFeedbackManager', () => {
       const element = document.createElement('div')
       container.appendChild(element)
 
-      manager.showEntityFeedback(
-        'entity1',
-        element,
-        FeedbackType.INVALID,
-        'Error message',
-        { duration: 100 },
-      )
+      manager.showEntityFeedback('entity1', element, FeedbackType.INVALID, 'Error message', {
+        duration: 100,
+      })
 
       expect(element.classList.contains('feedback-invalid')).toBe(true)
 
-      await new Promise<void>((resolve) => setTimeout(resolve, 150))
+      await new Promise<void>(resolve => setTimeout(resolve, 150))
 
       expect(element.classList.contains('feedback-invalid')).toBe(false)
       expect(container.querySelector('.feedback-tooltip')).toBeFalsy()
@@ -115,7 +104,7 @@ describe('VisualFeedbackManager', () => {
         getAffectedEntities: (): string[] => ['entity1', 'entity2'],
       }
 
-      const getElement = (id: string): HTMLElement | null => {
+      const getElement = (id: EntityId): HTMLElement | null => {
         if (id === 'entity1') return element1
         if (id === 'entity2') return element2
         return null
@@ -148,7 +137,7 @@ describe('VisualFeedbackManager', () => {
         getAffectedEntities: (): string[] => ['entity1'],
       }
 
-      const getElement = (id: string): HTMLElement | null => id === 'entity1' ? element : null
+      const getElement = (id: EntityId): HTMLElement | null => (id === 'entity1' ? element : null)
 
       manager.showExecutionFeedback(mockAct as never, true, getElement)
 
@@ -180,12 +169,12 @@ describe('VisualFeedbackManager', () => {
       expect(notification).toBeTruthy()
       expect(notification?.textContent).toBe('Test message')
 
-      await new Promise<void>((resolve) => setTimeout(resolve, 150))
+      await new Promise<void>(resolve => setTimeout(resolve, 150))
 
       // Should start fade out
       expect(notification?.classList.contains('notification-fade-out')).toBe(true)
 
-      await new Promise<void>((resolve) => setTimeout(resolve, 350))
+      await new Promise<void>(resolve => setTimeout(resolve, 350))
 
       // Should be removed
       expect(container.querySelector('.notification')).toBeFalsy()

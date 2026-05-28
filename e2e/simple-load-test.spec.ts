@@ -17,14 +17,20 @@ test.describe('Load Function', () => {
 
     // Find the textarea and fill it with minimal JSON
     const textarea = page.locator('textarea').first()
-    await textarea.fill(JSON.stringify({
-      persons: [{ id: 1, name: 'TestPerson', color: '#FF0000' }],
-      locations: [{ id: 1, name: 'TestLocation', connections: [] }],
-      acts: [{ id: 1, personId: 1, locationId: 1, time: '09:00:00', description: 'TestAct' }],
-      props: [],
-      informations: [],
-      initialStates: [{ personId: 1, locationId: 1, time: '09:00:00' }],
-    }, null, 2))
+    await textarea.fill(
+      JSON.stringify(
+        {
+          persons: [{ id: 1, name: 'TestPerson', color: '#FF0000' }],
+          locations: [{ id: 1, name: 'TestLocation', connections: [] }],
+          acts: [{ id: 1, personId: 1, locationId: 1, time: '09:00:00', description: 'TestAct' }],
+          props: [],
+          informations: [],
+          initialStates: [{ personId: 1, locationId: 1, time: '09:00:00' }],
+        },
+        null,
+        2,
+      ),
+    )
 
     // Find and click the load button
     const loadButton = page.getByRole('button', { name: '物語データをロード' })
@@ -52,7 +58,7 @@ test.describe('Load Function', () => {
     // Check if there's any content in the output area
     const outputArea = page.locator('.output-area')
     const outputText = await outputArea.textContent()
-    console.log('Output area text length:', outputText.length)
+    console.log('Output area text length:', outputText?.length ?? 0)
 
     // Basic assertion - at least check the page didn't crash
     expect(await page.title()).toBe('Scene-Flow - イマーシブシアターシミュレーター')

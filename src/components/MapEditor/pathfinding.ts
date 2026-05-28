@@ -66,12 +66,12 @@ export class AStar {
       let current: Node | null = null
       let lowestF = Infinity
 
-      openSet.forEach(node => {
+      for (const node of openSet.values()) {
         if (node.f < lowestF) {
           lowestF = node.f
           current = node
         }
-      })
+      }
 
       if (!current) break
 
@@ -98,7 +98,7 @@ export class AStar {
           const neighborLoc = this.locations.get(neighborId)
           if (!neighborLoc) return
 
-          const tentativeG = current!.g + weight
+          const tentativeG = current.g + weight
 
           const existingNode = openSet.get(neighborId)
           if (!existingNode || tentativeG < existingNode.g) {

@@ -106,8 +106,9 @@ export class TimelineEditor {
     this.timelineItems.clear()
 
     // Get all acts sorted by timestamp
-    const acts = Array.from(this.engine.getActs().values())
-      .sort((a, b) => a.timestamp - b.timestamp)
+    const acts = Array.from(this.engine.getActs().values()).sort(
+      (a, b) => a.timestamp - b.timestamp,
+    )
 
     // Create timeline items
     acts.forEach(act => {
@@ -159,20 +160,20 @@ export class TimelineEditor {
     `
 
     // Event handlers
-    element.addEventListener('click', (e) => {
+    element.addEventListener('click', e => {
       if (!(e.target as HTMLElement).matches('button')) {
         this.selectAct(act.id)
       }
     })
 
     const validateBtn = element.querySelector('.btn-item-validate')
-    validateBtn?.addEventListener('click', (e) => {
+    validateBtn?.addEventListener('click', e => {
       e.stopPropagation()
       this.validateAct(act.id)
     })
 
     const removeBtn = element.querySelector('.btn-item-remove')
-    removeBtn?.addEventListener('click', (e) => {
+    removeBtn?.addEventListener('click', e => {
       e.stopPropagation()
       this.removeAct(act.id)
     })
@@ -189,7 +190,7 @@ export class TimelineEditor {
     this.timelineItems.forEach(item => {
       const element = item.element
 
-      element.addEventListener('dragstart', (e) => {
+      element.addEventListener('dragstart', e => {
         draggedItem = item
         element.classList.add('dragging')
         if (e.dataTransfer) {
@@ -202,7 +203,7 @@ export class TimelineEditor {
         draggedItem = null
       })
 
-      element.addEventListener('dragover', (e) => {
+      element.addEventListener('dragover', e => {
         if (!draggedItem || draggedItem === item || !element.parentElement) return
 
         e.preventDefault()
@@ -210,24 +211,18 @@ export class TimelineEditor {
           e.dataTransfer.dropEffect = 'move'
         }
 
-        const afterElement = this.getDragAfterElement(
-          element.parentElement,
-          e.clientY,
-        )
+        const afterElement = this.getDragAfterElement(element.parentElement, e.clientY)
 
         if (afterElement === null) {
           element.parentElement.appendChild(draggedItem.element)
         } else {
-          element.parentElement.insertBefore(
-            draggedItem.element,
-            afterElement,
-          )
+          element.parentElement.insertBefore(draggedItem.element, afterElement)
         }
       })
     })
 
     // Handle drop on placeholder
-    const placeholder = this.container.querySelector('.timeline-add-placeholder')
+    const placeholder = this.container.querySelector<HTMLElement>('.timeline-add-placeholder')
 
     placeholder?.addEventListener('dragover', (e: DragEvent) => {
       e.preventDefault()
@@ -263,26 +258,24 @@ export class TimelineEditor {
   /**
    * Get element after which to insert during drag
    */
-  private getDragAfterElement(
-    container: HTMLElement,
-    y: number,
-  ): Element | null {
-    const draggableElements = [
-      ...container.querySelectorAll('.timeline-item:not(.dragging)'),
-    ]
+  private getDragAfterElement(container: HTMLElement, y: number): Element | null {
+    const draggableElements = [...container.querySelectorAll('.timeline-item:not(.dragging)')]
 
     type ClosestElement = { offset: number; element: Element | null }
 
-    const result = draggableElements.reduce<ClosestElement>((closest, child) => {
-      const box = child.getBoundingClientRect()
-      const offset = y - box.top - box.height / 2
+    const result = draggableElements.reduce<ClosestElement>(
+      (closest, child) => {
+        const box = child.getBoundingClientRect()
+        const offset = y - box.top - box.height / 2
 
-      if (offset < 0 && offset > closest.offset) {
-        return { offset: offset, element: child }
-      } else {
-        return closest
-      }
-    }, { offset: Number.NEGATIVE_INFINITY, element: null })
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child }
+        } else {
+          return closest
+        }
+      },
+      { offset: Number.NEGATIVE_INFINITY, element: null },
+    )
 
     return result.element
   }
@@ -363,10 +356,7 @@ export class TimelineEditor {
 
     // Show feedback
     if (validation.valid) {
-      this.feedbackManager.showNotification(
-        'Timeline is valid!',
-        FeedbackType.SUCCESS,
-      )
+      this.feedbackManager.showNotification('Timeline is valid!', FeedbackType.SUCCESS)
     } else {
       this.feedbackManager.showNotification(
         `Found ${validation.conflicts.length} conflicts`,
@@ -445,10 +435,7 @@ export class TimelineEditor {
         this.onTimelineChange()
       }
 
-      this.feedbackManager.showNotification(
-        'Act removed successfully',
-        FeedbackType.SUCCESS,
-      )
+      this.feedbackManager.showNotification('Act removed successfully', FeedbackType.SUCCESS)
     } else {
       this.feedbackManager.showNotification(
         result.errors.map(e => e.message).join('\n'),
@@ -465,12 +452,9 @@ export class TimelineEditor {
     if (!stats) return
 
     const totalActs = this.timelineItems.size
-    const invalidActs = Array.from(this.timelineItems.values())
-      .filter(item => !item.valid).length
+    const invalidActs = Array.from(this.timelineItems.values()).filter(item => !item.valid).length
 
-    stats.textContent = `${totalActs} acts${
-      invalidActs > 0 ? ` (${invalidActs} invalid)` : ''
-    }`
+    stats.textContent = `${totalActs} acts${invalidActs > 0 ? ` (${invalidActs} invalid)` : ''}`
   }
 
   /**
@@ -484,9 +468,7 @@ export class TimelineEditor {
    * Format entity list for display
    */
   private formatEntities(entities: EntityId[]): string {
-    return entities
-      .map(id => `<span class="entity-tag">${id}</span>`)
-      .join(' ')
+    return entities.map(id => `<span class="entity-tag">${id}</span>`).join(' ')
   }
 
   /**

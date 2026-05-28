@@ -12,7 +12,8 @@ export function parseJsonData(inputElement: HTMLTextAreaElement): StoryData {
   }
 
   // Check for potential security issues
-  if (inputValue.length > 10 * 1024 * 1024) { // 10MB limit
+  if (inputValue.length > 10 * 1024 * 1024) {
+    // 10MB limit
     throw new Error('JSONデータが大きすぎます（最大10MB）')
   }
 
@@ -96,5 +97,5 @@ export function parseJsonData(inputElement: HTMLTextAreaElement): StoryData {
     }
   })
 
-  return typedData as StoryData
+  return typedData as unknown as StoryData
 }

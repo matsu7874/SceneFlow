@@ -12,18 +12,10 @@ describe('indexStoryData', () => {
       { id: 101, name: 'Room 1', connections: [102] },
       { id: 102, name: 'Room 2', connections: [101] },
     ],
-    acts: [
-      { id: 1001, personId: 1, locationId: 101, time: '09:00', description: 'Act 1' },
-    ],
-    props: [
-      { id: 201, name: 'Key' },
-    ],
-    informations: [
-      { id: 301, content: 'Secret info' },
-    ],
-    initialStates: [
-      { personId: 1, locationId: 101, time: '09:00' },
-    ],
+    acts: [{ id: 1001, personId: 1, locationId: 101, time: '09:00', description: 'Act 1' }],
+    props: [{ id: 201, name: 'Key' }],
+    informations: [{ id: 301, content: 'Secret info' }],
+    initialStates: [{ personId: 1, locationId: 101, time: '09:00' }],
   }
 
   it('should create maps for all entity types', () => {
@@ -77,14 +69,15 @@ describe('indexStoryData', () => {
   })
 
   it('should handle undefined optional arrays', () => {
-    const minimalData: StoryData = {
+    // Intentionally pass undefined arrays to verify indexStoryData tolerates them.
+    const minimalData = {
       persons: mockStoryData.persons,
       locations: mockStoryData.locations,
       acts: mockStoryData.acts,
       initialStates: mockStoryData.initialStates,
       props: undefined,
       informations: undefined,
-    }
+    } as unknown as StoryData
 
     const result = indexStoryData(minimalData)
 
@@ -141,9 +134,30 @@ describe('indexStoryData', () => {
 describe('sortEvents', () => {
   it('should sort events by time', () => {
     const events: Event[] = [
-      { id: 3, triggerType: '時刻', triggerValue: '10:00', eventTime: '10:00', personId: 1, actId: 1003 },
-      { id: 1, triggerType: '時刻', triggerValue: '09:00', eventTime: '09:00', personId: 1, actId: 1001 },
-      { id: 2, triggerType: '時刻', triggerValue: '09:30', eventTime: '09:30', personId: 1, actId: 1002 },
+      {
+        id: 3,
+        triggerType: '時刻',
+        triggerValue: '10:00',
+        eventTime: '10:00',
+        personId: 1,
+        actId: 1003,
+      },
+      {
+        id: 1,
+        triggerType: '時刻',
+        triggerValue: '09:00',
+        eventTime: '09:00',
+        personId: 1,
+        actId: 1001,
+      },
+      {
+        id: 2,
+        triggerType: '時刻',
+        triggerValue: '09:30',
+        eventTime: '09:30',
+        personId: 1,
+        actId: 1002,
+      },
     ]
 
     const sorted = sortEvents(events)
@@ -155,9 +169,30 @@ describe('sortEvents', () => {
 
   it('should sort by id when times are equal', () => {
     const events: Event[] = [
-      { id: 3, triggerType: '時刻', triggerValue: '09:00', eventTime: '09:00', personId: 3, actId: 1003 },
-      { id: 1, triggerType: '時刻', triggerValue: '09:00', eventTime: '09:00', personId: 1, actId: 1001 },
-      { id: 2, triggerType: '時刻', triggerValue: '09:00', eventTime: '09:00', personId: 2, actId: 1002 },
+      {
+        id: 3,
+        triggerType: '時刻',
+        triggerValue: '09:00',
+        eventTime: '09:00',
+        personId: 3,
+        actId: 1003,
+      },
+      {
+        id: 1,
+        triggerType: '時刻',
+        triggerValue: '09:00',
+        eventTime: '09:00',
+        personId: 1,
+        actId: 1001,
+      },
+      {
+        id: 2,
+        triggerType: '時刻',
+        triggerValue: '09:00',
+        eventTime: '09:00',
+        personId: 2,
+        actId: 1002,
+      },
     ]
 
     const sorted = sortEvents(events)
@@ -169,8 +204,22 @@ describe('sortEvents', () => {
 
   it('should not modify the original array', () => {
     const events: Event[] = [
-      { id: 2, triggerType: '時刻', triggerValue: '10:00', eventTime: '10:00', personId: 1, actId: 1002 },
-      { id: 1, triggerType: '時刻', triggerValue: '09:00', eventTime: '09:00', personId: 1, actId: 1001 },
+      {
+        id: 2,
+        triggerType: '時刻',
+        triggerValue: '10:00',
+        eventTime: '10:00',
+        personId: 1,
+        actId: 1002,
+      },
+      {
+        id: 1,
+        triggerType: '時刻',
+        triggerValue: '09:00',
+        eventTime: '09:00',
+        personId: 1,
+        actId: 1001,
+      },
     ]
 
     const originalOrder = [...events]

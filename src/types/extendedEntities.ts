@@ -104,6 +104,11 @@ export interface ExtendedEntity {
     targetId: string
     metadata?: Record<string, any>
   }>
+  // Type-specific fields flattened onto the entity at runtime when form data is applied.
+  color?: string
+  content?: string
+  connectedTo?: string[]
+  connections?: number[]
 }
 
 /**

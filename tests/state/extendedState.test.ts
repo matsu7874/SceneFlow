@@ -16,31 +16,40 @@ import {
 import type { StoryData } from '../../src/types'
 
 describe('Extended State Management', () => {
-  const createSampleStoryData = (): StoryData => ({
-    persons: [
-      { id: 'alice', name: 'Alice', description: 'Main character' },
-      { id: 'bob', name: 'Bob', description: 'Supporting character' },
-    ],
-    locations: [
-      { id: 'room1', name: 'Living Room', description: 'A cozy room' },
-      { id: 'room2', name: 'Kitchen', description: 'Where food is prepared' },
-    ],
-    props: [
-      { id: 'chair', name: '椅子(大)', description: '大きな椅子' },
-      { id: 'key', name: 'Key', description: 'A small key' },
-    ],
-    acts: [
-      {
-        id: 1,
-        personId: 'alice',
-        locationId: 'room1',
-        time: '00:01:40',
-        description: 'Alice enters',
-      },
-      { id: 2, personId: 'bob', locationId: 'room2', time: '00:03:20', description: 'Bob enters' },
-    ],
-    initialStates: [],
-  })
+  // Tests use string entity ids (a valid EntityId form) while StoryData declares
+  // numeric ids; cast through unknown to keep the string-id sample data.
+  const createSampleStoryData = (): StoryData =>
+    ({
+      persons: [
+        { id: 'alice', name: 'Alice', description: 'Main character' },
+        { id: 'bob', name: 'Bob', description: 'Supporting character' },
+      ],
+      locations: [
+        { id: 'room1', name: 'Living Room', description: 'A cozy room' },
+        { id: 'room2', name: 'Kitchen', description: 'Where food is prepared' },
+      ],
+      props: [
+        { id: 'chair', name: '椅子(大)', description: '大きな椅子' },
+        { id: 'key', name: 'Key', description: 'A small key' },
+      ],
+      acts: [
+        {
+          id: 1,
+          personId: 'alice',
+          locationId: 'room1',
+          time: '00:01:40',
+          description: 'Alice enters',
+        },
+        {
+          id: 2,
+          personId: 'bob',
+          locationId: 'room2',
+          time: '00:03:20',
+          description: 'Bob enters',
+        },
+      ],
+      initialStates: [],
+    }) as unknown as StoryData
 
   describe('storyDataToWorldState', () => {
     it('should convert story data to world state', () => {
@@ -62,7 +71,7 @@ describe('Extended State Management', () => {
         locationId: 'room2',
         time: '00:06:40', // 400秒 = 6分40秒
         description: 'Alice moves',
-      })
+      } as unknown as (typeof storyData.acts)[number])
 
       const worldState1 = storyDataToWorldState(storyData, 2.5) // 150秒 = 2.5分
       expect(worldState1.personPositions['alice']).toBe('room1')

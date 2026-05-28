@@ -29,7 +29,7 @@ export const LocationLayout: React.FC<LocationLayoutProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animatedPersonsRef = useRef<Map<number, AnimatedPerson>>(new Map())
-  const animationFrameRef = useRef<number>()
+  const animationFrameRef = useRef<number | undefined>(undefined)
   const previousPositionsRef = useRef<Map<number, number>>(new Map())
 
   // Calculate location positions on canvas

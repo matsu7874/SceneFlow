@@ -96,9 +96,9 @@ export interface RelationshipEditorOptions {
 export class RelationshipEditor {
   private container: HTMLElement
   private feedbackManager: VisualFeedbackManager
-  private canvas: HTMLCanvasElement
-  private ctx: CanvasRenderingContext2D
-  private svg: SVGElement
+  private canvas!: HTMLCanvasElement
+  private ctx!: CanvasRenderingContext2D
+  private svg!: SVGElement
 
   private entities: Map<EntityId, EditableEntity> = new Map()
   private relationships: Map<string, Relationship> = new Map()
@@ -493,7 +493,7 @@ export class RelationshipEditor {
    */
   private renderNode(node: RelationshipNode): void {
     const group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-    group.setAttribute('data-entity-id', node.entity.id)
+    group.setAttribute('data-entity-id', String(node.entity.id))
 
     const x = (node.x + this.panX) * this.zoom
     const y = (node.y + this.panY) * this.zoom

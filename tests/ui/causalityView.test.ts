@@ -24,7 +24,7 @@ Object.defineProperty(document, 'createElementNS', {
     element.appendChild = vi.fn()
     element.removeChild = vi.fn()
     element.querySelector = vi.fn()
-    element.querySelectorAll = vi.fn(() => [])
+    element.querySelectorAll = vi.fn(() => []) as unknown as typeof element.querySelectorAll
 
     // Mock important properties
     Object.defineProperty(element, 'firstChild', {

@@ -33,7 +33,7 @@ vi.mock('../../src/components/CausalityView', async () => {
   const actual = await vi.importActual('../../src/components/CausalityView')
   return {
     ...actual,
-    CausalityView: vi.fn().mockImplementation(props => {
+    CausalityView: vi.fn().mockImplementation((props: any) => {
       const { useState, useRef } = React
 
       const [scale, setScale] = useState(1)
@@ -59,7 +59,7 @@ vi.mock('../../src/components/CausalityView', async () => {
         React.createElement(
           'svg',
           null,
-          props.storyData.acts.map((act, i) =>
+          props.storyData.acts.map((act: Act, i: number) =>
             React.createElement(
               'g',
               { key: act.id },
@@ -82,7 +82,7 @@ vi.mock('../../src/components/CausalityView', async () => {
             ),
           ),
           props.storyData.events &&
-            props.storyData.events.map((event, i) =>
+            props.storyData.events.map((event: { id: string }, i: number) =>
               React.createElement(
                 'g',
                 { key: event.id },
@@ -122,8 +122,8 @@ vi.mock('../../src/components/CausalityView', async () => {
   }
 })
 
-// Mock story data with acts
-const mockStoryData: StoryData = {
+// Mock story data with acts (uses an extended act shape; cast through unknown)
+const mockStoryData = {
   persons: [
     { id: 1, name: 'Alice', color: '#ff0000' },
     { id: 2, name: 'Bob', color: '#00ff00' },
@@ -164,10 +164,10 @@ const mockStoryData: StoryData = {
       startTime: 180,
       description: 'Bob takes Key from Alice',
     },
-  ] as Act[],
+  ],
   events: [],
   initialStates: [],
-}
+} as unknown as StoryData
 
 describe('CausalityView', () => {
   const user = userEvent.setup()

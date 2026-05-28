@@ -3,6 +3,7 @@ import { ExtendedEntity, EntityType } from '../../types/extendedEntities'
 import { EntityEditor } from './EntityEditor'
 import { useVisualFeedback } from '../../contexts/VisualFeedbackContext'
 import { useAppContext } from '../../contexts/AppContext'
+import { generateEventsFromActs } from '../../utils/eventGeneration'
 import styles from './EntityEditor.module.css'
 
 interface ExtendedEntityEditorProps {
@@ -235,10 +236,10 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
   }, [entity.type])
 
   // Prepare entities for reference fields
-  const entities = useMemo(() => {
+  const entities = useMemo<Record<string, Array<{ id: string; name: string }>>>(() => {
     if (!storyData) return {}
 
-    return {
+    const result: Record<string, Array<{ id: string; name: string }>> = {
       person: storyData.persons.map(p => ({ id: p.id.toString(), name: p.name })),
       location: storyData.locations.map(l => ({ id: l.id.toString(), name: l.name })),
       prop: storyData.props.map(p => ({ id: p.id.toString(), name: p.name })),
@@ -247,8 +248,12 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
         name: i.content.substring(0, 50),
       })),
       act: storyData.acts.map(a => ({ id: a.id.toString(), name: a.description || `Act ${a.id}` })),
-      event: storyData.events.map(e => ({ id: e.id.toString(), name: `Event ${e.id}` })),
+      event: generateEventsFromActs(storyData.acts).map(e => ({
+        id: e.id.toString(),
+        name: `Event ${e.id}`,
+      })),
     }
+    return result
   }, [storyData])
 
   const handleSave = (data: any): void => {

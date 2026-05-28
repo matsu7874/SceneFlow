@@ -33,6 +33,7 @@ const generateLargeDataset = (scale: number): StoryData => {
   const initialStates = persons.map(person => ({
     personId: person.id,
     locationId: 1,
+    time: '00:00',
   }))
 
   return {
@@ -62,7 +63,12 @@ describe('Performance Tests', () => {
 
     // Test simulation performance
     const simulationStart = performance.now()
-    const worldState = getStateAtTime(300, indexedData, indexedData.sortedEvents, indexedData.initialStates)
+    const worldState = getStateAtTime(
+      300,
+      indexedData,
+      indexedData.sortedEvents,
+      indexedData.initialStates,
+    )
     const simulationEnd = performance.now()
 
     const totalTime = performance.now() - startTime
@@ -74,7 +80,9 @@ describe('Performance Tests', () => {
     expect(Object.keys(worldState)).toHaveLength(100)
 
     // Performance assertions - should complete within reasonable time
-    console.log(`Medium dataset (100 persons): Total time: ${totalTime}ms, Simulation time: ${simulationTime}ms`)
+    console.log(
+      `Medium dataset (100 persons): Total time: ${totalTime}ms, Simulation time: ${simulationTime}ms`,
+    )
     expect(totalTime).toBeLessThan(5000) // 5 seconds
     expect(simulationTime).toBeLessThan(1000) // 1 second for simulation
   })
@@ -90,7 +98,12 @@ describe('Performance Tests', () => {
 
     // Test simulation performance
     const simulationStart = performance.now()
-    const worldState = getStateAtTime(600, indexedData, indexedData.sortedEvents, indexedData.initialStates)
+    const worldState = getStateAtTime(
+      600,
+      indexedData,
+      indexedData.sortedEvents,
+      indexedData.initialStates,
+    )
     const simulationEnd = performance.now()
 
     const totalTime = performance.now() - startTime
@@ -102,7 +115,9 @@ describe('Performance Tests', () => {
     expect(Object.keys(worldState)).toHaveLength(500)
 
     // Performance assertions - larger dataset may take more time but should still be reasonable
-    console.log(`Large dataset (500 persons): Total time: ${totalTime}ms, Simulation time: ${simulationTime}ms`)
+    console.log(
+      `Large dataset (500 persons): Total time: ${totalTime}ms, Simulation time: ${simulationTime}ms`,
+    )
     expect(totalTime).toBeLessThan(15000) // 15 seconds
     expect(simulationTime).toBeLessThan(3000) // 3 seconds for simulation
   })
@@ -135,7 +150,9 @@ describe('Performance Tests', () => {
     const totalTime = performance.now() - startTime
     const avgTimePerIteration = totalTime / iterations
 
-    console.log(`Memory test (${iterations} iterations): Total time: ${totalTime}ms, Avg per iteration: ${avgTimePerIteration}ms`)
+    console.log(
+      `Memory test (${iterations} iterations): Total time: ${totalTime}ms, Avg per iteration: ${avgTimePerIteration}ms`,
+    )
     expect(avgTimePerIteration).toBeLessThan(50) // Should average less than 50ms per simulation
   })
 })

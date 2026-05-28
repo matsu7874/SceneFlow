@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { MapEditor } from '../components/MapEditor'
 import { useAppContext } from '../contexts/AppContext'
 import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
-import { Location } from '../types'
+import { Location, Connection } from '../components/MapEditor/types'
 import './MapEditorPage.css'
 
 export const MapEditorPage: React.FC = () => {
@@ -10,10 +10,7 @@ export const MapEditorPage: React.FC = () => {
   const { showNotification } = useVisualFeedback()
   const [showGuide, setShowGuide] = useState(true)
 
-  const handleMapSave = (mapData: {
-    locations: Location[]
-    connections: { from: string; to: string; weight: number; bidirectional: boolean }[]
-  }): void => {
+  const handleMapSave = (mapData: { locations: Location[]; connections: Connection[] }): void => {
     if (storyData) {
       // Convert map editor format to story data format
       const connectionMap = new Map<string, Set<number>>()
@@ -56,10 +53,7 @@ export const MapEditorPage: React.FC = () => {
   }
 
   const convertToMapEditorFormat = ():
-    | {
-        locations: Location[]
-        connections: { from: string; to: string; weight: number; bidirectional: boolean }[]
-      }
+    | { locations: Location[]; connections: Connection[] }
     | undefined => {
     if (!storyData) return undefined
 
@@ -75,7 +69,7 @@ export const MapEditorPage: React.FC = () => {
     }))
 
     // Convert connections to bidirectional format
-    const connections: { from: string; to: string; weight: number; bidirectional: boolean }[] = []
+    const connections: Connection[] = []
     const connectionSet = new Set<string>()
 
     storyData.locations.forEach(loc => {

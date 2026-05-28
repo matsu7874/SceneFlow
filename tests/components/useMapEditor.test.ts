@@ -25,8 +25,8 @@ describe('useMapEditor', () => {
     it('should add node to selection with addToSelection parameter', () => {
       const { result } = renderHook(() => useMapEditor())
 
-      let firstNodeId: string
-      let secondNodeId: string
+      let firstNodeId = ''
+      let secondNodeId = ''
 
       act(() => {
         firstNodeId = result.current.addNode(100, 100)
@@ -39,12 +39,12 @@ describe('useMapEditor', () => {
       expect(result.current.state.mapData.locations.length).toBe(2)
 
       act(() => {
-        result.current.selectNode(firstNodeId!)
-        result.current.selectNode(secondNodeId!, true) // Add to selection
+        result.current.selectNode(firstNodeId)
+        result.current.selectNode(secondNodeId, true) // Add to selection
       })
 
-      expect(result.current.state.selection.selectedNodes.has(firstNodeId!)).toBe(true)
-      expect(result.current.state.selection.selectedNodes.has(secondNodeId!)).toBe(true)
+      expect(result.current.state.selection.selectedNodes.has(firstNodeId)).toBe(true)
+      expect(result.current.state.selection.selectedNodes.has(secondNodeId)).toBe(true)
       expect(result.current.state.selection.selectedNodes.size).toBe(2)
     })
 
@@ -213,14 +213,16 @@ describe('useMapEditor', () => {
 
       act(() => {
         // Import data with existing IDs
-        result.current.importMapData(JSON.stringify({
-          locations: [
-            { id: '105', name: 'Location 1', x: 100, y: 100, description: '', tags: [] },
-            { id: '110', name: 'Location 2', x: 200, y: 200, description: '', tags: [] },
-            { id: '108', name: 'Location 3', x: 300, y: 300, description: '', tags: [] },
-          ],
-          connections: [],
-        }))
+        result.current.importMapData(
+          JSON.stringify({
+            locations: [
+              { id: '105', name: 'Location 1', x: 100, y: 100, description: '', tags: [] },
+              { id: '110', name: 'Location 2', x: 200, y: 200, description: '', tags: [] },
+              { id: '108', name: 'Location 3', x: 300, y: 300, description: '', tags: [] },
+            ],
+            connections: [],
+          }),
+        )
       })
 
       act(() => {

@@ -58,7 +58,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyDat
             category: 'Missing Data',
             message: `Person "${person.id}" has no name`,
             entityType: 'person',
-            entityId: person.id,
+            entityId: String(person.id),
             suggestion: 'Add a name to this person',
             autoFixable: false,
           })
@@ -73,7 +73,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyDat
             category: 'Missing Data',
             message: `Location "${location.id}" has no name`,
             entityType: 'location',
-            entityId: location.id,
+            entityId: String(location.id),
             suggestion: 'Add a name to this location',
             autoFixable: false,
           })
@@ -125,7 +125,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyDat
             category: 'Invalid Reference',
             message: `Act "${act.id}" references non-existent person "${act.personId}"`,
             entityType: 'act',
-            entityId: act.id,
+            entityId: String(act.id),
             suggestion: 'Update the person reference or create the missing person',
             autoFixable: false,
           })
@@ -138,7 +138,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyDat
             category: 'Invalid Reference',
             message: `Act "${act.id}" references non-existent location "${act.locationId}"`,
             entityType: 'act',
-            entityId: act.id,
+            entityId: String(act.id),
             suggestion: 'Update the location reference or create the missing location',
             autoFixable: false,
           })
@@ -153,13 +153,14 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyDat
 
       storyData.acts.forEach(act => {
         if (act.personId && act.startTime !== undefined && act.endTime !== undefined) {
-          if (!personSchedules.has(act.personId)) {
-            personSchedules.set(act.personId, [])
+          const personKey = String(act.personId)
+          if (!personSchedules.has(personKey)) {
+            personSchedules.set(personKey, [])
           }
-          personSchedules.get(act.personId)!.push({
+          personSchedules.get(personKey)!.push({
             start: act.startTime,
             end: act.endTime,
-            actId: act.id,
+            actId: String(act.id),
           })
         }
       })
@@ -245,7 +246,7 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyDat
           if (component.length === 1) {
             // Check if this location has no connections at all
             const locationId = component[0]
-            const hasAnyConnection = locationConnections.get(locationId)?.size > 0
+            const hasAnyConnection = (locationConnections.get(locationId)?.size ?? 0) > 0
 
             // Only report as isolated if it truly has no connections
             if (!hasAnyConnection) {

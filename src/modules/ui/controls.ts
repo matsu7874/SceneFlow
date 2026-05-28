@@ -41,9 +41,9 @@ export function playSimulation(): void {
   domElements.playPauseButton.textContent = '❚❚ Pause'
   simState.lastTimestamp = performance.now()
 
-  simState.timerId = setInterval(() => {
+  simState.timerId = window.setInterval(() => {
     const now = performance.now()
-    if (simState.lastTimestamp === undefined) return
+    if (simState.lastTimestamp === null) return
     const deltaSeconds = (now - simState.lastTimestamp) / 1000
     simState.lastTimestamp = now
 

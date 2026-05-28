@@ -121,11 +121,10 @@ export function storyDataToExtendedWorldState(
     const extendedProp: ExtendedProp = {
       id: prop.id,
       name: prop.name,
-      description: (prop.description || '') as string,
+      description: prop.description || '',
       // Heuristic: items with "大" in name or description are large props
       category:
-        prop.name.includes('大') ||
-        ((prop.description as string | undefined)?.includes('大') ?? false)
+        prop.name.includes('大') || (prop.description?.includes('大') ?? false)
           ? PropCategory.LARGE_PROP
           : PropCategory.SMALL_PROP,
       isPortable: !prop.name.includes('大'),

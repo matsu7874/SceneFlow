@@ -106,10 +106,7 @@ describe('getStateAtTime', () => {
       acts: [],
       props: [],
       informations: [],
-      events: [],
       initialStates: [],
-      moves: [],
-      stays: [],
     })
 
     const state = getStateAtTime(540, emptyIndexedData, [], [])

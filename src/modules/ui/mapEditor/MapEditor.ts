@@ -6,7 +6,8 @@
 
 import type { EntityId } from '../../../types/causality'
 import type { EditableEntity } from '../entityEditor/EntityEditor'
-import type { Connection, ConnectionType } from '../entityEditor/RelationshipEditor'
+import type { Connection } from '../entityEditor/RelationshipEditor'
+import { ConnectionType } from '../entityEditor/RelationshipEditor'
 import { VisualFeedbackManager, FeedbackType } from '../visualFeedback'
 
 /**
@@ -67,9 +68,9 @@ export enum LayoutAlgorithm {
  */
 export class MapEditor {
   private container: HTMLElement
-  private canvas: HTMLCanvasElement
-  private ctx: CanvasRenderingContext2D
-  private svg: SVGElement
+  private canvas!: HTMLCanvasElement
+  private ctx!: CanvasRenderingContext2D
+  private svg!: SVGElement
   private feedbackManager: VisualFeedbackManager
   private config: Required<MapEditorConfig>
 
@@ -421,7 +422,7 @@ export class MapEditor {
 
     this.ctx.strokeStyle = this.getConnectionColor(connection)
     this.ctx.lineWidth = this.getConnectionWidth(connection)
-    this.ctx.setLineDash(connection.type === 'HIDDEN' ? [5, 5] : [])
+    this.ctx.setLineDash(connection.type === ConnectionType.HIDDEN ? [5, 5] : [])
 
     this.ctx.beginPath()
     this.ctx.moveTo(fromPos.x, fromPos.y)
@@ -631,19 +632,19 @@ export class MapEditor {
    */
   private getConnectionColor(connection: Connection): string {
     switch (connection.type) {
-      case 'DOOR':
+      case ConnectionType.DOOR:
         return '#4caf50'
-      case 'PASSAGE':
+      case ConnectionType.PASSAGE:
         return '#2196f3'
-      case 'STAIRS':
+      case ConnectionType.STAIRS:
         return '#ff9800'
-      case 'ELEVATOR':
+      case ConnectionType.ELEVATOR:
         return '#9c27b0'
-      case 'PORTAL':
+      case ConnectionType.PORTAL:
         return '#e91e63'
-      case 'HIDDEN':
+      case ConnectionType.HIDDEN:
         return '#9e9e9e'
-      case 'LOCKED':
+      case ConnectionType.LOCKED:
         return '#f44336'
       default:
         return '#333'
@@ -657,11 +658,11 @@ export class MapEditor {
     const baseWidth = 2 * this.zoom
 
     switch (connection.type) {
-      case 'PASSAGE':
+      case ConnectionType.PASSAGE:
         return baseWidth * 1.5
-      case 'DOOR':
+      case ConnectionType.DOOR:
         return baseWidth
-      case 'HIDDEN':
+      case ConnectionType.HIDDEN:
         return baseWidth * 0.7
       default:
         return baseWidth
@@ -1032,7 +1033,7 @@ export class MapEditor {
   private createConnection(
     fromId: EntityId,
     toId: EntityId,
-    type: ConnectionType = 'DIRECT',
+    type: ConnectionType = ConnectionType.DIRECT,
   ): void {
     const connection: Connection = {
       id: `conn-${Date.now()}`,

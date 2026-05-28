@@ -31,6 +31,7 @@ export const EntitiesPage: React.FC = () => {
       // Convert story data entities to ExtendedEntity format
       const convertedEntities: ExtendedEntity[] = [
         ...storyData.persons.map(person => ({
+          ...person,
           id: person.id.toString(),
           type: 'person' as EntityType,
           name: person.name,
@@ -40,9 +41,9 @@ export const EntitiesPage: React.FC = () => {
           attributes: person,
           relationships: person.relationships || [],
           color: person.color,
-          ...person,
         })),
         ...storyData.locations.map(location => ({
+          ...location,
           id: location.id.toString(),
           type: 'location' as EntityType,
           name: location.name,
@@ -52,9 +53,9 @@ export const EntitiesPage: React.FC = () => {
           attributes: location,
           relationships: [],
           connectedTo: location.connections?.map(conn => conn.toString()) || [],
-          ...location,
         })),
         ...storyData.props.map(prop => ({
+          ...prop,
           id: prop.id.toString(),
           type: 'prop' as EntityType,
           name: prop.name,
@@ -63,9 +64,9 @@ export const EntitiesPage: React.FC = () => {
           updated_at: new Date().toISOString(),
           attributes: prop,
           relationships: [],
-          ...prop,
         })),
         ...storyData.informations.map(info => ({
+          ...info,
           id: info.id.toString(),
           type: 'information' as EntityType,
           name:
@@ -75,9 +76,9 @@ export const EntitiesPage: React.FC = () => {
           updated_at: new Date().toISOString(),
           attributes: info,
           relationships: [],
-          ...info,
         })),
         ...storyData.acts.map(act => ({
+          ...act,
           id: act.id.toString(),
           type: 'act' as EntityType,
           name: act.description || `行動 ${act.id}`,
@@ -86,10 +87,10 @@ export const EntitiesPage: React.FC = () => {
           updated_at: new Date().toISOString(),
           attributes: act,
           relationships: [],
-          ...act,
         })),
         // Events are generated from acts
         ...generateEventsFromActs(storyData.acts || []).map(event => ({
+          ...event,
           id: event.id.toString(),
           type: 'event' as EntityType,
           name: event.name || `イベント ${event.id}`,
@@ -98,7 +99,6 @@ export const EntitiesPage: React.FC = () => {
           updated_at: new Date().toISOString(),
           attributes: event,
           relationships: [],
-          ...event,
         })),
       ]
       setEntities(convertedEntities)

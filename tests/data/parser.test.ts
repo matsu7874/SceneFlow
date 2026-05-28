@@ -9,18 +9,10 @@ describe('parseJsonData', () => {
   }
 
   const validJsonData = {
-    persons: [
-      { id: 1, name: 'Alice', color: '#ff0000' },
-    ],
-    locations: [
-      { id: 101, name: 'Room 1', connections: [102] },
-    ],
-    acts: [
-      { id: 1001, personId: 1, locationId: 101, time: '09:00', description: 'Test act' },
-    ],
-    initialStates: [
-      { personId: 1, locationId: 101, time: '09:00' },
-    ],
+    persons: [{ id: 1, name: 'Alice', color: '#ff0000' }],
+    locations: [{ id: 101, name: 'Room 1', connections: [102] }],
+    acts: [{ id: 1001, personId: 1, locationId: 101, time: '09:00', description: 'Test act' }],
+    initialStates: [{ personId: 1, locationId: 101, time: '09:00' }],
   }
 
   it('should parse valid JSON data', () => {
@@ -54,7 +46,6 @@ describe('parseJsonData', () => {
       persons: validJsonData.persons,
       locations: validJsonData.locations,
       acts: validJsonData.acts,
-      events: validJsonData.events,
       initialStates: validJsonData.initialStates,
     }
 

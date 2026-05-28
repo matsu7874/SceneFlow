@@ -301,7 +301,7 @@ describe('JSONEditor', () => {
     it('should display error list', () => {
       editor.setValue('{"invalid": true,}')
 
-      const errorList = container.querySelector('.error-list')
+      const errorList = container.querySelector<HTMLElement>('.error-list')
       expect(errorList?.style.display).not.toBe('none')
       expect(container.querySelector('.error-item')).toBeTruthy()
     })
@@ -309,7 +309,7 @@ describe('JSONEditor', () => {
     it('should hide error list when valid', () => {
       editor.setValue('{"valid": true}')
 
-      const errorList = container.querySelector('.error-list')
+      const errorList = container.querySelector<HTMLElement>('.error-list')
       expect(errorList?.style.display).toBe('none')
     })
   })

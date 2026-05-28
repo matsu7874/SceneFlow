@@ -16,6 +16,7 @@ export enum FeedbackType {
   WARNING = 'warning',
   SUCCESS = 'success',
   ERROR = 'error',
+  INFO = 'info',
 }
 
 /**
@@ -80,10 +81,7 @@ export class VisualFeedbackManager {
   /**
    * Show action validation feedback
    */
-  showActionFeedback(
-    validation: ActionValidation,
-    targetElement?: HTMLElement,
-  ): void {
+  showActionFeedback(validation: ActionValidation, targetElement?: HTMLElement): void {
     const type = validation.valid ? FeedbackType.VALID : FeedbackType.INVALID
     const messages: string[] = []
 
@@ -96,13 +94,9 @@ export class VisualFeedbackManager {
     }
 
     if (targetElement) {
-      this.showEntityFeedback(
-        'action-validation',
-        targetElement,
-        type,
-        messages.join('\n'),
-        { duration: 3000 },
-      )
+      this.showEntityFeedback('action-validation', targetElement, type, messages.join('\n'), {
+        duration: 3000,
+      })
     } else {
       // Show global notification
       this.showNotification(
@@ -150,9 +144,7 @@ export class VisualFeedbackManager {
     getElementForEntity: (entityId: EntityId) => HTMLElement | null,
   ): void {
     const type = success ? FeedbackType.SUCCESS : FeedbackType.ERROR
-    const message = success
-      ? `✓ ${act.description}`
-      : `✗ Failed to execute: ${act.description}`
+    const message = success ? `✓ ${act.description}` : `✗ Failed to execute: ${act.description}`
 
     // Animate affected entities
     act.getAffectedEntities().forEach(entityId => {
@@ -170,11 +162,7 @@ export class VisualFeedbackManager {
   /**
    * Show a notification
    */
-  showNotification(
-    message: string,
-    type: FeedbackType,
-    options: FeedbackOptions = {},
-  ): void {
+  showNotification(message: string, type: FeedbackType, options: FeedbackOptions = {}): void {
     const notification = document.createElement('div')
     notification.className = `notification notification-${type}`
     notification.textContent = message
@@ -267,22 +255,22 @@ export class VisualFeedbackManager {
     let left = 0
 
     switch (position) {
-    case 'top':
-      top = targetRect.top - tooltipRect.height - 8
-      left = targetRect.left + (targetRect.width - tooltipRect.width) / 2
-      break
-    case 'bottom':
-      top = targetRect.bottom + 8
-      left = targetRect.left + (targetRect.width - tooltipRect.width) / 2
-      break
-    case 'left':
-      top = targetRect.top + (targetRect.height - tooltipRect.height) / 2
-      left = targetRect.left - tooltipRect.width - 8
-      break
-    case 'right':
-      top = targetRect.top + (targetRect.height - tooltipRect.height) / 2
-      left = targetRect.right + 8
-      break
+      case 'top':
+        top = targetRect.top - tooltipRect.height - 8
+        left = targetRect.left + (targetRect.width - tooltipRect.width) / 2
+        break
+      case 'bottom':
+        top = targetRect.bottom + 8
+        left = targetRect.left + (targetRect.width - tooltipRect.width) / 2
+        break
+      case 'left':
+        top = targetRect.top + (targetRect.height - tooltipRect.height) / 2
+        left = targetRect.left - tooltipRect.width - 8
+        break
+      case 'right':
+        top = targetRect.top + (targetRect.height - tooltipRect.height) / 2
+        left = targetRect.right + 8
+        break
     }
 
     tooltip.style.position = 'fixed'

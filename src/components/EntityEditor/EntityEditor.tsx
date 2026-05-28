@@ -272,7 +272,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
                 return (
                   <div className={styles.arrayItemContent}>
                     <div className={styles.objectInArray}>
-                      {Object.entries(fieldSchema.itemSchema.schema.fields).map(
+                      {Object.entries(fieldSchema.itemSchema.schema?.fields || {}).map(
                         ([subFieldName, subFieldSchema]: [string, any]) => (
                           <div key={subFieldName} className={styles.inlineField}>
                             <label>{subFieldSchema.label || subFieldName}:</label>

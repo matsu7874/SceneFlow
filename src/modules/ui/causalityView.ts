@@ -63,9 +63,9 @@ export class CausalityView {
   private container: HTMLElement
   private engine: CausalityEngine
   private feedbackManager?: VisualFeedbackManager
-  private canvas: HTMLCanvasElement
-  private ctx: CanvasRenderingContext2D
-  private svg: SVGElement
+  private canvas!: HTMLCanvasElement
+  private ctx!: CanvasRenderingContext2D
+  private svg!: SVGElement
 
   private nodes: Map<EntityId, CausalNode> = new Map()
   private edges: Map<string, CausalEdge> = new Map()
@@ -134,7 +134,7 @@ export class CausalityView {
    */
   private setupSVG(): void {
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    this.svg.className = 'causality-svg'
+    this.svg.setAttribute('class', 'causality-svg')
 
     if (this.svg.style) {
       this.svg.style.position = 'absolute'
@@ -241,7 +241,7 @@ export class CausalityView {
         fromNodeId: link.fromActId,
         toNodeId: link.toActId,
         type: link.linkType === 'ENABLES' ? 'enables' : 'requires',
-        weight: link.strength || 1,
+        weight: 1,
       }
 
       this.edges.set(edge.id, edge)
@@ -531,7 +531,7 @@ export class CausalityView {
    */
   private renderNode(node: CausalNode): void {
     const group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-    group.setAttribute('data-node-id', node.id)
+    group.setAttribute('data-node-id', String(node.id))
 
     const x = (node.x + this.panX) * this.zoom
     const y = (node.y + this.panY) * this.zoom
