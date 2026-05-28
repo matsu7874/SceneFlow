@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import styles from './MapEditor.module.css'
 import { useMapEditor } from './useMapEditor'
 import { AStar } from './pathfinding'
+import { getCanvasCoords } from './coords'
 import { Location, Connection, Point } from './types'
 
 interface MapEditorProps {
@@ -135,15 +136,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
   // Mouse event handlers
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
-      const canvas = e.currentTarget
-      const rect = canvas.getBoundingClientRect()
-
-      // Calculate the actual canvas position considering CSS scaling
-      const scaleX = rect.width ? canvas.width / rect.width : 1
-      const scaleY = rect.height ? canvas.height / rect.height : 1
-
-      const x = (e.clientX - rect.left) * scaleX
-      const y = (e.clientY - rect.top) * scaleY
+      const { x, y } = getCanvasCoords(e)
       const worldPos = editor.screenToWorld(x, y)
 
       // Right click - show context menu
@@ -255,15 +248,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
-      const canvas = e.currentTarget
-      const rect = canvas.getBoundingClientRect()
-
-      // Calculate the actual canvas position considering CSS scaling
-      const scaleX = rect.width ? canvas.width / rect.width : 1
-      const scaleY = rect.height ? canvas.height / rect.height : 1
-
-      const x = (e.clientX - rect.left) * scaleX
-      const y = (e.clientY - rect.top) * scaleY
+      const { x, y } = getCanvasCoords(e)
       setMousePos({ x, y })
       const worldPos = editor.screenToWorld(x, y)
 
@@ -378,15 +363,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
 
   const handleDoubleClick = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
-      const canvas = e.currentTarget
-      const rect = canvas.getBoundingClientRect()
-
-      // Calculate the actual canvas position considering CSS scaling
-      const scaleX = rect.width ? canvas.width / rect.width : 1
-      const scaleY = rect.height ? canvas.height / rect.height : 1
-
-      const x = (e.clientX - rect.left) * scaleX
-      const y = (e.clientY - rect.top) * scaleY
+      const { x, y } = getCanvasCoords(e)
       const worldPos = editor.screenToWorld(x, y)
 
       const node = editor.getNodeAt(worldPos.x, worldPos.y)
