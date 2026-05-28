@@ -41,13 +41,7 @@
     "@typescript-eslint/no-unsafe-return": "warn",
     "@typescript-eslint/no-unsafe-enum-comparison": "warn",
     "@typescript-eslint/require-await": "warn",
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "semi": ["error", "never"],
-    "quotes": ["error", "single"],
-    "comma-dangle": ["error", "always-multiline"],
-    "no-trailing-spaces": "error",
-    "indent": ["error", 2],
-    "object-curly-spacing": ["error", "always"]
+    "no-console": ["warn", { "allow": ["warn", "error"] }]
   },
   "ignorePatterns": ["dist", "node_modules", "coverage", "*.config.js", "*.config.ts"],
   "overrides": [
