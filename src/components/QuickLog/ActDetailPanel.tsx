@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import type { Act, Prop, Information, Person, Location } from '../../types/StoryData'
+import { ACT_KINDS, getActKind } from '../../modules/consistency'
 import { timeStringToMinutes } from './quickLogLogic'
 import styles from './QuickLog.module.css'
 
@@ -57,8 +58,14 @@ export const ActDetailPanel: React.FC<ActDetailPanelProps> = ({
         </select>
       </label>
       <label>
-        タイプ
-        <input value={act.type ?? ''} onChange={event => onChange({ type: event.target.value })} />
+        種類
+        <select value={getActKind(act)} onChange={event => onChange({ type: event.target.value })}>
+          {ACT_KINDS.map(kind => (
+            <option key={kind.value} value={kind.value}>
+              {kind.label}
+            </option>
+          ))}
+        </select>
       </label>
       <label>
         相手
