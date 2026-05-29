@@ -18,7 +18,10 @@ export const SpatialView: React.FC<SpatialViewProps> = ({ storyData }) => {
   const background = useMapBackground()
   const report = useMemo(() => analyzeStory(storyData), [storyData])
 
-  const placed = storyData.locations.filter(l => l.x !== undefined && l.y !== undefined)
+  const placed = useMemo(
+    () => storyData.locations.filter(l => l.x !== undefined && l.y !== undefined),
+    [storyData.locations],
+  )
   const toScreen = useMemo(
     () =>
       computeFitTransform(
