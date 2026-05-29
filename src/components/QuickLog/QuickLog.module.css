@@ -14,3 +14,33 @@
 .createOption {
   color: #2563eb;
 }
+.inputBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.particle {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+.description {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+.time {
+  width: 72px;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
