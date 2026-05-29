@@ -1,46 +1,146 @@
+.inputBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.particle {
+  color: var(--color-text-secondary);
+}
 .combobox {
   position: relative;
+}
+.combobox input {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+}
+.description {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+}
+/* inputBar内の時刻入力欄 & タイムライン行の時刻表示を兼用 */
+.time {
+  width: 5rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 .options {
   position: absolute;
   z-index: 10;
-  margin: 0;
+  margin: 0.2rem 0 0;
   padding: 0;
   list-style: none;
-  background: #fff;
-  border: 1px solid #ccc;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  width: max-content;
+  min-width: 100%;
+  max-height: 12rem;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.options li button {
+  display: block;
   width: 100%;
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  border: none;
+  background: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+.options li button:hover {
+  background: var(--color-surface-hover);
 }
 .createOption {
-  color: #2563eb;
+  color: var(--color-primary);
 }
-.inputBar {
+.timeline {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+.row {
+  border-bottom: 1px solid var(--color-border);
+}
+.rowHeader {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  gap: 0.5rem;
 }
-.particle {
-  font-size: 0.85rem;
-  color: #6b7280;
-}
-.description {
+.rowToggle {
   flex: 1;
-  padding: 4px 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 0.9rem;
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.6rem 0.4rem;
+  border: none;
+  background: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
 }
-.time {
-  width: 72px;
-  padding: 4px 8px;
-  border: 1px solid #d1d5db;
+.rowToggle:hover {
+  background: var(--color-surface-hover);
+}
+.deleteButton {
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+}
+.deleteButton:hover {
+  color: var(--color-error);
+}
+.who {
+  font-weight: 600;
+}
+.where {
+  color: var(--color-primary-dark);
+}
+.what {
+  flex: 1;
+}
+.warningBadge {
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 18%, transparent);
   border-radius: 4px;
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
+  padding: 0 0.4rem;
+  font-size: 0.8rem;
+}
+.detailPanel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem 1rem;
+  background: var(--color-surface);
+}
+.detailPanel label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  gap: 0.2rem;
+  color: var(--color-text-secondary);
+}
+.empty {
+  color: var(--color-text-disabled);
+  padding: 1rem;
 }

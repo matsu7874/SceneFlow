@@ -45,6 +45,12 @@ export const Navigation: React.FC = () => {
         >
           検証
         </NavLink>
+        <NavLink
+          to="/log"
+          className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
+        >
+          イベント入力
+        </NavLink>
       </div>
     </nav>
   )

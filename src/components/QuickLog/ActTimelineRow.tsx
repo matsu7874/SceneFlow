@@ -42,7 +42,7 @@ export const ActTimelineRow: React.FC<ActTimelineRowProps> = ({
             </span>
           )}
         </button>
-        <button type="button" aria-label="削除" onClick={onDelete}>
+        <button type="button" aria-label="削除" className={styles.deleteButton} onClick={onDelete}>
           ✕
         </button>
       </div>
