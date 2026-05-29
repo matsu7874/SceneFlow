@@ -45,6 +45,12 @@ export const Navigation: React.FC = () => {
         >
           イベント入力
         </NavLink>
+        <NavLink
+          to="/spatial"
+          className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
+        >
+          空間ビュー
+        </NavLink>
       </div>
     </nav>
   )

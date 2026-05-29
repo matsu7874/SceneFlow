@@ -11,6 +11,7 @@ import { EntitiesPage } from './pages/EntitiesPage'
 import { MapEditorPage } from './pages/MapEditorPage'
 import { ValidationPage } from './pages/ValidationPage'
 import { QuickLogPage } from './pages/QuickLogPage'
+import { SpatialPage } from './pages/SpatialPage'
 import './App.css'
 
 /**
@@ -37,6 +38,7 @@ function App(): React.ReactNode {
                   <Route path="/map-editor" element={<MapEditorPage />} />
                   <Route path="/validation" element={<ValidationPage />} />
                   <Route path="/log" element={<QuickLogPage />} />
+                  <Route path="/spatial" element={<SpatialPage />} />
                 </Routes>
               </main>
 
