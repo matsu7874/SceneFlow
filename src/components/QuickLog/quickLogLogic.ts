@@ -1,3 +1,34 @@
+import type { StoryData } from '../../types/StoryData'
+
+const DEFAULT_COLORS = [
+  '#FF6B6B',
+  '#4ECDC4',
+  '#45B7D1',
+  '#FFA07A',
+  '#98D8C8',
+  '#F7B731',
+  '#A55EEA',
+  '#26DE81',
+  '#FD9644',
+  '#2BCBBA',
+]
+
+export function pickColor(index: number): string {
+  return DEFAULT_COLORS[index % DEFAULT_COLORS.length]
+}
+
+export function appendPerson(story: StoryData, name: string): { data: StoryData; id: number } {
+  const id = nextId(story.persons)
+  const person = { id, name, color: pickColor(story.persons.length) }
+  return { data: { ...story, persons: [...story.persons, person] }, id }
+}
+
+export function appendLocation(story: StoryData, name: string): { data: StoryData; id: number } {
+  const id = nextId(story.locations)
+  const location = { id, name, connections: [] as number[] }
+  return { data: { ...story, locations: [...story.locations, location] }, id }
+}
+
 export function nextId(items: Array<{ id: number }>): number {
   if (items.length === 0) return 1
   return Math.max(...items.map(item => item.id)) + 1
