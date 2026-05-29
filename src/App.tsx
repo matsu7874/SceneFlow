@@ -8,7 +8,6 @@ import { SimulationPage } from './pages/SimulationPage'
 import { CausalityPage } from './pages/CausalityPage'
 import { EntitiesPage } from './pages/EntitiesPage'
 import { MapEditorPage } from './pages/MapEditorPage'
-import { RelationshipsPage } from './pages/RelationshipsPage'
 import { ValidationPage } from './pages/ValidationPage'
 import { QuickLogPage } from './pages/QuickLogPage'
 import './App.css'
@@ -34,7 +33,6 @@ function App(): React.ReactNode {
                 <Route path="/causality" element={<CausalityPage />} />
                 <Route path="/entities" element={<EntitiesPage />} />
                 <Route path="/map-editor" element={<MapEditorPage />} />
-                <Route path="/relationships" element={<RelationshipsPage />} />
                 <Route path="/validation" element={<ValidationPage />} />
                 <Route path="/log" element={<QuickLogPage />} />
               </Routes>

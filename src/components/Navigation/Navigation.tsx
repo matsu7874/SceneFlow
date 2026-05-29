@@ -34,12 +34,6 @@ export const Navigation: React.FC = () => {
           マップエディタ
         </NavLink>
         <NavLink
-          to="/relationships"
-          className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
-        >
-          関係性
-        </NavLink>
-        <NavLink
           to="/validation"
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
