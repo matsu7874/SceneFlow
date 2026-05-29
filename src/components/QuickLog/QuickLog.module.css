@@ -1,0 +1,16 @@
+.combobox {
+  position: relative;
+}
+.options {
+  position: absolute;
+  z-index: 10;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+.createOption {
+  color: #2563eb;
+}

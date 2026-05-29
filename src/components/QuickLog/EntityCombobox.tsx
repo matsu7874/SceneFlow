@@ -1,0 +1,100 @@
+import React, { useMemo, useState } from 'react'
+import styles from './QuickLog.module.css'
+
+export interface ComboOption {
+  id: number
+  name: string
+}
+
+interface EntityComboboxProps {
+  label: string
+  options: ComboOption[]
+  value: number | null
+  onSelect: (id: number) => void
+  onCreate: (name: string) => number | null
+}
+
+export const EntityCombobox: React.FC<EntityComboboxProps> = ({
+  label,
+  options,
+  value,
+  onSelect,
+  onCreate,
+}) => {
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+
+  const selectedName = useMemo(
+    () => options.find(option => option.id === value)?.name ?? '',
+    [options, value],
+  )
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return options
+    return options.filter(option => option.name.toLowerCase().includes(q))
+  }, [options, query])
+
+  const exactMatch = options.find(option => option.name === query.trim())
+
+  const choose = (id: number): void => {
+    onSelect(id)
+    setQuery('')
+    setOpen(false)
+  }
+
+  const create = (): void => {
+    const name = query.trim()
+    if (!name) return
+    const id = onCreate(name)
+    if (id !== null) {
+      onSelect(id)
+    }
+    setQuery('')
+    setOpen(false)
+  }
+
+  return (
+    <div className={styles.combobox}>
+      <input
+        aria-label={label}
+        placeholder={selectedName || label}
+        value={query}
+        onChange={event => {
+          setQuery(event.target.value)
+          setOpen(true)
+        }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        onKeyDown={event => {
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            if (filtered.length > 0) {
+              choose(filtered[0].id)
+            } else if (query.trim()) {
+              create()
+            }
+          }
+        }}
+      />
+      {open && (
+        <ul className={styles.options}>
+          {filtered.map(option => (
+            <li key={option.id}>
+              <button type="button" onMouseDown={() => choose(option.id)}>
+                {option.name}
+              </button>
+            </li>
+          ))}
+          {query.trim() && !exactMatch && (
+            <li>
+              <button type="button" onMouseDown={create} className={styles.createOption}>
+                + 新規: {query.trim()}
+              </button>
+            </li>
+          )}
+        </ul>
+      )}
+    </div>
+  )
+}
