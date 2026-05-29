@@ -1,4 +1,4 @@
-import type { StoryData } from '../../types/StoryData'
+import type { StoryData, Act } from '../../types/StoryData'
 
 const DEFAULT_COLORS = [
   '#FF6B6B',
@@ -48,4 +48,40 @@ export function minutesToTimeString(total: number): string {
   const hours = Math.floor(safe / 60)
   const minutes = safe % 60
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+}
+
+export interface AppendActInput {
+  personId: number
+  locationId: number
+  description: string
+  startTime: number
+  type?: string
+}
+
+export function appendAct(
+  story: StoryData,
+  input: AppendActInput,
+): { data: StoryData; id: number } {
+  const id = nextId(story.acts)
+  const act: Act = {
+    id,
+    personId: input.personId,
+    locationId: input.locationId,
+    description: input.description,
+    startTime: input.startTime,
+    time: minutesToTimeString(input.startTime),
+    ...(input.type ? { type: input.type } : {}),
+  }
+  return { data: { ...story, acts: [...story.acts, act] }, id }
+}
+
+export function applyActPatch(story: StoryData, id: number, patch: Partial<Act>): StoryData {
+  return {
+    ...story,
+    acts: story.acts.map(act => (act.id === id ? { ...act, ...patch } : act)),
+  }
+}
+
+export function removeAct(story: StoryData, id: number): StoryData {
+  return { ...story, acts: story.acts.filter(act => act.id !== id) }
 }

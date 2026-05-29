@@ -5,6 +5,9 @@ import {
   minutesToTimeString,
   appendPerson,
   appendLocation,
+  appendAct,
+  applyActPatch,
+  removeAct,
 } from '../../src/components/QuickLog/quickLogLogic'
 import type { StoryData } from '../../src/types/StoryData'
 
@@ -61,5 +64,50 @@ describe('appendLocation', () => {
     const { data, id } = appendLocation(emptyStory(), '広場')
     expect(id).toBe(1)
     expect(data.locations[0]).toMatchObject({ id: 1, name: '広場', connections: [] })
+  })
+})
+
+describe('appendAct', () => {
+  it('startTimeから時刻文字列を同期して追加する', () => {
+    const { data, id } = appendAct(emptyStory(), {
+      personId: 1,
+      locationId: 2,
+      description: '到着した',
+      startTime: 570,
+    })
+    expect(id).toBe(1)
+    expect(data.acts[0]).toMatchObject({
+      id: 1,
+      personId: 1,
+      locationId: 2,
+      description: '到着した',
+      startTime: 570,
+      time: '09:30',
+    })
+  })
+})
+
+describe('applyActPatch', () => {
+  it('指定idのActだけを部分更新する', () => {
+    const base = appendAct(emptyStory(), {
+      personId: 1,
+      locationId: 1,
+      description: 'a',
+      startTime: 0,
+    }).data
+    const data = applyActPatch(base, 1, { description: 'b', propId: 3 })
+    expect(data.acts[0]).toMatchObject({ description: 'b', propId: 3 })
+  })
+})
+
+describe('removeAct', () => {
+  it('指定idのActを削除する', () => {
+    const base = appendAct(emptyStory(), {
+      personId: 1,
+      locationId: 1,
+      description: 'a',
+      startTime: 0,
+    }).data
+    expect(removeAct(base, 1).acts).toHaveLength(0)
   })
 })
