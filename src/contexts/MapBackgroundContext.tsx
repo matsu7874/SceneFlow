@@ -35,6 +35,9 @@ export const MapBackgroundProvider: React.FC<{ children: ReactNode }> = ({ child
       setScale(1)
       setOpacity(0.5)
     }
+    img.onerror = (): void => {
+      URL.revokeObjectURL(url)
+    }
     img.src = url
   }, [])
 
