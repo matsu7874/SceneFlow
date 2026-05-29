@@ -4,6 +4,8 @@ import { useMapEditor } from './useMapEditor'
 import { AStar } from './pathfinding'
 import { getCanvasCoords } from './coords'
 import { Location, Connection, Point } from './types'
+import { useMapBackground } from '../../contexts/MapBackgroundContext'
+import { drawMapBackground } from '../MapBackground/drawMapBackground'
 
 interface MapEditorProps {
   initialData?: {
@@ -22,6 +24,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
   height = 600,
 }) => {
   const editor = useMapEditor()
+  const background = useMapBackground()
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState<Point>({ x: 0, y: 0 })
   const [isConnecting, setIsConnecting] = useState(false)
@@ -69,6 +72,22 @@ export const MapEditor: React.FC<MapEditorProps> = ({
       // Apply view transformation
       ctx.translate(editor.state.viewState.panX, editor.state.viewState.panY)
       ctx.scale(editor.state.viewState.zoom, editor.state.viewState.zoom)
+
+      // Draw background image (world coordinates)
+      if (background.image) {
+        drawMapBackground(ctx, {
+          image: background.image,
+          placement: {
+            offsetX: background.offsetX,
+            offsetY: background.offsetY,
+            scale: background.scale,
+            naturalWidth: background.image.naturalWidth,
+            naturalHeight: background.image.naturalHeight,
+          },
+          opacity: background.opacity,
+          toScreen: (x, y) => ({ x, y }),
+        })
+      }
 
       // Draw grid
       if (editor.state.showGrid) {
@@ -131,7 +150,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     }
 
     render()
-  }, [editor.state, width, height, isConnecting, connectingFrom, mousePos])
+  }, [editor.state, width, height, isConnecting, connectingFrom, mousePos, background])
 
   // Mouse event handlers
   const handleMouseDown = useCallback(
@@ -784,6 +803,43 @@ export const MapEditor: React.FC<MapEditorProps> = ({
                 onClick={() => onSave(editor.state.mapData)}
               >
                 保存
+              </button>
+            </>
+          )}
+          <div className={styles.separator} />
+          <label className={styles.button}>
+            背景画像
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (file) background.setImage(file)
+              }}
+            />
+          </label>
+          {background.image && (
+            <>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={background.opacity}
+                onChange={e => background.update({ opacity: Number(e.target.value) })}
+                aria-label="背景不透明度"
+              />
+              <input
+                type="number"
+                step={0.1}
+                value={background.scale}
+                onChange={e => background.update({ scale: Number(e.target.value) })}
+                aria-label="背景倍率"
+                style={{ width: '5rem' }}
+              />
+              <button type="button" className={styles.button} onClick={() => background.clear()}>
+                背景クリア
               </button>
             </>
           )}

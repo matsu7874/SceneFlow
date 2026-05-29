@@ -1,8 +1,12 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { MapEditor } from '../../src/components/MapEditor'
+import { MapBackgroundProvider } from '../../src/contexts/MapBackgroundContext'
 import { vi } from 'vitest'
 import '@testing-library/jest-dom'
+
+const renderWithProviders = (ui: React.ReactElement): ReturnType<typeof render> =>
+  render(<MapBackgroundProvider>{ui}</MapBackgroundProvider>)
 
 describe('MapEditor', () => {
   const defaultProps = {
@@ -26,7 +30,9 @@ describe('MapEditor', () => {
 
   describe('Multiple Selection', () => {
     it('should add node to selection when Shift+click', async () => {
-      const { container } = render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      const { container } = renderWithProviders(
+        <MapEditor {...defaultProps} initialData={mockInitialData} />,
+      )
 
       const canvas = container.querySelector('canvas')
       expect(canvas).toBeInTheDocument()
@@ -54,7 +60,9 @@ describe('MapEditor', () => {
     })
 
     it('should maintain selection when Shift+clicking already selected node', async () => {
-      const { container } = render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      const { container } = renderWithProviders(
+        <MapEditor {...defaultProps} initialData={mockInitialData} />,
+      )
 
       const canvas = container.querySelector('canvas')
 
@@ -87,7 +95,9 @@ describe('MapEditor', () => {
     })
 
     it('should allow deselecting node with Shift+click', async () => {
-      const { container } = render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      const { container } = renderWithProviders(
+        <MapEditor {...defaultProps} initialData={mockInitialData} />,
+      )
 
       const canvas = container.querySelector('canvas')
 
@@ -124,7 +134,7 @@ describe('MapEditor', () => {
 
   describe('Select All', () => {
     it('should select all nodes with Ctrl+A', async () => {
-      render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      renderWithProviders(<MapEditor {...defaultProps} initialData={mockInitialData} />)
 
       // Press Ctrl+A
       fireEvent.keyDown(window, {
@@ -138,7 +148,7 @@ describe('MapEditor', () => {
     })
 
     it('should select all nodes with Cmd+A on Mac', async () => {
-      render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      renderWithProviders(<MapEditor {...defaultProps} initialData={mockInitialData} />)
 
       // Press Cmd+A
       fireEvent.keyDown(window, {
@@ -152,7 +162,7 @@ describe('MapEditor', () => {
     })
 
     it('should prevent default browser behavior for Ctrl+A', async () => {
-      render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      renderWithProviders(<MapEditor {...defaultProps} initialData={mockInitialData} />)
 
       const event = new KeyboardEvent('keydown', {
         key: 'a',
@@ -173,7 +183,9 @@ describe('MapEditor', () => {
 
   describe('Rubber Band Selection', () => {
     it('should start rubber band selection with Shift+drag on empty area', async () => {
-      const { container } = render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      const { container } = renderWithProviders(
+        <MapEditor {...defaultProps} initialData={mockInitialData} />,
+      )
 
       const canvas = container.querySelector('canvas')
 
@@ -202,7 +214,9 @@ describe('MapEditor', () => {
     })
 
     it('should select only nodes within rubber band area', async () => {
-      const { container } = render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      const { container } = renderWithProviders(
+        <MapEditor {...defaultProps} initialData={mockInitialData} />,
+      )
 
       const canvas = container.querySelector('canvas')
 
@@ -227,7 +241,9 @@ describe('MapEditor', () => {
     })
 
     it('should clear previous selection when starting rubber band', async () => {
-      const { container } = render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      const { container } = renderWithProviders(
+        <MapEditor {...defaultProps} initialData={mockInitialData} />,
+      )
 
       const canvas = container.querySelector('canvas')
 
@@ -262,7 +278,9 @@ describe('MapEditor', () => {
 
   describe('Canvas Double Click', () => {
     it('should create new node on canvas double click', async () => {
-      const { container } = render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      const { container } = renderWithProviders(
+        <MapEditor {...defaultProps} initialData={mockInitialData} />,
+      )
 
       const canvas = container.querySelector('canvas')
 
@@ -280,7 +298,9 @@ describe('MapEditor', () => {
     })
 
     it('should not create node when double clicking on existing node', async () => {
-      const { container } = render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      const { container } = renderWithProviders(
+        <MapEditor {...defaultProps} initialData={mockInitialData} />,
+      )
 
       const canvas = container.querySelector('canvas')
 
@@ -298,7 +318,9 @@ describe('MapEditor', () => {
 
   describe('Keyboard Shortcuts', () => {
     it('should delete selected nodes with Delete key', async () => {
-      const { container } = render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      const { container } = renderWithProviders(
+        <MapEditor {...defaultProps} initialData={mockInitialData} />,
+      )
 
       const canvas = container.querySelector('canvas')
 
@@ -321,7 +343,7 @@ describe('MapEditor', () => {
     })
 
     it('should cancel operations with Escape key', async () => {
-      render(<MapEditor {...defaultProps} initialData={mockInitialData} />)
+      renderWithProviders(<MapEditor {...defaultProps} initialData={mockInitialData} />)
 
       // Start connecting mode
       const connectButton = screen.getByText('接続')
