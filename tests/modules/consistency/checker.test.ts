@@ -153,3 +153,152 @@ describe('analyzeStory: nodes/edges/byActId', () => {
     expect(r.edges.some(e => e.to === 1 && e.fact.kind === 'at')).toBe(true)
   })
 })
+
+describe('analyzeStory: item', () => {
+  it('未所持のGIVEを破綻にする', () => {
+    const r = analyzeStory(
+      story({
+        props: [{ id: 100, name: '鍵' }],
+        acts: [
+          act({
+            id: 1,
+            personId: 1,
+            locationId: 10,
+            startTime: 10,
+            type: 'GIVE',
+            propId: 100,
+            interactedPersonId: 2,
+          }),
+        ],
+      }),
+    )
+    expect(cat(r, 1)).toContain('item')
+  })
+  it('TAKEで所持してからのGIVEは破綻しない', () => {
+    const r = analyzeStory(
+      story({
+        props: [{ id: 100, name: '鍵', currentLocation: '10' }],
+        acts: [
+          act({ id: 1, personId: 1, locationId: 10, startTime: 5, type: 'TAKE', propId: 100 }),
+          act({
+            id: 2,
+            personId: 1,
+            locationId: 10,
+            startTime: 10,
+            type: 'GIVE',
+            propId: 100,
+            interactedPersonId: 2,
+          }),
+        ],
+      }),
+    )
+    expect(cat(r, 2)).not.toContain('item')
+  })
+  it('その場にない物のTAKEを破綻にする', () => {
+    const r = analyzeStory(
+      story({
+        props: [{ id: 100, name: '鍵', currentLocation: '11' }],
+        acts: [
+          act({ id: 1, personId: 1, locationId: 10, startTime: 10, type: 'TAKE', propId: 100 }),
+        ],
+      }),
+    )
+    expect(cat(r, 1)).toContain('item')
+  })
+  it('TAKE→GIVEでownsの来歴エッジが張られる', () => {
+    const r = analyzeStory(
+      story({
+        props: [{ id: 100, name: '鍵', currentLocation: '10' }],
+        acts: [
+          act({ id: 1, personId: 1, locationId: 10, startTime: 5, type: 'TAKE', propId: 100 }),
+          act({
+            id: 2,
+            personId: 1,
+            locationId: 10,
+            startTime: 10,
+            type: 'GIVE',
+            propId: 100,
+            interactedPersonId: 2,
+          }),
+        ],
+      }),
+    )
+    expect(r.edges.some(e => e.to === 2 && e.fact.kind === 'owns')).toBe(true)
+  })
+})
+
+describe('analyzeStory: info', () => {
+  it('知らない情報のSPEAKを破綻にする', () => {
+    const r = analyzeStory(
+      story({
+        informations: [{ id: 200, content: '秘密' }],
+        acts: [
+          act({
+            id: 1,
+            personId: 1,
+            locationId: 10,
+            startTime: 10,
+            type: 'SPEAK',
+            informationId: 200,
+            interactedPersonId: 2,
+          }),
+        ],
+      }),
+    )
+    expect(cat(r, 1)).toContain('info')
+  })
+  it('LEARN後のSPEAKは破綻しない', () => {
+    const r = analyzeStory(
+      story({
+        informations: [{ id: 200, content: '秘密' }],
+        acts: [
+          act({
+            id: 1,
+            personId: 1,
+            locationId: 10,
+            startTime: 5,
+            type: 'LEARN',
+            informationId: 200,
+          }),
+          act({
+            id: 2,
+            personId: 1,
+            locationId: 10,
+            startTime: 10,
+            type: 'SPEAK',
+            informationId: 200,
+            interactedPersonId: 2,
+          }),
+        ],
+      }),
+    )
+    expect(cat(r, 2)).not.toContain('info')
+  })
+  it('LEARN→SPEAKでknowsの来歴エッジが張られる', () => {
+    const r = analyzeStory(
+      story({
+        informations: [{ id: 200, content: '秘密' }],
+        acts: [
+          act({
+            id: 1,
+            personId: 1,
+            locationId: 10,
+            startTime: 5,
+            type: 'LEARN',
+            informationId: 200,
+          }),
+          act({
+            id: 2,
+            personId: 1,
+            locationId: 10,
+            startTime: 10,
+            type: 'SPEAK',
+            informationId: 200,
+            interactedPersonId: 2,
+          }),
+        ],
+      }),
+    )
+    expect(r.edges.some(e => e.to === 2 && e.fact.kind === 'knows')).toBe(true)
+  })
+})

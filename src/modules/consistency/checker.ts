@@ -127,7 +127,102 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
       }
     }
 
-    // item / info は Task 5 で追加
+    if (
+      act.propId != null &&
+      (kind === 'TAKE' || kind === 'GIVE' || kind === 'DROP' || kind === 'USE')
+    ) {
+      const propName = (id: number): string => story.props.find(p => p.id === id)?.name ?? `#${id}`
+      const owner = ws.ownerOf(act.propId)
+      const ploc = ws.propLocationOf(act.propId)
+      if (kind === 'TAKE') {
+        if (!ploc || ploc.locationId !== act.locationId) {
+          brek(
+            'item',
+            { kind: 'propAt', propId: act.propId, locationId: act.locationId },
+            `${propName(act.propId)} は ${locName(act.locationId)} に無いため取得できません`,
+          )
+        } else {
+          edges.push({
+            from: ploc.producer,
+            to: act.id,
+            fact: { kind: 'propAt', propId: act.propId, locationId: act.locationId },
+          })
+        }
+        ws.setOwner(act.propId, act.personId, act.id)
+      } else if (kind === 'GIVE') {
+        if (!owner || owner.ownerId !== act.personId) {
+          brek(
+            'item',
+            { kind: 'owns', personId: act.personId, propId: act.propId },
+            `${personName(act.personId)} は ${propName(act.propId)} を所持していないため渡せません`,
+          )
+        } else {
+          edges.push({
+            from: owner.producer,
+            to: act.id,
+            fact: { kind: 'owns', personId: act.personId, propId: act.propId },
+          })
+        }
+        if (act.interactedPersonId != null) ws.setOwner(act.propId, act.interactedPersonId, act.id)
+      } else if (kind === 'DROP') {
+        if (!owner || owner.ownerId !== act.personId) {
+          brek(
+            'item',
+            { kind: 'owns', personId: act.personId, propId: act.propId },
+            `${personName(act.personId)} は ${propName(act.propId)} を所持していないため置けません`,
+          )
+        } else {
+          edges.push({
+            from: owner.producer,
+            to: act.id,
+            fact: { kind: 'owns', personId: act.personId, propId: act.propId },
+          })
+        }
+        ws.setPropLocation(act.propId, act.locationId, act.id)
+      } else {
+        if (!owner || owner.ownerId !== act.personId) {
+          brek(
+            'item',
+            { kind: 'owns', personId: act.personId, propId: act.propId },
+            `${personName(act.personId)} は ${propName(act.propId)} を所持していないため使えません`,
+          )
+        } else {
+          edges.push({
+            from: owner.producer,
+            to: act.id,
+            fact: { kind: 'owns', personId: act.personId, propId: act.propId },
+          })
+        }
+        if (story.props.find(p => p.id === act.propId)?.isConsumable) ws.consume(act.propId)
+      }
+    }
+
+    if (act.informationId != null && (kind === 'LEARN' || kind === 'SPEAK')) {
+      const infoName = (id: number): string => {
+        const i = story.informations.find(x => x.id === id)
+        return i?.name ?? i?.content ?? `#${id}`
+      }
+      if (kind === 'LEARN') {
+        ws.setKnows(act.personId, act.informationId, act.id)
+      } else {
+        const kp = ws.knowerProducer(act.personId, act.informationId)
+        if (!kp) {
+          brek(
+            'info',
+            { kind: 'knows', personId: act.personId, informationId: act.informationId },
+            `${personName(act.personId)} は「${infoName(act.informationId)}」を知らないため話せません`,
+          )
+        } else {
+          edges.push({
+            from: kp,
+            to: act.id,
+            fact: { kind: 'knows', personId: act.personId, informationId: act.informationId },
+          })
+        }
+        if (act.interactedPersonId != null)
+          ws.setKnows(act.interactedPersonId, act.informationId, act.id)
+      }
+    }
   }
 
   const byActId = new Map<number, Breakage[]>()
