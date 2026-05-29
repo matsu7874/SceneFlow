@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import styles from './QuickLog.module.css'
 
 export interface ComboOption {
@@ -24,6 +24,9 @@ export const EntityCombobox: React.FC<EntityComboboxProps> = ({
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
 
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(blurTimer.current), [])
+
   const selectedName = useMemo(
     () => options.find(option => option.id === value)?.name ?? '',
     [options, value],
@@ -35,7 +38,8 @@ export const EntityCombobox: React.FC<EntityComboboxProps> = ({
     return options.filter(option => option.name.toLowerCase().includes(q))
   }, [options, query])
 
-  const exactMatch = options.find(option => option.name === query.trim())
+  const trimmedQuery = query.trim()
+  const hasExactMatch = options.some(option => option.name === trimmedQuery)
 
   const choose = (id: number): void => {
     onSelect(id)
@@ -47,9 +51,8 @@ export const EntityCombobox: React.FC<EntityComboboxProps> = ({
     const name = query.trim()
     if (!name) return
     const id = onCreate(name)
-    if (id !== null) {
-      onSelect(id)
-    }
+    if (id === null) return
+    onSelect(id)
     setQuery('')
     setOpen(false)
   }
@@ -65,7 +68,9 @@ export const EntityCombobox: React.FC<EntityComboboxProps> = ({
           setOpen(true)
         }}
         onFocus={() => setOpen(true)}
-        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        onBlur={() => {
+          blurTimer.current = setTimeout(() => setOpen(false), 150)
+        }}
         onKeyDown={event => {
           if (event.key === 'Enter') {
             event.preventDefault()
@@ -86,10 +91,10 @@ export const EntityCombobox: React.FC<EntityComboboxProps> = ({
               </button>
             </li>
           ))}
-          {query.trim() && !exactMatch && (
+          {trimmedQuery && !hasExactMatch && (
             <li>
               <button type="button" onMouseDown={create} className={styles.createOption}>
-                + 新規: {query.trim()}
+                + 新規: {trimmedQuery}
               </button>
             </li>
           )}

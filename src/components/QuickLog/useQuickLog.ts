@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useAppContext } from '../../contexts/AppContext'
 import type { Act, StoryData } from '../../types/StoryData'
 import {
@@ -72,10 +72,11 @@ export function useQuickLog(): UseQuickLogReturn {
     [storyData, setStoryData],
   )
 
-  const sortedActs = storyData ? sortActs(storyData.acts) : []
-  const inconsistentActIds = storyData
-    ? detectMovementInconsistencies(storyData.acts)
-    : new Set<number>()
+  const sortedActs = useMemo(() => (storyData ? sortActs(storyData.acts) : []), [storyData])
+  const inconsistentActIds = useMemo(
+    () => (storyData ? detectMovementInconsistencies(storyData.acts) : new Set<number>()),
+    [storyData],
+  )
 
   return {
     storyData,
