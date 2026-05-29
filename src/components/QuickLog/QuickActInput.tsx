@@ -76,7 +76,7 @@ export const QuickActInput: React.FC<QuickActInputProps> = ({
       />
       <input
         aria-label="時刻"
-        className={styles.time}
+        className={styles.timeInput}
         value={timeText}
         onChange={event => setTimeText(event.target.value)}
       />

@@ -32,13 +32,13 @@
   color: var(--color-text-primary);
 }
 /* inputBar内の時刻入力欄 & タイムライン行の時刻表示を兼用 */
-.time {
+.timeInput {
   width: 5rem;
   padding: 0.4rem 0.5rem;
   border: 1px solid var(--color-border);
   border-radius: 4px;
   background: var(--color-background);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   font-variant-numeric: tabular-nums;
 }
 .options {
@@ -109,6 +109,10 @@
 }
 .deleteButton:hover {
   color: var(--color-error);
+}
+.time {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 .who {
   font-weight: 600;
