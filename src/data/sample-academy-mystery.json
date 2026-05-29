@@ -1,0 +1,244 @@
+{
+  "persons": [
+    {
+      "id": 1,
+      "name": "レオ",
+      "color": "#6366f1",
+      "occupation": "生徒会長",
+      "description": "完璧主義の生徒会長。ある秘密を抱える"
+    },
+    {
+      "id": 2,
+      "name": "ユーリ",
+      "color": "#22c55e",
+      "occupation": "転入生",
+      "description": "学院の過去を探る転入生"
+    },
+    {
+      "id": 3,
+      "name": "クラウス",
+      "color": "#a855f7",
+      "occupation": "寮監",
+      "description": "生徒を見守る寮監の教師"
+    },
+    {
+      "id": 4,
+      "name": "ニコ",
+      "color": "#f59e0b",
+      "occupation": "図書委員",
+      "description": "物静かな図書委員"
+    },
+    {
+      "id": 5,
+      "name": "アラン",
+      "color": "#ef4444",
+      "occupation": "生徒",
+      "description": "脅迫状を握る問題児（被害者）"
+    }
+  ],
+  "locations": [
+    { "id": 1, "name": "寮の自室", "connections": [2], "description": "レオの個室" },
+    { "id": 2, "name": "廊下", "connections": [1, 3, 4, 6], "description": "各室をつなぐ中央廊下" },
+    { "id": 3, "name": "図書室", "connections": [2], "description": "古い蔵書が並ぶ図書室" },
+    { "id": 4, "name": "礼拝堂", "connections": [2, 5], "description": "学院の礼拝堂。事件の現場" },
+    { "id": 5, "name": "中庭", "connections": [4], "description": "礼拝堂に面した中庭" },
+    { "id": 6, "name": "音楽室", "connections": [2], "description": "防音の音楽室" }
+  ],
+  "props": [
+    {
+      "id": 101,
+      "name": "古い鍵",
+      "currentLocation": "3",
+      "isPortable": true,
+      "description": "礼拝堂の地下へ通じる鍵"
+    },
+    {
+      "id": 102,
+      "name": "一通の手紙",
+      "owner": "1",
+      "isPortable": true,
+      "description": "レオ宛ての差出人不明の手紙"
+    },
+    {
+      "id": 103,
+      "name": "銀の燭台",
+      "currentLocation": "4",
+      "isPortable": true,
+      "description": "礼拝堂の燭台。凶器になりうる"
+    },
+    {
+      "id": 104,
+      "name": "鎮静剤",
+      "owner": "3",
+      "isPortable": true,
+      "isConsumable": true,
+      "description": "クラウスが管理する鎮静剤"
+    }
+  ],
+  "informations": [
+    { "id": 201, "content": "レオの出生の秘密", "category": "SECRET", "isSecret": true },
+    { "id": 202, "content": "礼拝堂の隠し扉", "category": "SECRET", "isSecret": true },
+    { "id": 203, "content": "アランへの脅迫状の存在", "category": "FACT" }
+  ],
+  "initialStates": [
+    { "personId": 1, "locationId": 1, "time": "21:00" },
+    { "personId": 2, "locationId": 2, "time": "21:00" },
+    { "personId": 3, "locationId": 6, "time": "21:00" },
+    { "personId": 4, "locationId": 3, "time": "21:00" },
+    { "personId": 5, "locationId": 4, "time": "21:00" }
+  ],
+  "acts": [
+    {
+      "id": 1,
+      "personId": 4,
+      "locationId": 3,
+      "startTime": 1260,
+      "time": "21:00",
+      "type": "TAKE",
+      "propId": 101,
+      "description": "図書室で古い鍵を手に取る"
+    },
+    {
+      "id": 2,
+      "personId": 3,
+      "locationId": 2,
+      "startTime": 1265,
+      "time": "21:05",
+      "type": "MOVE",
+      "description": "音楽室から廊下へ出る"
+    },
+    {
+      "id": 3,
+      "personId": 1,
+      "locationId": 2,
+      "startTime": 1265,
+      "time": "21:05",
+      "type": "MOVE",
+      "description": "自室から廊下へ出る"
+    },
+    {
+      "id": 4,
+      "personId": 3,
+      "locationId": 4,
+      "startTime": 1270,
+      "time": "21:10",
+      "type": "MOVE",
+      "description": "廊下から礼拝堂へ向かう"
+    },
+    {
+      "id": 5,
+      "personId": 2,
+      "locationId": 3,
+      "startTime": 1270,
+      "time": "21:10",
+      "type": "MOVE",
+      "description": "廊下から図書室へ入る"
+    },
+    {
+      "id": 6,
+      "personId": 1,
+      "locationId": 2,
+      "startTime": 1270,
+      "time": "21:10",
+      "type": "LEARN",
+      "informationId": 203,
+      "description": "廊下で脅迫状の噂を耳にする"
+    },
+    {
+      "id": 7,
+      "personId": 3,
+      "locationId": 4,
+      "startTime": 1275,
+      "time": "21:15",
+      "type": "GIVE",
+      "propId": 104,
+      "interactedPersonId": 5,
+      "description": "アランに鎮静剤を渡す"
+    },
+    {
+      "id": 8,
+      "personId": 4,
+      "locationId": 2,
+      "startTime": 1275,
+      "time": "21:15",
+      "type": "MOVE",
+      "description": "図書室から廊下へ戻る"
+    },
+    {
+      "id": 9,
+      "personId": 2,
+      "locationId": 3,
+      "startTime": 1280,
+      "time": "21:20",
+      "type": "TAKE",
+      "propId": 101,
+      "description": "図書室で古い鍵を探して手に取る（※鍵は既にニコが持ち出している）"
+    },
+    {
+      "id": 10,
+      "personId": 5,
+      "locationId": 4,
+      "startTime": 1285,
+      "time": "21:25",
+      "type": "USE",
+      "propId": 104,
+      "description": "渡された鎮静剤を飲む"
+    },
+    {
+      "id": 11,
+      "personId": 4,
+      "locationId": 4,
+      "startTime": 1285,
+      "time": "21:25",
+      "type": "MOVE",
+      "description": "廊下から礼拝堂へ入る"
+    },
+    {
+      "id": 12,
+      "personId": 1,
+      "locationId": 5,
+      "startTime": 1290,
+      "time": "21:30",
+      "description": "中庭でひとり考えを巡らせる（※レオは廊下にいたはずで中庭への移動がない）"
+    },
+    {
+      "id": 13,
+      "personId": 1,
+      "locationId": 4,
+      "startTime": 1295,
+      "time": "21:35",
+      "type": "MOVE",
+      "description": "中庭から礼拝堂へ入る"
+    },
+    {
+      "id": 14,
+      "personId": 4,
+      "locationId": 4,
+      "startTime": 1295,
+      "time": "21:35",
+      "type": "SPEAK",
+      "informationId": 202,
+      "interactedPersonId": 1,
+      "description": "レオに礼拝堂の隠し扉を教える（※ニコはこの情報を知らないはず）"
+    },
+    {
+      "id": 15,
+      "personId": 1,
+      "locationId": 4,
+      "startTime": 1300,
+      "time": "21:40",
+      "type": "TAKE",
+      "propId": 103,
+      "description": "礼拝堂の銀の燭台を手に取る"
+    },
+    {
+      "id": 16,
+      "personId": 1,
+      "locationId": 4,
+      "startTime": 1305,
+      "time": "21:45",
+      "interactedPersonId": 5,
+      "description": "アランと対峙する"
+    }
+  ]
+}

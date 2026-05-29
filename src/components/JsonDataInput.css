@@ -59,3 +59,12 @@
   border-radius: 3px;
   white-space: pre-wrap;
 }
+.json-data-input-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.json-data-input-actions .sample-button {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
