@@ -123,13 +123,6 @@
 .what {
   flex: 1;
 }
-.warningBadge {
-  color: var(--color-warning);
-  background: color-mix(in srgb, var(--color-warning) 18%, transparent);
-  border-radius: 4px;
-  padding: 0 0.4rem;
-  font-size: 0.8rem;
-}
 .breakIcons {
   display: inline-flex;
   gap: 0.15rem;

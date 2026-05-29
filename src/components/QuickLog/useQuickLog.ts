@@ -1,8 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useAppContext } from '../../contexts/AppContext'
 import type { Act, StoryData } from '../../types/StoryData'
-import { analyzeStory } from '../../modules/consistency'
-import type { Breakage } from '../../modules/consistency'
+import { analyzeStory, type Breakage } from '../../modules/consistency'
 import {
   appendAct,
   appendPerson,

@@ -47,9 +47,14 @@ export const ActTimelineRow: React.FC<ActTimelineRowProps> = ({
           <span className={styles.where}>{locationName}</span>
           <span className={styles.what}>{act.description}</span>
           {categories.length > 0 && (
-            <span className={styles.breakIcons} title={tooltip}>
+            <span
+              className={styles.breakIcons}
+              title={tooltip}
+              role="img"
+              aria-label={`整合性の警告: ${categories.join(', ')}`}
+            >
               {categories.map(c => (
-                <span key={c} className={styles.breakIcon} aria-label={`整合性の警告: ${c}`}>
+                <span key={c} className={styles.breakIcon} aria-hidden="true">
                   {CATEGORY_ICON[c]}
                 </span>
               ))}
