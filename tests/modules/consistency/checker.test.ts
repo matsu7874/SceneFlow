@@ -225,6 +225,61 @@ describe('analyzeStory: item', () => {
     )
     expect(r.edges.some(e => e.to === 2 && e.fact.kind === 'owns')).toBe(true)
   })
+  it('DROP: 未所持なら破綻にする', () => {
+    const r = analyzeStory(
+      story({
+        props: [{ id: 100, name: '鍵' }],
+        acts: [
+          act({ id: 1, personId: 1, locationId: 10, startTime: 10, type: 'DROP', propId: 100 }),
+        ],
+      }),
+    )
+    expect(cat(r, 1)).toContain('item')
+  })
+  it('USE: 未所持なら破綻にする', () => {
+    const r = analyzeStory(
+      story({
+        props: [{ id: 100, name: '鍵' }],
+        acts: [
+          act({ id: 1, personId: 1, locationId: 10, startTime: 10, type: 'USE', propId: 100 }),
+        ],
+      }),
+    )
+    expect(cat(r, 1)).toContain('item')
+  })
+  it('USE: isConsumableは消費され、以降のUSEは破綻になる', () => {
+    const r = analyzeStory(
+      story({
+        props: [{ id: 100, name: '薬', isConsumable: true, owner: '1' }],
+        acts: [
+          act({ id: 1, personId: 1, locationId: 10, startTime: 10, type: 'USE', propId: 100 }),
+          act({ id: 2, personId: 1, locationId: 10, startTime: 20, type: 'USE', propId: 100 }),
+        ],
+      }),
+    )
+    expect(cat(r, 1)).not.toContain('item')
+    expect(cat(r, 2)).toContain('item')
+  })
+  it('GIVE: 相手がその場にいなければ破綻にする（対人共在）', () => {
+    const r = analyzeStory(
+      story({
+        props: [{ id: 100, name: '鍵', owner: '1' }],
+        acts: [
+          act({ id: 1, personId: 2, locationId: 11, startTime: 5, type: 'MOVE' }),
+          act({
+            id: 2,
+            personId: 1,
+            locationId: 10,
+            startTime: 10,
+            type: 'GIVE',
+            propId: 100,
+            interactedPersonId: 2,
+          }),
+        ],
+      }),
+    )
+    expect(cat(r, 2)).toContain('colocation')
+  })
 })
 
 describe('analyzeStory: info', () => {
@@ -300,5 +355,52 @@ describe('analyzeStory: info', () => {
       }),
     )
     expect(r.edges.some(e => e.to === 2 && e.fact.kind === 'knows')).toBe(true)
+  })
+  it('SPEAK: 相手がその場にいなければ破綻にする（対人共在）', () => {
+    const r = analyzeStory(
+      story({
+        informations: [{ id: 200, content: '秘密' }],
+        acts: [
+          act({ id: 1, personId: 2, locationId: 11, startTime: 3, type: 'MOVE' }),
+          act({
+            id: 2,
+            personId: 1,
+            locationId: 10,
+            startTime: 5,
+            type: 'LEARN',
+            informationId: 200,
+          }),
+          act({
+            id: 3,
+            personId: 1,
+            locationId: 10,
+            startTime: 10,
+            type: 'SPEAK',
+            informationId: 200,
+            interactedPersonId: 2,
+          }),
+        ],
+      }),
+    )
+    expect(cat(r, 3)).toContain('colocation')
+  })
+  it('満たされないSPEAKのrequireはknowsエッジを張らない', () => {
+    const r = analyzeStory(
+      story({
+        informations: [{ id: 200, content: '秘密' }],
+        acts: [
+          act({
+            id: 1,
+            personId: 1,
+            locationId: 10,
+            startTime: 10,
+            type: 'SPEAK',
+            informationId: 200,
+            interactedPersonId: 2,
+          }),
+        ],
+      }),
+    )
+    expect(r.edges.some(e => e.to === 1 && e.fact.kind === 'knows')).toBe(false)
   })
 })
