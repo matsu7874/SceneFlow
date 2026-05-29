@@ -50,6 +50,7 @@ export const ActTimelineRow: React.FC<ActTimelineRowProps> = ({
         <ActDetailPanel
           act={act}
           persons={persons}
+          locations={locations}
           props={props}
           informations={informations}
           onChange={onUpdate}

@@ -1,10 +1,12 @@
-import React from 'react'
-import type { Act, Prop, Information, Person } from '../../types/StoryData'
+import React, { useState, useEffect } from 'react'
+import type { Act, Prop, Information, Person, Location } from '../../types/StoryData'
+import { timeStringToMinutes } from './quickLogLogic'
 import styles from './QuickLog.module.css'
 
 interface ActDetailPanelProps {
   act: Act
   persons: Person[]
+  locations: Location[]
   props: Prop[]
   informations: Information[]
   onChange: (patch: Partial<Act>) => void
@@ -16,12 +18,44 @@ const numberOrUndefined = (value: string): number | undefined =>
 export const ActDetailPanel: React.FC<ActDetailPanelProps> = ({
   act,
   persons,
+  locations,
   props,
   informations,
   onChange,
 }) => {
+  const [timeDraft, setTimeDraft] = useState(act.time)
+
+  useEffect(() => {
+    setTimeDraft(act.time)
+  }, [act.time])
+
   return (
     <div className={styles.detailPanel}>
+      <label>
+        時刻
+        <input
+          value={timeDraft}
+          onChange={event => {
+            const next = event.target.value
+            setTimeDraft(next)
+            const minutes = timeStringToMinutes(next)
+            if (minutes !== null) onChange({ startTime: minutes })
+          }}
+        />
+      </label>
+      <label>
+        場所
+        <select
+          value={act.locationId}
+          onChange={event => onChange({ locationId: Number(event.target.value) })}
+        >
+          {locations.map(location => (
+            <option key={location.id} value={location.id}>
+              {location.name}
+            </option>
+          ))}
+        </select>
+      </label>
       <label>
         タイプ
         <input value={act.type ?? ''} onChange={event => onChange({ type: event.target.value })} />
