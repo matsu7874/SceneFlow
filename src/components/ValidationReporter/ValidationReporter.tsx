@@ -19,7 +19,7 @@ const CATEGORY_LABEL: Record<DiagnosticCategory, string> = {
 export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyData, className }) => {
   const breakages = useMemo(() => analyzeStory(storyData).breakages, [storyData])
 
-  const describe = (actId: number): string => {
+  const describeAct = (actId: number): string => {
     const act = storyData.acts.find(a => a.id === actId)
     if (!act) return `Act ${actId}`
     const person = storyData.persons.find(p => p.id === act.personId)?.name ?? `#${act.personId}`
@@ -52,8 +52,8 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyDat
             </h3>
             <ul>
               {grouped.get(category)?.map((b, i) => (
-                <li key={`${b.actId}-${i}`}>
-                  <strong>{describe(b.actId)}</strong>: {b.message}
+                <li key={`${category}-${b.actId}-${i}`}>
+                  <strong>{describeAct(b.actId)}</strong>: {b.message}
                 </li>
               ))}
             </ul>
