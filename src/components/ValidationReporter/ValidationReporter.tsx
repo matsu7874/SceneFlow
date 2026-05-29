@@ -1,443 +1,64 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { StoryData } from '../../types'
-import { CausalityEngine } from '../../modules/core/causalityEngine'
-import { useVisualFeedback } from '../../contexts/VisualFeedbackContext'
-import { generateEventsFromActs } from '../../utils/eventGeneration'
+import React, { useMemo } from 'react'
+import type { StoryData } from '../../types/StoryData'
+import { analyzeStory } from '../../modules/consistency'
+import type { Breakage, DiagnosticCategory } from '../../modules/consistency'
 import styles from './ValidationReporter.module.css'
 
 interface ValidationReporterProps {
   storyData: StoryData
-  onAutoFix?: (fixes: ValidationFix[]) => void
   className?: string
 }
 
-interface ValidationIssue {
-  id: string
-  type: 'error' | 'warning' | 'info'
-  category: string
-  message: string
-  details?: string
-  entityType?: string
-  entityId?: string
-  suggestion?: string
-  autoFixable?: boolean
-}
-
-interface ValidationFix {
-  issueId: string
-  description: string
-  apply: () => void
+const CATEGORY_LABEL: Record<DiagnosticCategory, string> = {
+  position: '位置・動線',
+  colocation: '同時刻・共在',
+  item: 'アイテム所持',
+  info: '情報の知識',
 }
 
 export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyData, className }) => {
-  const [issues, setIssues] = useState<ValidationIssue[]>([])
-  const [isValidating, setIsValidating] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [selectedType, setSelectedType] = useState<string>('all')
-  const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set())
+  const breakages = useMemo(() => analyzeStory(storyData).breakages, [storyData])
 
-  const { showNotification } = useVisualFeedback()
+  const describe = (actId: number): string => {
+    const act = storyData.acts.find(a => a.id === actId)
+    if (!act) return `Act ${actId}`
+    const person = storyData.persons.find(p => p.id === act.personId)?.name ?? `#${act.personId}`
+    return `${act.time} ${person}「${act.description}」`
+  }
 
-  const causalityEngine = useMemo(() => {
-    return new CausalityEngine(storyData)
-  }, [storyData])
+  if (breakages.length === 0) {
+    return (
+      <div className={className}>
+        <p>破綻は見つかりませんでした。</p>
+      </div>
+    )
+  }
 
-  // Run validation
-  const runValidation = useCallback(() => {
-    setIsValidating(true)
-    const newIssues: ValidationIssue[] = []
-    let issueId = 0
-
-    try {
-      // 1. Check for missing required fields
-      storyData.persons.forEach(person => {
-        if (!person.name || person.name.trim() === '') {
-          newIssues.push({
-            id: `issue-${issueId++}`,
-            type: 'error',
-            category: 'Missing Data',
-            message: `Person "${person.id}" has no name`,
-            entityType: 'person',
-            entityId: String(person.id),
-            suggestion: 'Add a name to this person',
-            autoFixable: false,
-          })
-        }
-      })
-
-      storyData.locations.forEach(location => {
-        if (!location.name || location.name.trim() === '') {
-          newIssues.push({
-            id: `issue-${issueId++}`,
-            type: 'error',
-            category: 'Missing Data',
-            message: `Location "${location.id}" has no name`,
-            entityType: 'location',
-            entityId: String(location.id),
-            suggestion: 'Add a name to this location',
-            autoFixable: false,
-          })
-        }
-      })
-
-      // 2. Check for duplicate IDs
-      const idSets = {
-        persons: new Set<string>(),
-        locations: new Set<string>(),
-        props: new Set<string>(),
-        acts: new Set<string>(),
-        events: new Set<string>(),
-      }
-
-      const checkDuplicates = (items: any[], type: string, set: Set<string>): void => {
-        items.forEach(item => {
-          const itemId = String(item.id)
-          if (set.has(itemId)) {
-            newIssues.push({
-              id: `issue-${issueId++}`,
-              type: 'error',
-              category: 'Duplicate ID',
-              message: `Duplicate ${type} ID: "${item.id}"`,
-              entityType: type,
-              entityId: item.id,
-              suggestion: 'Change the ID to make it unique',
-              autoFixable: false,
-            })
-          }
-          set.add(itemId)
-        })
-      }
-
-      checkDuplicates(storyData.persons, 'person', idSets.persons)
-      checkDuplicates(storyData.locations, 'location', idSets.locations)
-      checkDuplicates(storyData.props, 'prop', idSets.props)
-      checkDuplicates(storyData.acts, 'act', idSets.acts)
-      // Events are generated from acts, so check the generated events
-      const events = generateEventsFromActs(storyData.acts || [])
-      checkDuplicates(events, 'event', idSets.events)
-
-      // 3. Check for invalid references
-      storyData.acts.forEach(act => {
-        if (act.personId && !idSets.persons.has(String(act.personId))) {
-          newIssues.push({
-            id: `issue-${issueId++}`,
-            type: 'error',
-            category: 'Invalid Reference',
-            message: `Act "${act.id}" references non-existent person "${act.personId}"`,
-            entityType: 'act',
-            entityId: String(act.id),
-            suggestion: 'Update the person reference or create the missing person',
-            autoFixable: false,
-          })
-        }
-
-        if (act.locationId && !idSets.locations.has(String(act.locationId))) {
-          newIssues.push({
-            id: `issue-${issueId++}`,
-            type: 'error',
-            category: 'Invalid Reference',
-            message: `Act "${act.id}" references non-existent location "${act.locationId}"`,
-            entityType: 'act',
-            entityId: String(act.id),
-            suggestion: 'Update the location reference or create the missing location',
-            autoFixable: false,
-          })
-        }
-      })
-
-      // 4. Check for timing conflicts
-      const personSchedules = new Map<
-        string,
-        Array<{ start: number; end: number; actId: string }>
-      >()
-
-      storyData.acts.forEach(act => {
-        if (act.personId && act.startTime !== undefined && act.endTime !== undefined) {
-          const personKey = String(act.personId)
-          if (!personSchedules.has(personKey)) {
-            personSchedules.set(personKey, [])
-          }
-          personSchedules.get(personKey)!.push({
-            start: act.startTime,
-            end: act.endTime,
-            actId: String(act.id),
-          })
-        }
-      })
-
-      personSchedules.forEach((schedule, personId) => {
-        schedule.sort((a, b) => a.start - b.start)
-
-        for (let i = 0; i < schedule.length - 1; i++) {
-          if (schedule[i].end > schedule[i + 1].start) {
-            newIssues.push({
-              id: `issue-${issueId++}`,
-              type: 'warning',
-              category: 'Timing Conflict',
-              message: `Person "${personId}" has overlapping acts: "${schedule[i].actId}" and "${schedule[i + 1].actId}"`,
-              details: `First act ends at ${schedule[i].end}, second act starts at ${schedule[i + 1].start}`,
-              entityType: 'person',
-              entityId: personId,
-              suggestion: 'Adjust act times to avoid overlap',
-              autoFixable: false,
-            })
-          }
-        }
-      })
-
-      // 5. Check for unreachable locations
-      const locationConnections = new Map<string, Set<string>>()
-
-      storyData.locations.forEach(location => {
-        locationConnections.set(String(location.id), new Set())
-      })
-
-      // Build connection graph
-      storyData.locations.forEach(location => {
-        // Check both connections (number[]) and connectedTo (string[]) fields
-        location.connections?.forEach(targetId => {
-          const targetIdStr = String(targetId)
-          if (idSets.locations.has(targetIdStr)) {
-            locationConnections.get(String(location.id))?.add(targetIdStr)
-          }
-        })
-
-        location.connectedTo?.forEach(targetId => {
-          if (idSets.locations.has(targetId)) {
-            locationConnections.get(String(location.id))?.add(targetId)
-          }
-        })
-      })
-
-      // Find disconnected components
-      const visited = new Set<string>()
-      const components: string[][] = []
-
-      const dfs = (locationId: string, component: string[]): void => {
-        if (visited.has(locationId)) return
-        visited.add(locationId)
-        component.push(locationId)
-
-        locationConnections.get(locationId)?.forEach(connectedId => {
-          dfs(connectedId, component)
-        })
-
-        // Check reverse connections
-        locationConnections.forEach((connections, fromId) => {
-          if (connections.has(locationId)) {
-            dfs(fromId, component)
-          }
-        })
-      }
-
-      storyData.locations.forEach(location => {
-        const locationId = String(location.id)
-        if (!visited.has(locationId)) {
-          const component: string[] = []
-          dfs(locationId, component)
-          components.push(component)
-        }
-      })
-
-      // Only report isolated locations if there are multiple components
-      // and one of them is a single location
-      if (components.length > 1) {
-        components.forEach(component => {
-          if (component.length === 1) {
-            // Check if this location has no connections at all
-            const locationId = component[0]
-            const hasAnyConnection = (locationConnections.get(locationId)?.size ?? 0) > 0
-
-            // Only report as isolated if it truly has no connections
-            if (!hasAnyConnection) {
-              newIssues.push({
-                id: `issue-${issueId++}`,
-                type: 'warning',
-                category: 'Isolated Location',
-                message: `Location "${locationId}" is not connected to any other location`,
-                entityType: 'location',
-                entityId: locationId,
-                suggestion: 'Connect this location to others or remove it if unused',
-                autoFixable: false,
-              })
-            }
-          } else if (components.length > 2 || component.length > 1) {
-            // Only report disconnected groups if there are more than 2 components
-            // or if this group has more than 1 location
-            newIssues.push({
-              id: `issue-${issueId++}`,
-              type: 'info',
-              category: 'Disconnected Group',
-              message: `Group of ${component.length} locations is disconnected from others`,
-              details: `Locations: ${component.join(', ')}`,
-              suggestion: 'Consider connecting these location groups',
-              autoFixable: false,
-            })
-          }
-        })
-      }
-
-      // 6. Check causality
-      const conflicts = causalityEngine.validateCausality()
-      conflicts.forEach(conflict => {
-        newIssues.push({
-          id: `issue-${issueId++}`,
-          type: 'error',
-          category: 'Causality Conflict',
-          message: conflict.message,
-          details: conflict.description,
-          suggestion: conflict.suggestion,
-          autoFixable: false,
-        })
-      })
-
-      setIssues(newIssues)
-      showNotification(`Validation complete: ${newIssues.length} issues found`, {
-        type: newIssues.length === 0 ? 'success' : 'warning',
-      })
-    } catch (error) {
-      showNotification('Validation failed', { type: 'error' })
-      console.error('Validation error:', error)
-    } finally {
-      setIsValidating(false)
-    }
-  }, [storyData, causalityEngine, showNotification])
-
-  // Run validation on mount and when data changes
-  useEffect(() => {
-    runValidation()
-  }, [runValidation])
-
-  // Filter issues
-  const filteredIssues = useMemo(() => {
-    return issues.filter(issue => {
-      if (selectedCategory !== 'all' && issue.category !== selectedCategory) return false
-      if (selectedType !== 'all' && issue.type !== selectedType) return false
-      return true
-    })
-  }, [issues, selectedCategory, selectedType])
-
-  // Get unique categories
-  const categories = useMemo(() => {
-    const cats = new Set(issues.map(issue => issue.category))
-    return ['all', ...Array.from(cats)]
-  }, [issues])
-
-  // Count by type
-  const typeCounts = useMemo(() => {
-    const counts = { error: 0, warning: 0, info: 0 }
-    issues.forEach(issue => {
-      counts[issue.type]++
-    })
-    return counts
-  }, [issues])
-
-  const toggleExpanded = (issueId: string): void => {
-    setExpandedIssues(prev => {
-      const next = new Set(prev)
-      if (next.has(issueId)) {
-        next.delete(issueId)
-      } else {
-        next.add(issueId)
-      }
-      return next
-    })
+  const grouped = new Map<DiagnosticCategory, Breakage[]>()
+  for (const b of breakages) {
+    const arr = grouped.get(b.category) ?? []
+    arr.push(b)
+    grouped.set(b.category, arr)
   }
 
   return (
-    <div className={`${styles.container} ${className || ''}`}>
-      <div className={styles.header}>
-        <h3>Validation Report</h3>
-        <button className={styles.refreshButton} onClick={runValidation} disabled={isValidating}>
-          {isValidating ? 'Validating...' : 'Refresh'}
-        </button>
-      </div>
-
-      <div className={styles.summary}>
-        <div className={`${styles.summaryItem} ${styles.error}`}>
-          <span className={styles.icon}>❌</span>
-          <span>{typeCounts.error} Errors</span>
-        </div>
-        <div className={`${styles.summaryItem} ${styles.warning}`}>
-          <span className={styles.icon}>⚠️</span>
-          <span>{typeCounts.warning} Warnings</span>
-        </div>
-        <div className={`${styles.summaryItem} ${styles.info}`}>
-          <span className={styles.icon}>ℹ️</span>
-          <span>{typeCounts.info} Info</span>
-        </div>
-      </div>
-
-      <div className={styles.filters}>
-        <select
-          value={selectedCategory}
-          onChange={e => setSelectedCategory(e.target.value)}
-          className={styles.filterSelect}
-        >
-          {categories.map(cat => (
-            <option key={cat} value={cat}>
-              {cat === 'all' ? 'All Categories' : cat}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={selectedType}
-          onChange={e => setSelectedType(e.target.value)}
-          className={styles.filterSelect}
-        >
-          <option value="all">All Types</option>
-          <option value="error">Errors Only</option>
-          <option value="warning">Warnings Only</option>
-          <option value="info">Info Only</option>
-        </select>
-      </div>
-
-      <div className={styles.issuesList}>
-        {filteredIssues.length === 0 ? (
-          <div className={styles.noIssues}>
-            {issues.length === 0
-              ? '✅ No validation issues found!'
-              : 'No issues match the selected filters'}
-          </div>
-        ) : (
-          filteredIssues.map(issue => (
-            <div
-              key={issue.id}
-              className={`${styles.issue} ${styles[issue.type]}`}
-              onClick={() => toggleExpanded(issue.id)}
-            >
-              <div className={styles.issueHeader}>
-                <span className={styles.issueIcon}>
-                  {issue.type === 'error' ? '❌' : issue.type === 'warning' ? '⚠️' : 'ℹ️'}
-                </span>
-                <span className={styles.issueCategory}>{issue.category}</span>
-                <span className={styles.issueMessage}>{issue.message}</span>
-              </div>
-
-              {expandedIssues.has(issue.id) && (
-                <div className={styles.issueDetails}>
-                  {issue.details && (
-                    <p className={styles.detail}>
-                      <strong>Details:</strong> {issue.details}
-                    </p>
-                  )}
-                  {issue.suggestion && (
-                    <p className={styles.suggestion}>
-                      <strong>Suggestion:</strong> {issue.suggestion}
-                    </p>
-                  )}
-                  {issue.entityType && issue.entityId && (
-                    <p className={styles.entity}>
-                      <strong>Entity:</strong> {issue.entityType} - {issue.entityId}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+    <div className={className}>
+      {(Object.keys(CATEGORY_LABEL) as DiagnosticCategory[])
+        .filter(c => grouped.has(c))
+        .map(category => (
+          <section key={category} className={styles.category ?? undefined}>
+            <h3>
+              {CATEGORY_LABEL[category]}（{grouped.get(category)?.length}）
+            </h3>
+            <ul>
+              {grouped.get(category)?.map((b, i) => (
+                <li key={`${b.actId}-${i}`}>
+                  <strong>{describe(b.actId)}</strong>: {b.message}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
     </div>
   )
 }
