@@ -7,7 +7,7 @@ export const QuickLogPage: React.FC = () => {
   const {
     storyData,
     sortedActs,
-    inconsistentActIds,
+    breakagesByActId,
     addAct,
     updateAct,
     deleteAct,
@@ -46,7 +46,7 @@ export const QuickLogPage: React.FC = () => {
         locations={storyData.locations}
         props={storyData.props}
         informations={storyData.informations}
-        inconsistentActIds={inconsistentActIds}
+        breakagesByActId={breakagesByActId}
         onUpdate={updateAct}
         onDelete={deleteAct}
       />

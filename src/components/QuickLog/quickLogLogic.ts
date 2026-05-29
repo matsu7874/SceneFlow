@@ -93,27 +93,3 @@ export function removeAct(story: StoryData, id: number): StoryData {
 export function sortActs(acts: Act[]): Act[] {
   return [...acts].sort((a, b) => (a.startTime ?? 0) - (b.startTime ?? 0) || a.id - b.id)
 }
-
-export function isMoveAct(act: Act): boolean {
-  return (act.type ?? '').toUpperCase() === 'MOVE'
-}
-
-export function detectMovementInconsistencies(acts: Act[]): Set<number> {
-  const flagged = new Set<number>()
-  const byPerson = new Map<number, Act[]>()
-  for (const act of acts) {
-    const list = byPerson.get(act.personId) ?? []
-    list.push(act)
-    byPerson.set(act.personId, list)
-  }
-  for (const list of byPerson.values()) {
-    let prevLocation: number | null = null
-    for (const act of sortActs(list)) {
-      if (!isMoveAct(act) && prevLocation !== null && act.locationId !== prevLocation) {
-        flagged.add(act.id)
-      }
-      prevLocation = act.locationId
-    }
-  }
-  return flagged
-}

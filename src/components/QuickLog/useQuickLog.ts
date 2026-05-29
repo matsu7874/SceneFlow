@@ -1,13 +1,14 @@
 import { useCallback, useMemo } from 'react'
 import { useAppContext } from '../../contexts/AppContext'
 import type { Act, StoryData } from '../../types/StoryData'
+import { analyzeStory } from '../../modules/consistency'
+import type { Breakage } from '../../modules/consistency'
 import {
   appendAct,
   appendPerson,
   appendLocation,
   applyActPatch,
   removeAct,
-  detectMovementInconsistencies,
   sortActs,
   type AppendActInput,
 } from './quickLogLogic'
@@ -15,7 +16,7 @@ import {
 export interface UseQuickLogReturn {
   storyData: StoryData | null
   sortedActs: Act[]
-  inconsistentActIds: Set<number>
+  breakagesByActId: Map<number, Breakage[]>
   addAct: (input: AppendActInput) => number | null
   updateAct: (id: number, patch: Partial<Act>) => void
   deleteAct: (id: number) => void
@@ -73,15 +74,15 @@ export function useQuickLog(): UseQuickLogReturn {
   )
 
   const sortedActs = useMemo(() => (storyData ? sortActs(storyData.acts) : []), [storyData])
-  const inconsistentActIds = useMemo(
-    () => (storyData ? detectMovementInconsistencies(storyData.acts) : new Set<number>()),
+  const breakagesByActId = useMemo(
+    () => (storyData ? analyzeStory(storyData).byActId : new Map<number, Breakage[]>()),
     [storyData],
   )
 
   return {
     storyData,
     sortedActs,
-    inconsistentActIds,
+    breakagesByActId,
     addAct,
     updateAct,
     deleteAct,

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import type { Act, Prop, Information, Person, Location } from '../../types/StoryData'
+import type { Breakage, DiagnosticCategory } from '../../modules/consistency'
 import { ActDetailPanel } from './ActDetailPanel'
 import styles from './QuickLog.module.css'
 
@@ -9,7 +10,7 @@ interface ActTimelineRowProps {
   locations: Location[]
   props: Prop[]
   informations: Information[]
-  inconsistent: boolean
+  breakages: Breakage[]
   onUpdate: (patch: Partial<Act>) => void
   onDelete: () => void
 }
@@ -20,13 +21,22 @@ export const ActTimelineRow: React.FC<ActTimelineRowProps> = ({
   locations,
   props,
   informations,
-  inconsistent,
+  breakages,
   onUpdate,
   onDelete,
 }) => {
   const [expanded, setExpanded] = useState(false)
   const personName = persons.find(p => p.id === act.personId)?.name ?? `#${act.personId}`
   const locationName = locations.find(l => l.id === act.locationId)?.name ?? `#${act.locationId}`
+
+  const CATEGORY_ICON: Record<DiagnosticCategory, string> = {
+    position: '📍',
+    colocation: '👥',
+    item: '📦',
+    info: '💬',
+  }
+  const categories = Array.from(new Set(breakages.map(b => b.category)))
+  const tooltip = breakages.map(b => b.message).join('\n')
 
   return (
     <li className={styles.row}>
@@ -36,9 +46,13 @@ export const ActTimelineRow: React.FC<ActTimelineRowProps> = ({
           <span className={styles.who}>{personName}</span>
           <span className={styles.where}>{locationName}</span>
           <span className={styles.what}>{act.description}</span>
-          {inconsistent && (
-            <span className={styles.warningBadge} title="移動Actなしで場所が変化しています">
-              ⚠ 動線
+          {categories.length > 0 && (
+            <span className={styles.breakIcons} title={tooltip}>
+              {categories.map(c => (
+                <span key={c} className={styles.breakIcon} aria-label={`整合性の警告: ${c}`}>
+                  {CATEGORY_ICON[c]}
+                </span>
+              ))}
             </span>
           )}
         </button>

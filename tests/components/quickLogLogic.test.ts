@@ -9,8 +9,6 @@ import {
   applyActPatch,
   removeAct,
   sortActs,
-  isMoveAct,
-  detectMovementInconsistencies,
 } from '../../src/components/QuickLog/quickLogLogic'
 import type { StoryData, Act } from '../../src/types/StoryData'
 
@@ -137,39 +135,5 @@ describe('sortActs', () => {
   it('startTimeが同じ場合はid昇順を維持する', () => {
     const sorted = sortActs([act({ id: 2, startTime: 0 }), act({ id: 1, startTime: 0 })])
     expect(sorted.map(a => a.id)).toEqual([1, 2])
-  })
-})
-
-describe('isMoveAct', () => {
-  it('typeがMOVEなら移動とみなす（大小無視）', () => {
-    expect(isMoveAct(act({ id: 1, type: 'MOVE' }))).toBe(true)
-    expect(isMoveAct(act({ id: 1, type: 'move' }))).toBe(true)
-    expect(isMoveAct(act({ id: 1, type: 'SPEAK' }))).toBe(false)
-    expect(isMoveAct(act({ id: 1 }))).toBe(false)
-  })
-})
-
-describe('detectMovementInconsistencies', () => {
-  it('移動Actなしの場所変化を検出する', () => {
-    const acts = [
-      act({ id: 1, personId: 1, locationId: 1, startTime: 0 }),
-      act({ id: 2, personId: 1, locationId: 2, startTime: 10 }),
-    ]
-    expect(detectMovementInconsistencies(acts)).toEqual(new Set([2]))
-  })
-  it('移動Actを挟めば検出しない', () => {
-    const acts = [
-      act({ id: 1, personId: 1, locationId: 1, startTime: 0 }),
-      act({ id: 2, personId: 1, locationId: 2, startTime: 10, type: 'MOVE' }),
-      act({ id: 3, personId: 1, locationId: 2, startTime: 20 }),
-    ]
-    expect(detectMovementInconsistencies(acts)).toEqual(new Set())
-  })
-  it('別人物の場所は混同しない', () => {
-    const acts = [
-      act({ id: 1, personId: 1, locationId: 1, startTime: 0 }),
-      act({ id: 2, personId: 2, locationId: 2, startTime: 10 }),
-    ]
-    expect(detectMovementInconsistencies(acts)).toEqual(new Set())
   })
 })

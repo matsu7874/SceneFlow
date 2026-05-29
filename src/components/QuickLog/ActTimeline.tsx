@@ -1,5 +1,6 @@
 import React from 'react'
 import type { Act, Prop, Information, Person, Location } from '../../types/StoryData'
+import type { Breakage } from '../../modules/consistency'
 import { ActTimelineRow } from './ActTimelineRow'
 import styles from './QuickLog.module.css'
 
@@ -9,7 +10,7 @@ interface ActTimelineProps {
   locations: Location[]
   props: Prop[]
   informations: Information[]
-  inconsistentActIds: Set<number>
+  breakagesByActId: Map<number, Breakage[]>
   onUpdate: (id: number, patch: Partial<Act>) => void
   onDelete: (id: number) => void
 }
@@ -20,7 +21,7 @@ export const ActTimeline: React.FC<ActTimelineProps> = ({
   locations,
   props,
   informations,
-  inconsistentActIds,
+  breakagesByActId,
   onUpdate,
   onDelete,
 }) => {
@@ -37,7 +38,7 @@ export const ActTimeline: React.FC<ActTimelineProps> = ({
           locations={locations}
           props={props}
           informations={informations}
-          inconsistent={inconsistentActIds.has(act.id)}
+          breakages={breakagesByActId.get(act.id) ?? []}
           onUpdate={patch => onUpdate(act.id, patch)}
           onDelete={() => onDelete(act.id)}
         />
