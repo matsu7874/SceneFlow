@@ -18,6 +18,11 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
   const ws = initWorldState(story)
   const personName = (id: number): string => story.persons.find(p => p.id === id)?.name ?? `#${id}`
   const locName = (id: number): string => story.locations.find(l => l.id === id)?.name ?? `#${id}`
+  const propName = (id: number): string => story.props.find(p => p.id === id)?.name ?? `#${id}`
+  const infoName = (id: number): string => {
+    const i = story.informations.find(x => x.id === id)
+    return i?.name ?? i?.content ?? `#${id}`
+  }
 
   const nodes: GraphNode[] = []
   const edges: DependencyEdge[] = []
@@ -76,6 +81,8 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
 
     const cur = ws.positionOf(act.personId)
     if (kind === 'MOVE') {
+      // 初期位置が未設定の人物（initialStates未登録）の初出MOVEは、起点不明のため
+      // 隣接チェックをせず移動先をシードする（非MOVEの初出と同じ初期化扱い）。
       if (cur) {
         edges.push({
           from: cur.producer,
@@ -131,7 +138,6 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
       act.propId != null &&
       (kind === 'TAKE' || kind === 'GIVE' || kind === 'DROP' || kind === 'USE')
     ) {
-      const propName = (id: number): string => story.props.find(p => p.id === id)?.name ?? `#${id}`
       const owner = ws.ownerOf(act.propId)
       const ploc = ws.propLocationOf(act.propId)
       if (kind === 'TAKE') {
@@ -198,10 +204,6 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
     }
 
     if (act.informationId != null && (kind === 'LEARN' || kind === 'SPEAK')) {
-      const infoName = (id: number): string => {
-        const i = story.informations.find(x => x.id === id)
-        return i?.name ?? i?.content ?? `#${id}`
-      }
       if (kind === 'LEARN') {
         ws.setKnows(act.personId, act.informationId, act.id)
       } else {

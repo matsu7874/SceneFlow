@@ -73,10 +73,13 @@ export function initWorldState(story: StoryData): WorldState {
     ws.setPosition(s.personId, s.locationId, `initial:${s.personId}`)
   }
   for (const p of story.props) {
-    if (p.owner != null && p.owner !== '') {
-      ws.setOwner(p.id, Number(p.owner), `initial:prop:${p.id}`)
-    } else if (p.currentLocation != null && p.currentLocation !== '') {
-      ws.setPropLocation(p.id, Number(p.currentLocation), `initial:prop:${p.id}`)
+    const ownerId = p.owner != null && p.owner !== '' ? Number(p.owner) : NaN
+    const locId =
+      p.currentLocation != null && p.currentLocation !== '' ? Number(p.currentLocation) : NaN
+    if (Number.isFinite(ownerId)) {
+      ws.setOwner(p.id, ownerId, `initial:prop:${p.id}`)
+    } else if (Number.isFinite(locId)) {
+      ws.setPropLocation(p.id, locId, `initial:prop:${p.id}`)
     }
   }
   return ws

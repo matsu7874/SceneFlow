@@ -16,7 +16,7 @@ export const ACT_KINDS: ActKindDef[] = [
   { value: 'SPEAK', label: '会話/共有' },
 ]
 
-const KNOWN = new Set<string>(['MOVE', 'TAKE', 'GIVE', 'DROP', 'USE', 'LEARN', 'SPEAK'])
+const KNOWN = new Set<string>(ACT_KINDS.map(k => k.value).filter(v => v !== ''))
 
 export function getActKind(act: { type?: string }): ActKindValue {
   const t = (act.type ?? '').toUpperCase()

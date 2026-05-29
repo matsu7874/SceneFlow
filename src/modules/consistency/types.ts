@@ -13,7 +13,7 @@ export interface GraphNode {
   id: NodeId
   actId: number | null
   personId: number
-  locationId: number | null
+  locationId: number
   startTime: number
   label: string
 }
