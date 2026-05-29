@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { Person, Location } from '../types/StoryData'
+import { useMapBackground } from '../contexts/MapBackgroundContext'
+import { drawMapBackground } from './MapBackground/drawMapBackground'
 import './LocationLayout.css'
 
 interface LocationLayoutProps {
@@ -31,6 +33,7 @@ export const LocationLayout: React.FC<LocationLayoutProps> = ({
   const animatedPersonsRef = useRef<Map<number, AnimatedPerson>>(new Map())
   const animationFrameRef = useRef<number | undefined>(undefined)
   const previousPositionsRef = useRef<Map<number, number>>(new Map())
+  const background = useMapBackground()
 
   // Calculate location positions on canvas
   const getLocationPositions = (): Map<number, { x: number; y: number }> => {
@@ -149,9 +152,61 @@ export const LocationLayout: React.FC<LocationLayoutProps> = ({
 
     const locationPositions = getLocationPositions()
 
+    // Build toScreen that matches getLocationPositions' world→canvas mapping exactly.
+    // Uses the same constants: centerX=300, centerY=200, canvasWidth=500, canvasHeight=300.
+    const buildToScreen = ():
+      | ((worldX: number, worldY: number) => { x: number; y: number })
+      | null => {
+      let minX = Infinity,
+        maxX = -Infinity,
+        minY = Infinity,
+        maxY = -Infinity
+      let hasCoordinates = false
+      locations.forEach(location => {
+        if (location.x !== undefined && location.y !== undefined) {
+          hasCoordinates = true
+          minX = Math.min(minX, location.x)
+          maxX = Math.max(maxX, location.x)
+          minY = Math.min(minY, location.y)
+          maxY = Math.max(maxY, location.y)
+        }
+      })
+      if (!hasCoordinates) return null
+      const mapWidth = maxX - minX || 1
+      const mapHeight = maxY - minY || 1
+      const canvasWidth = 500
+      const canvasHeight = 300
+      const scale = Math.min(canvasWidth / mapWidth, canvasHeight / mapHeight) * 0.8
+      const centerX = 300
+      const centerY = 200
+      const midX = (minX + maxX) / 2
+      const midY = (minY + maxY) / 2
+      return (worldX: number, worldY: number): { x: number; y: number } => ({
+        x: centerX + (worldX - midX) * scale,
+        y: centerY + (worldY - midY) * scale,
+      })
+    }
+    const toScreen = buildToScreen()
+
     const animate = (): void => {
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Draw background image if available, using the same world→screen mapping as location points
+      if (background.image && toScreen !== null) {
+        drawMapBackground(ctx, {
+          image: background.image,
+          placement: {
+            offsetX: background.offsetX,
+            offsetY: background.offsetY,
+            scale: background.scale,
+            naturalWidth: background.image.naturalWidth,
+            naturalHeight: background.image.naturalHeight,
+          },
+          opacity: background.opacity,
+          toScreen,
+        })
+      }
 
       // Draw connections
       ctx.strokeStyle = '#ccc'
@@ -326,7 +381,7 @@ export const LocationLayout: React.FC<LocationLayoutProps> = ({
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [persons, locations, personPositions, currentTime])
+  }, [persons, locations, personPositions, currentTime, background])
 
   return (
     <div className="location-layout">
