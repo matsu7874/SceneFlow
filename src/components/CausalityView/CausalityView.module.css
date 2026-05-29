@@ -1,104 +1,64 @@
 .container {
-  position: relative;
-  width: 100%;
-  height: 600px;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.hint {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  margin: 0;
+}
+.scroll {
+  overflow: auto;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  overflow: hidden;
-  cursor: grab;
+  background: var(--color-surface);
+  max-height: 70vh;
 }
-
-.container:active {
-  cursor: grabbing;
-}
-
-.canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
 .svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  display: block;
 }
-
-.svg circle,
-.svg text {
-  pointer-events: all;
+.rowLabel {
+  font-size: 12px;
+  fill: var(--color-text-secondary);
+  dominant-baseline: middle;
 }
-
 .node {
   cursor: pointer;
-  transition: all 0.2s ease;
 }
-
-.node.act {
-  fill: #3b82f6;
-  stroke: #1e40af;
-  stroke-width: 2px;
-}
-
-.node.event {
-  fill: #8b5cf6;
-  stroke: #6d28d9;
-  stroke-width: 2px;
-}
-
-.node.selected {
-  stroke-width: 4px;
-  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
-}
-
-.node.hovered {
-  transform: scale(1.1);
-  transform-origin: center;
-}
-
-.nodeText {
-  fill: white;
+.nodeLabel {
   font-size: 12px;
-  font-weight: 600;
+  fill: var(--color-text-primary);
   pointer-events: none;
-  user-select: none;
 }
-
-.controls {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  background: white;
-  padding: 10px 20px;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.actRect {
+  fill: var(--color-surface-hover);
+  stroke: var(--color-border-hover);
+  stroke-width: 1;
 }
-
-.controls button {
-  padding: 6px 12px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
+.seedRect {
+  fill: var(--color-background);
+  stroke: var(--color-border);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
 }
-
-.controls button:hover {
-  background: #2563eb;
+.breakRect {
+  fill: color-mix(in srgb, var(--color-error) 16%, transparent);
+  stroke: var(--color-error);
+  stroke-width: 2;
 }
-
-.controls span {
-  font-size: 14px;
-  color: #64748b;
+.selectedRect {
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+.edge {
+  stroke: var(--color-border-hover);
+  stroke-width: 1.5;
+}
+.dim {
+  opacity: 0.2;
+}
+.empty {
+  color: var(--color-text-disabled);
+  padding: 1rem;
 }

@@ -1,410 +1,168 @@
-import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
-import { StoryData, Act, Event } from '../../types'
-import { useVisualFeedback } from '../../contexts/VisualFeedbackContext'
-import { CausalityEngine } from '../../modules/core/causalityEngine'
-import { generateEventsFromActs } from '../../utils/eventGeneration'
-import { timeToMinutes } from '../../modules/utils/timeUtils'
+import React, { useMemo, useState } from 'react'
+import type { StoryData } from '../../types/StoryData'
+import { analyzeStory } from '../../modules/consistency'
+import type { GraphNode, NodeId } from '../../modules/consistency'
 import styles from './CausalityView.module.css'
 
 interface CausalityViewProps {
   storyData: StoryData
-  currentTime?: number
-  onTimeSeek?: (minutes: number) => void
 }
 
-interface Node {
-  id: string
-  type: 'act' | 'event'
-  data: Act | Event
-  x: number
-  y: number
-  time: number
-  causedBy: string[]
-  causes: string[]
-}
+const GUTTER = 96
+const MARGIN_X = 16
+const MARGIN_Y = 16
+const COL_W = 200
+const ROW_H = 84
+const NODE_W = 168
+const NODE_H = 48
 
-interface ViewState {
-  scale: number
-  offsetX: number
-  offsetY: number
-}
+const key = (id: NodeId): string => String(id)
 
-export const CausalityView: React.FC<CausalityViewProps> = ({ storyData, onTimeSeek }) => {
-  const [error, setError] = useState<string | null>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const svgRef = useRef<SVGSVGElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
+  const report = useMemo(() => analyzeStory(storyData), [storyData])
+  const [selected, setSelected] = useState<string | null>(null)
 
-  const [viewState, setViewState] = useState<ViewState>({
-    scale: 1,
-    offsetX: 0,
-    offsetY: 0,
-  })
+  const personName = (id: number): string =>
+    storyData.persons.find(p => p.id === id)?.name ?? `#${id}`
 
-  const [selectedNode, setSelectedNode] = useState<string | null>(null)
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null)
-  const [isPanning, setIsPanning] = useState(false)
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 })
+  const personIds = useMemo(() => {
+    const ids = Array.from(new Set(report.nodes.map(n => n.personId)))
+    return ids.sort((a, b) => a - b)
+  }, [report])
+  const times = useMemo(() => {
+    const ts = Array.from(new Set(report.nodes.map(n => n.startTime)))
+    return ts.sort((a, b) => a - b)
+  }, [report])
 
-  const { showNotification } = useVisualFeedback()
+  const rowOf = (personId: number): number => Math.max(0, personIds.indexOf(personId))
+  const colOf = (startTime: number): number => Math.max(0, times.indexOf(startTime))
+  const xOf = (n: GraphNode): number => GUTTER + MARGIN_X + colOf(n.startTime) * COL_W
+  const yOf = (n: GraphNode): number => MARGIN_Y + rowOf(n.personId) * ROW_H
 
-  // Initialize causality engine
-  const causalityEngine = useMemo(() => {
-    try {
-      return new CausalityEngine(storyData)
-    } catch (err) {
-      console.error('Error initializing CausalityEngine:', err)
-      setError(
-        `Failed to initialize causality engine: ${err instanceof Error ? err.message : 'Unknown error'}`,
-      )
-      return null
+  const nodeById = useMemo(() => {
+    const m = new Map<string, GraphNode>()
+    for (const n of report.nodes) m.set(key(n.id), n)
+    return m
+  }, [report])
+
+  const { outMap, inMap } = useMemo(() => {
+    const out = new Map<string, string[]>()
+    const inc = new Map<string, string[]>()
+    for (const e of report.edges) {
+      const f = key(e.from)
+      const t = key(e.to)
+      if (!out.has(f)) out.set(f, [])
+      out.get(f)!.push(t)
+      if (!inc.has(t)) inc.set(t, [])
+      inc.get(t)!.push(f)
     }
-  }, [storyData])
+    return { outMap: out, inMap: inc }
+  }, [report])
 
-  // Layout algorithm
-  const layoutNodes = useCallback((nodes: Node[]) => {
-    const timeGroups = new Map<number, Node[]>()
-
-    // Group by time
-    nodes.forEach(node => {
-      const time = Math.floor(node.time / 60) * 60 // Round to nearest hour
-      if (!timeGroups.has(time)) {
-        timeGroups.set(time, [])
-      }
-      timeGroups.get(time)!.push(node)
-    })
-
-    // Position nodes
-    const times = Array.from(timeGroups.keys()).sort((a, b) => a - b)
-    times.forEach((time, timeIndex) => {
-      const nodesAtTime = timeGroups.get(time)!
-      const spacing = 120
-      const yStart = (-(nodesAtTime.length - 1) * spacing) / 2
-
-      nodesAtTime.forEach((node, nodeIndex) => {
-        node.x = timeIndex * 200 + 100
-        node.y = yStart + nodeIndex * spacing + 100
-      })
-    })
-  }, [])
-
-  // Build node graph
-  const nodes = useMemo(() => {
-    if (!causalityEngine) return []
-
-    try {
-      const nodeMap = new Map<string, Node>()
-      const relationships = causalityEngine.getCausalRelationships()
-
-      // Create nodes for acts
-      storyData.acts.forEach((act, _index) => {
-        const node: Node = {
-          id: `act-${act.id}`,
-          type: 'act',
-          data: act,
-          x: 0,
-          y: 0,
-          time: timeToMinutes(act.time) || 0,
-          causedBy: [],
-          causes: [],
+  const highlighted = useMemo(() => {
+    if (!selected) return null
+    const hi = new Set<string>([selected])
+    const up = [selected]
+    while (up.length) {
+      const n = up.pop() as string
+      for (const f of inMap.get(n) ?? []) {
+        if (!hi.has(f)) {
+          hi.add(f)
+          up.push(f)
         }
-        nodeMap.set(node.id, node)
-      })
-
-      // Create nodes for events (generated from acts)
-      const events = generateEventsFromActs(storyData.acts || [])
-      events.forEach((event, _index) => {
-        const node: Node = {
-          id: `event-${event.id}`,
-          type: 'event',
-          data: event,
-          x: 0,
-          y: 0,
-          time: timeToMinutes(event.eventTime) || 0,
-          causedBy: [],
-          causes: [],
-        }
-        nodeMap.set(node.id, node)
-      })
-
-      // Build relationships
-      relationships.forEach(rel => {
-        const fromNode = nodeMap.get(rel.from)
-        const toNode = nodeMap.get(rel.to)
-        if (fromNode && toNode) {
-          fromNode.causes.push(rel.to)
-          toNode.causedBy.push(rel.from)
-        }
-      })
-
-      // Layout nodes
-      layoutNodes(Array.from(nodeMap.values()))
-
-      return Array.from(nodeMap.values())
-    } catch (err) {
-      console.error('Error building node graph:', err)
-      setError(
-        `Failed to build node graph: ${err instanceof Error ? err.message : 'Unknown error'}`,
-      )
-      return []
-    }
-  }, [storyData, causalityEngine, layoutNodes])
-
-  // Convert coordinates
-  const worldToScreen = useCallback(
-    (x: number, y: number) => {
-      return {
-        x: (x - viewState.offsetX) * viewState.scale,
-        y: (y - viewState.offsetY) * viewState.scale,
-      }
-    },
-    [viewState],
-  )
-
-  const screenToWorld = useCallback(
-    (x: number, y: number) => {
-      return {
-        x: x / viewState.scale + viewState.offsetX,
-        y: y / viewState.scale + viewState.offsetY,
-      }
-    },
-    [viewState],
-  )
-
-  // Render canvas
-  const renderCanvas = useCallback(() => {
-    const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d')
-    if (!canvas || !ctx) return
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Save context
-    ctx.save()
-
-    // Apply transformations
-    ctx.scale(viewState.scale, viewState.scale)
-    ctx.translate(-viewState.offsetX, -viewState.offsetY)
-
-    // Draw connections
-    ctx.strokeStyle = '#94a3b8'
-    ctx.lineWidth = 2
-
-    nodes.forEach(node => {
-      node.causes.forEach(targetId => {
-        const targetNode = nodes.find(n => n.id === targetId)
-        if (targetNode) {
-          ctx.beginPath()
-          ctx.moveTo(node.x, node.y)
-
-          // Draw curved line
-          const cp1x = node.x + (targetNode.x - node.x) * 0.5
-          const cp1y = node.y
-          const cp2x = node.x + (targetNode.x - node.x) * 0.5
-          const cp2y = targetNode.y
-
-          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, targetNode.x, targetNode.y)
-          ctx.stroke()
-
-          // Draw arrowhead
-          const angle = Math.atan2(targetNode.y - cp2y, targetNode.x - cp2x)
-          const arrowSize = 10
-
-          ctx.beginPath()
-          ctx.moveTo(targetNode.x, targetNode.y)
-          ctx.lineTo(
-            targetNode.x - arrowSize * Math.cos(angle - Math.PI / 6),
-            targetNode.y - arrowSize * Math.sin(angle - Math.PI / 6),
-          )
-          ctx.lineTo(
-            targetNode.x - arrowSize * Math.cos(angle + Math.PI / 6),
-            targetNode.y - arrowSize * Math.sin(angle + Math.PI / 6),
-          )
-          ctx.closePath()
-          ctx.fillStyle = '#94a3b8'
-          ctx.fill()
-        }
-      })
-    })
-
-    // Restore context
-    ctx.restore()
-  }, [nodes, viewState])
-
-  // Handle mouse events
-  const handleWheel = useCallback(
-    (e: React.WheelEvent) => {
-      e.preventDefault()
-      const delta = e.deltaY > 0 ? 0.9 : 1.1
-      const newScale = Math.min(Math.max(viewState.scale * delta, 0.1), 5)
-
-      const rect = containerRef.current?.getBoundingClientRect()
-      if (rect) {
-        const mouseX = e.clientX - rect.left
-        const mouseY = e.clientY - rect.top
-        const worldPos = screenToWorld(mouseX, mouseY)
-
-        setViewState(_prev => ({
-          scale: newScale,
-          offsetX: worldPos.x - mouseX / newScale,
-          offsetY: worldPos.y - mouseY / newScale,
-        }))
-      }
-    },
-    [viewState.scale, screenToWorld],
-  )
-
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      const rect = containerRef.current?.getBoundingClientRect()
-      if (rect) {
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
-        const worldPos = screenToWorld(x, y)
-
-        // Check if clicking on a node
-        const clickedNode = nodes.find(node => {
-          const dx = worldPos.x - node.x
-          const dy = worldPos.y - node.y
-          return Math.sqrt(dx * dx + dy * dy) < 40
-        })
-
-        if (clickedNode) {
-          setSelectedNode(clickedNode.id)
-          showNotification(`Selected: ${clickedNode.data.id}`, { type: 'info' })
-
-          if (onTimeSeek && clickedNode.type === 'act') {
-            const act = clickedNode.data as Act
-            onTimeSeek(timeToMinutes(act.time) || 0)
-          }
-        } else {
-          setIsPanning(true)
-          setPanStart({ x: e.clientX, y: e.clientY })
-        }
-      }
-    },
-    [nodes, screenToWorld, showNotification, onTimeSeek],
-  )
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (isPanning) {
-        const dx = e.clientX - panStart.x
-        const dy = e.clientY - panStart.y
-
-        setViewState(prev => ({
-          ...prev,
-          offsetX: prev.offsetX - dx / prev.scale,
-          offsetY: prev.offsetY - dy / prev.scale,
-        }))
-
-        setPanStart({ x: e.clientX, y: e.clientY })
-      } else {
-        const rect = containerRef.current?.getBoundingClientRect()
-        if (rect) {
-          const x = e.clientX - rect.left
-          const y = e.clientY - rect.top
-          const worldPos = screenToWorld(x, y)
-
-          const hoveredNode = nodes.find(node => {
-            const dx = worldPos.x - node.x
-            const dy = worldPos.y - node.y
-            return Math.sqrt(dx * dx + dy * dy) < 40
-          })
-
-          setHoveredNode(hoveredNode?.id || null)
-        }
-      }
-    },
-    [isPanning, panStart, screenToWorld, nodes],
-  )
-
-  const handleMouseUp = useCallback(() => {
-    setIsPanning(false)
-  }, [])
-
-  // Update canvas size
-  useEffect(() => {
-    const updateSize = (): void => {
-      const container = containerRef.current
-      const canvas = canvasRef.current
-      const svg = svgRef.current
-
-      if (container && canvas && svg) {
-        const rect = container.getBoundingClientRect()
-        canvas.width = rect.width
-        canvas.height = rect.height
-        svg.setAttribute('width', rect.width.toString())
-        svg.setAttribute('height', rect.height.toString())
       }
     }
+    const dn = [selected]
+    while (dn.length) {
+      const n = dn.pop() as string
+      for (const t of outMap.get(n) ?? []) {
+        if (!hi.has(t)) {
+          hi.add(t)
+          dn.push(t)
+        }
+      }
+    }
+    return hi
+  }, [selected, inMap, outMap])
 
-    updateSize()
-    window.addEventListener('resize', updateSize)
-    return () => window.removeEventListener('resize', updateSize)
-  }, [])
+  const breakageActIds = report.byActId
+  const width = GUTTER + MARGIN_X + Math.max(1, times.length) * COL_W + NODE_W
+  const height = MARGIN_Y + Math.max(1, personIds.length) * ROW_H + NODE_H
 
-  // Render when view state changes
-  useEffect(() => {
-    renderCanvas()
-  }, [renderCanvas])
+  const isDimNode = (id: string): boolean => highlighted !== null && !highlighted.has(id)
+  const isDimEdge = (from: string, to: string): boolean =>
+    highlighted !== null && !(highlighted.has(from) && highlighted.has(to))
 
-  if (error) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.error}>
-          <h3>Error in Causality View</h3>
-          <p>{error}</p>
-        </div>
-      </div>
-    )
+  if (report.nodes.length === 0) {
+    return <p className={styles.empty}>表示するイベントがありません。</p>
   }
 
   return (
-    <div
-      ref={containerRef}
-      className={styles.container}
-      onWheel={handleWheel}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    >
-      <canvas ref={canvasRef} className={styles.canvas} />
-      <svg ref={svgRef} className={styles.svg}>
-        {nodes.map(node => {
-          const pos = worldToScreen(node.x, node.y)
-          const isSelected = node.id === selectedNode
-          const isHovered = node.id === hoveredNode
-          const radius = 35
-
-          return (
-            <g key={node.id}>
-              <circle
-                cx={pos.x}
-                cy={pos.y}
-                r={radius}
-                className={`${styles.node} ${styles[node.type]} ${isSelected ? styles.selected : ''} ${isHovered ? styles.hovered : ''}`}
+    <div className={styles.container}>
+      <p className={styles.hint}>
+        ノードをクリックすると、その事実の上流（供給元）と下流（依存先）が強調されます。赤いノードは破綻（前提が満たされていない箇所）です。
+      </p>
+      <div className={styles.scroll}>
+        <svg width={width} height={height} className={styles.svg}>
+          {personIds.map((pid, i) => (
+            <text
+              key={`row-${pid}`}
+              x={MARGIN_X}
+              y={MARGIN_Y + i * ROW_H + NODE_H / 2}
+              className={styles.rowLabel}
+            >
+              {personName(pid)}
+            </text>
+          ))}
+          {report.edges.map((e, i) => {
+            const from = nodeById.get(key(e.from))
+            const to = nodeById.get(key(e.to))
+            if (!from || !to) return null
+            return (
+              <line
+                key={`edge-${i}`}
+                x1={xOf(from) + NODE_W}
+                y1={yOf(from) + NODE_H / 2}
+                x2={xOf(to)}
+                y2={yOf(to) + NODE_H / 2}
+                className={`${styles.edge} ${isDimEdge(key(e.from), key(e.to)) ? styles.dim : ''}`}
               />
-              <text
-                x={pos.x}
-                y={pos.y}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                className={styles.nodeText}
+            )
+          })}
+          {report.nodes.map(n => {
+            const id = key(n.id)
+            const isSeed = n.actId === null
+            const hasBreak = n.actId !== null && breakageActIds.has(n.actId)
+            const selectedNow = selected === id
+            const breakMsgs =
+              n.actId !== null
+                ? (breakageActIds.get(n.actId) ?? []).map(b => b.message).join('\n')
+                : ''
+            const testid = isSeed ? `node-initial-${n.personId}` : `node-act-${n.actId}`
+            return (
+              <g
+                key={id}
+                data-testid={testid}
+                data-breakage={hasBreak ? 'true' : 'false'}
+                data-selected={selectedNow ? 'true' : 'false'}
+                transform={`translate(${xOf(n)}, ${yOf(n)})`}
+                className={`${styles.node} ${isDimNode(id) ? styles.dim : ''}`}
+                onClick={() => setSelected(prev => (prev === id ? null : id))}
               >
-                {String(node.data.id).slice(0, 8)}
-              </text>
-            </g>
-          )
-        })}
-      </svg>
-      <div className={styles.controls}>
-        <button onClick={() => setViewState({ scale: 1, offsetX: 0, offsetY: 0 })}>
-          Reset View
-        </button>
-        <span>Scale: {viewState.scale.toFixed(2)}x</span>
+                <title>{hasBreak ? breakMsgs : n.label}</title>
+                <rect
+                  width={NODE_W}
+                  height={NODE_H}
+                  rx={6}
+                  className={`${isSeed ? styles.seedRect : hasBreak ? styles.breakRect : styles.actRect} ${selectedNow ? styles.selectedRect : ''}`}
+                />
+                <text x={8} y={NODE_H / 2 + 4} className={styles.nodeLabel}>
+                  {n.label.length > 18 ? `${n.label.slice(0, 17)}…` : n.label}
+                </text>
+              </g>
+            )
+          })}
+        </svg>
       </div>
     </div>
   )
