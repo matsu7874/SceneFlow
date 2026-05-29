@@ -76,9 +76,13 @@ export function appendAct(
 }
 
 export function applyActPatch(story: StoryData, id: number, patch: Partial<Act>): StoryData {
+  const resolvedPatch =
+    patch.startTime !== undefined && patch.time === undefined
+      ? { ...patch, time: minutesToTimeString(patch.startTime) }
+      : patch
   return {
     ...story,
-    acts: story.acts.map(act => (act.id === id ? { ...act, ...patch } : act)),
+    acts: story.acts.map(act => (act.id === id ? { ...act, ...resolvedPatch } : act)),
   }
 }
 
@@ -87,7 +91,7 @@ export function removeAct(story: StoryData, id: number): StoryData {
 }
 
 export function sortActs(acts: Act[]): Act[] {
-  return [...acts].sort((a, b) => (a.startTime ?? 0) - (b.startTime ?? 0))
+  return [...acts].sort((a, b) => (a.startTime ?? 0) - (b.startTime ?? 0) || a.id - b.id)
 }
 
 export function isMoveAct(act: Act): boolean {

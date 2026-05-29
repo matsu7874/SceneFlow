@@ -105,6 +105,16 @@ describe('applyActPatch', () => {
     const data = applyActPatch(base, 1, { description: 'b', propId: 3 })
     expect(data.acts[0]).toMatchObject({ description: 'b', propId: 3 })
   })
+  it('startTimeを変更するとtimeも同期される', () => {
+    const base = appendAct(emptyStory(), {
+      personId: 1,
+      locationId: 1,
+      description: 'a',
+      startTime: 0,
+    }).data
+    const data = applyActPatch(base, 1, { startTime: 600 })
+    expect(data.acts[0]).toMatchObject({ startTime: 600, time: '10:00' })
+  })
 })
 
 describe('removeAct', () => {
@@ -123,6 +133,10 @@ describe('sortActs', () => {
   it('startTime昇順に並べる', () => {
     const sorted = sortActs([act({ id: 1, startTime: 30 }), act({ id: 2, startTime: 10 })])
     expect(sorted.map(a => a.id)).toEqual([2, 1])
+  })
+  it('startTimeが同じ場合はid昇順を維持する', () => {
+    const sorted = sortActs([act({ id: 2, startTime: 0 }), act({ id: 1, startTime: 0 })])
+    expect(sorted.map(a => a.id)).toEqual([1, 2])
   })
 })
 
