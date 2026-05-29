@@ -43,6 +43,16 @@ describe('QuickActInput', () => {
       startTime: 0,
     })
     expect((description as HTMLInputElement).value).toBe('')
+
+    // 2回目: 誰が/どこでを再入力せずに連射でき、stickyが保持され時刻が+5される
+    await user.type(description, '話しかけた{Enter}')
+    expect(onAdd).toHaveBeenCalledTimes(2)
+    expect(onAdd).toHaveBeenNthCalledWith(2, {
+      personId: 1,
+      locationId: 10,
+      description: '話しかけた',
+      startTime: 5,
+    })
   })
 
   it('何をしたが空ならEnterで確定しない', async () => {
