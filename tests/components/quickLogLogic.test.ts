@@ -8,11 +8,18 @@ import {
   appendAct,
   applyActPatch,
   removeAct,
+  sortActs,
+  isMoveAct,
+  detectMovementInconsistencies,
 } from '../../src/components/QuickLog/quickLogLogic'
-import type { StoryData } from '../../src/types/StoryData'
+import type { StoryData, Act } from '../../src/types/StoryData'
 
 function emptyStory(): StoryData {
   return { persons: [], locations: [], props: [], informations: [], initialStates: [], acts: [] }
+}
+
+function act(partial: Partial<Act> & { id: number }): Act {
+  return { personId: 1, locationId: 1, time: '00:00', description: '', startTime: 0, ...partial }
 }
 
 describe('nextId', () => {
@@ -109,5 +116,46 @@ describe('removeAct', () => {
       startTime: 0,
     }).data
     expect(removeAct(base, 1).acts).toHaveLength(0)
+  })
+})
+
+describe('sortActs', () => {
+  it('startTime昇順に並べる', () => {
+    const sorted = sortActs([act({ id: 1, startTime: 30 }), act({ id: 2, startTime: 10 })])
+    expect(sorted.map(a => a.id)).toEqual([2, 1])
+  })
+})
+
+describe('isMoveAct', () => {
+  it('typeがMOVEなら移動とみなす（大小無視）', () => {
+    expect(isMoveAct(act({ id: 1, type: 'MOVE' }))).toBe(true)
+    expect(isMoveAct(act({ id: 1, type: 'move' }))).toBe(true)
+    expect(isMoveAct(act({ id: 1, type: 'SPEAK' }))).toBe(false)
+    expect(isMoveAct(act({ id: 1 }))).toBe(false)
+  })
+})
+
+describe('detectMovementInconsistencies', () => {
+  it('移動Actなしの場所変化を検出する', () => {
+    const acts = [
+      act({ id: 1, personId: 1, locationId: 1, startTime: 0 }),
+      act({ id: 2, personId: 1, locationId: 2, startTime: 10 }),
+    ]
+    expect(detectMovementInconsistencies(acts)).toEqual(new Set([2]))
+  })
+  it('移動Actを挟めば検出しない', () => {
+    const acts = [
+      act({ id: 1, personId: 1, locationId: 1, startTime: 0 }),
+      act({ id: 2, personId: 1, locationId: 2, startTime: 10, type: 'MOVE' }),
+      act({ id: 3, personId: 1, locationId: 2, startTime: 20 }),
+    ]
+    expect(detectMovementInconsistencies(acts)).toEqual(new Set())
+  })
+  it('別人物の場所は混同しない', () => {
+    const acts = [
+      act({ id: 1, personId: 1, locationId: 1, startTime: 0 }),
+      act({ id: 2, personId: 2, locationId: 2, startTime: 10 }),
+    ]
+    expect(detectMovementInconsistencies(acts)).toEqual(new Set())
   })
 })
