@@ -20,10 +20,8 @@ const testStoryData = {
 
 test.describe('エンティティ編集機能', () => {
   test.beforeEach(async ({ page }) => {
-    // アプリケーションにアクセス
-    await page.goto('/')
-
-    // シミュレーションページにリダイレクトされるのを待つ
+    // データ読み込みのためシミュレーションページを開く
+    await page.goto('/simulation')
     await expect(page).toHaveURL(/\/simulation/)
 
     // テストデータを読み込む

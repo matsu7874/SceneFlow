@@ -31,7 +31,7 @@ function App(): React.ReactNode {
 
               <main className="app-main">
                 <Routes>
-                  <Route path="/" element={<Navigate to="/simulation" replace />} />
+                  <Route path="/" element={<Navigate to="/entities" replace />} />
                   <Route path="/simulation" element={<SimulationPage />} />
                   <Route path="/causality" element={<CausalityPage />} />
                   <Route path="/entities" element={<EntitiesPage />} />

@@ -30,17 +30,18 @@ test.describe('Scene Flow 基本機能確認', () => {
     // メインヘッダーの確認
     await expect(page.locator('.app-header h1').first()).toContainText('Scene-Flow')
 
-    // ナビゲーションリンクの確認
-    await expect(page.getByRole('link', { name: 'シミュレーション' })).toBeVisible()
-    await expect(page.getByRole('link', { name: '因果関係ビュー' })).toBeVisible()
+    // ナビゲーションリンクの確認（作業フロー順）
     await expect(page.getByRole('link', { name: 'エンティティ編集' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'マップエディタ' })).toBeVisible()
-    await expect(page.getByRole('link', { name: '関係性' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'イベント入力' })).toBeVisible()
+    await expect(page.getByRole('link', { name: '因果関係ビュー' })).toBeVisible()
     await expect(page.getByRole('link', { name: '検証' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'シミュレーション' })).toBeVisible()
+    await expect(page.getByRole('link', { name: '空間ビュー' })).toBeVisible()
 
-    // デフォルトでシミュレーションページが表示されることを確認
-    await expect(page).toHaveURL(/\/simulation/)
-    await expect(page.locator('h2').first()).toContainText('Simulation')
+    // デフォルトでエンティティ編集ページが表示されることを確認
+    await expect(page).toHaveURL(/\/entities/)
+    await expect(page.locator('h2:has-text("エンティティ管理")')).toBeVisible()
   })
 
   test('データのロードと通知が正しく動作する', async ({ page }) => {
@@ -114,7 +115,7 @@ test.describe('Scene Flow 基本機能確認', () => {
     await expect(typeFilter).toBeVisible()
 
     // セレクトボックスのオプションが存在することを確認（値で確認）
-    await expect(typeFilter).toHaveValue('all')  // デフォルト値
+    await expect(typeFilter).toHaveValue('all') // デフォルト値
     await typeFilter.selectOption('person')
     await expect(typeFilter).toHaveValue('person')
     await typeFilter.selectOption('location')
@@ -160,7 +161,9 @@ test.describe('Scene Flow 基本機能確認', () => {
     await page.getByRole('button', { name: '物語データをロード' }).click()
 
     // エラー通知の確認（NotificationDisplayコンポーネント内）
-    await expect(page.locator('[class*="notification"]').filter({ hasText: 'JSONの解析に失敗しました' })).toBeVisible()
+    await expect(
+      page.locator('[class*="notification"]').filter({ hasText: 'JSONの解析に失敗しました' }),
+    ).toBeVisible()
   })
 
   test('エラーハンドリング - 不完全なデータ', async ({ page }) => {
