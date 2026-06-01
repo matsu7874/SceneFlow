@@ -25,13 +25,12 @@ function App(): React.ReactNode {
           <MapBackgroundProvider>
             <div className="app">
               <header className="app-header">
-                <h1>Scene-Flow</h1>
                 <Navigation />
               </header>
 
               <main className="app-main">
                 <Routes>
-                  <Route path="/" element={<Navigate to="/entities" replace />} />
+                  <Route path="/" element={<Navigate to="/log" replace />} />
                   <Route path="/simulation" element={<SimulationPage />} />
                   <Route path="/causality" element={<CausalityPage />} />
                   <Route path="/entities" element={<EntitiesPage />} />

@@ -5,10 +5,13 @@ import styles from './Navigation.module.css'
 export const Navigation: React.FC = () => {
   return (
     <nav className={styles.nav}>
-      <div className={styles.brand}>
-        <h1>Scene-Flow</h1>
-      </div>
       <div className={styles.links}>
+        <NavLink
+          to="/log"
+          className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
+        >
+          イベント入力
+        </NavLink>
         <NavLink
           to="/entities"
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
@@ -20,12 +23,6 @@ export const Navigation: React.FC = () => {
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >
           マップエディタ
-        </NavLink>
-        <NavLink
-          to="/log"
-          className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
-        >
-          イベント入力
         </NavLink>
         <NavLink
           to="/causality"
