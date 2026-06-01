@@ -84,6 +84,10 @@
   font-size: 13px;
   pointer-events: none;
 }
+.misinfoIconLie {
+  fill: #dc2626;
+  font-weight: 700;
+}
 .contradictionIcon {
   font-size: 14px;
   pointer-events: none;

@@ -197,7 +197,9 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
   return (
     <div className={styles.container}>
       <p className={styles.hint}>
-        ノードをクリックすると、その事実の上流（供給元）と下流（依存先）が強調されます。赤いノードは破綻（前提が満たされていない箇所）、⚡は矛盾の発覚点です。矛盾ノードを選ぶと、食い違う2つの証言の流れが2色で表示されます。
+        ノードをクリックすると、その事実の上流（供給元）と下流（依存先）が強調されます。実線の赤いノードは破綻（前提が満たされていない箇所）、破線の枠は誤情報（❗=嘘
+        /
+        ❓=見間違い）、⚡は矛盾の発覚点です。矛盾ノードを選ぶと、食い違う2つの証言の流れが2色で表示されます。
       </p>
       {truthWarnings.length > 0 && (
         <div className={styles.truthWarning} data-testid="truth-warning">
@@ -213,10 +215,12 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
         </span>
         <span className={styles.legendItem}>
           <span className={`${styles.swatch} ${styles.swatchLie}`} />
+          <span className={`${styles.legendMark} ${styles.misinfoIconLie}`}>❗</span>
           誤情報(嘘)
         </span>
         <span className={styles.legendItem}>
           <span className={`${styles.swatch} ${styles.swatchMistake}`} />
+          <span className={styles.legendMark}>❓</span>
           誤情報(見間違い)
         </span>
         <span className={styles.legendItem}>
@@ -290,8 +294,12 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
                   className={`${isSeed ? styles.seedRect : hasBreak ? styles.breakRect : styles.actRect} ${misinfoClass} ${selectedNow ? styles.selectedRect : ''}`}
                 />
                 {misinfo !== 'none' && (
-                  <text x={NODE_W - 30} y={16} className={styles.misinfoIcon}>
-                    {misinfo === 'lie' ? '🚫' : '❓'}
+                  <text
+                    x={NODE_W - 30}
+                    y={16}
+                    className={`${styles.misinfoIcon} ${misinfo === 'lie' ? styles.misinfoIconLie : ''}`}
+                  >
+                    {misinfo === 'lie' ? '❗' : '❓'}
                   </text>
                 )}
                 {hasContradiction && (

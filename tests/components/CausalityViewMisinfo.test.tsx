@@ -103,4 +103,18 @@ describe('CausalityView 誤情報・矛盾の可視化', () => {
     expect(legend).toHaveTextContent('誤情報')
     expect(legend).toHaveTextContent('矛盾発覚点')
   })
+
+  it('誤情報(嘘)ノードは赤いビックリマーク(❗)で示す', () => {
+    render(<CausalityView storyData={data} />)
+    const node = screen.getByTestId('node-act-2')
+    expect(node).toHaveTextContent('❗')
+    expect(node).not.toHaveTextContent('🚫')
+  })
+
+  it('凡例のアイコンがノードと一致する（嘘=❗・矛盾=⚡）', () => {
+    render(<CausalityView storyData={data} />)
+    const legend = screen.getByTestId('causality-legend')
+    expect(legend).toHaveTextContent('❗')
+    expect(legend).toHaveTextContent('⚡')
+  })
 })
