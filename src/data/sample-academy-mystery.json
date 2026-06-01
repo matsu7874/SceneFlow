@@ -78,7 +78,25 @@
   "informations": [
     { "id": 201, "content": "レオの出生の秘密", "category": "SECRET", "isSecret": true },
     { "id": 202, "content": "礼拝堂の隠し扉", "category": "SECRET", "isSecret": true },
-    { "id": 203, "content": "アランへの脅迫状の存在", "category": "FACT" }
+    { "id": 203, "content": "アランへの脅迫状の存在", "category": "FACT" },
+    {
+      "id": 301,
+      "content": "アランは礼拝堂で昏倒している",
+      "category": "FACT",
+      "subject": 5,
+      "aspect": "容態",
+      "value": "昏倒",
+      "truth": true
+    },
+    {
+      "id": 302,
+      "content": "アランは自室で就寝中だ",
+      "category": "RUMOR",
+      "subject": 5,
+      "aspect": "容態",
+      "value": "自室で就寝",
+      "misinfoType": "lie"
+    }
   ],
   "initialStates": [
     { "personId": 1, "locationId": 1, "time": "21:00" },
@@ -239,6 +257,48 @@
       "time": "21:45",
       "interactedPersonId": 5,
       "description": "アランと対峙する"
+    },
+    {
+      "id": 17,
+      "personId": 4,
+      "locationId": 4,
+      "startTime": 1310,
+      "time": "21:50",
+      "type": "LEARN",
+      "informationId": 301,
+      "description": "ニコが礼拝堂でアランの昏倒を目撃する（真実）"
+    },
+    {
+      "id": 18,
+      "personId": 1,
+      "locationId": 4,
+      "startTime": 1310,
+      "time": "21:50",
+      "type": "LEARN",
+      "informationId": 302,
+      "description": "レオが「アランは自室で寝ている」という偽の筋書きを用意する"
+    },
+    {
+      "id": 19,
+      "personId": 1,
+      "locationId": 4,
+      "startTime": 1315,
+      "time": "21:55",
+      "type": "SPEAK",
+      "informationId": 302,
+      "interactedPersonId": 3,
+      "description": "レオがクラウスに嘘（アランは自室で就寝中）を吹き込む"
+    },
+    {
+      "id": 20,
+      "personId": 3,
+      "locationId": 4,
+      "startTime": 1320,
+      "time": "22:00",
+      "type": "SPEAK",
+      "informationId": 302,
+      "interactedPersonId": 4,
+      "description": "クラウスがニコに又聞きの嘘を伝える（ニコは昏倒を見ており矛盾に気づく）"
     }
   ]
 }

@@ -42,4 +42,14 @@ describe('学院ミステリ サンプルシナリオ', () => {
     expect(report.nodes.length).toBeGreaterThan(0)
     expect(report.edges.length).toBeGreaterThan(0)
   })
+
+  // 誤情報サブプロット: レオが「アランは自室で就寝中」という嘘を広め、
+  // アランの昏倒を実際に目撃したニコがクラウス経由でその嘘を聞いて矛盾に気づく。
+  it('誤情報の伝播による矛盾が1件検出される', () => {
+    expect(report.contradictions).toHaveLength(1)
+    const c = report.contradictions[0]
+    expect(c.personId).toBe(4) // ニコ
+    expect(c.aspect).toBe('容態')
+    expect(c.kind).toBe('truth-conflict')
+  })
 })
