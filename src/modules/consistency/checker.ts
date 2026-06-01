@@ -3,11 +3,14 @@ import { getActKind } from './actKinds'
 import { initWorldState } from './worldState'
 import type {
   Breakage,
+  ClaimRef,
+  Contradiction,
   ConsistencyReport,
   DependencyEdge,
   DiagnosticCategory,
   FactRef,
   GraphNode,
+  NodeId,
 } from './types'
 
 function sortForReplay(acts: Act[]): Act[] {
@@ -27,6 +30,50 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
   const nodes: GraphNode[] = []
   const edges: DependencyEdge[] = []
   const breakages: Breakage[] = []
+  const contradictions: Contradiction[] = []
+
+  // 構造化言明の保有追跡。人物 → "subject|aspect" → 保有する言明のリスト。
+  const infoById = new Map(story.informations.map(i => [i.id, i]))
+  const heldClaims = new Map<number, Map<string, ClaimRef[]>>()
+
+  // person が情報 infoId を取得したとき、構造化言明を持つなら保有slotに追加し、
+  // 同一slotで value の異なる言明を既に保有していれば矛盾を記録する。
+  const acquireClaim = (
+    personId: number,
+    infoId: number,
+    producer: NodeId,
+    actId: number,
+    time: number,
+  ): void => {
+    const info = infoById.get(infoId)
+    if (info == null || info.subject == null || info.aspect == null || info.value == null) return
+    const slot = `${info.subject}|${info.aspect}`
+    let perPerson = heldClaims.get(personId)
+    if (!perPerson) {
+      perPerson = new Map<string, ClaimRef[]>()
+      heldClaims.set(personId, perPerson)
+    }
+    const held = perPerson.get(slot) ?? []
+    if (held.some(h => h.infoId === infoId)) return // 既に保有済み
+    const conflict = held.find(h => h.value !== info.value)
+    if (conflict) {
+      const existingInfo = infoById.get(conflict.infoId)
+      const isTruth = info.truth === true || existingInfo?.truth === true
+      contradictions.push({
+        id: `contradiction:${personId}:${actId}:${info.subject}:${info.aspect}`,
+        personId,
+        subject: info.subject,
+        aspect: info.aspect,
+        actId,
+        incoming: { infoId, value: info.value, producer },
+        existing: { infoId: conflict.infoId, value: conflict.value, producer: conflict.producer },
+        kind: isTruth ? 'truth-conflict' : 'testimony-conflict',
+        time,
+      })
+    }
+    held.push({ infoId, value: info.value, producer })
+    perPerson.set(slot, held)
+  }
 
   for (const s of story.initialStates) {
     nodes.push({
@@ -204,8 +251,10 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
     }
 
     if (act.informationId != null && (kind === 'LEARN' || kind === 'SPEAK')) {
+      const time = act.startTime ?? 0
       if (kind === 'LEARN') {
         ws.setKnows(act.personId, act.informationId, act.id)
+        acquireClaim(act.personId, act.informationId, act.id, act.id, time)
       } else {
         const kp = ws.knowerProducer(act.personId, act.informationId)
         if (!kp) {
@@ -221,8 +270,10 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
             fact: { kind: 'knows', personId: act.personId, informationId: act.informationId },
           })
         }
-        if (act.interactedPersonId != null)
+        if (act.interactedPersonId != null) {
           ws.setKnows(act.interactedPersonId, act.informationId, act.id)
+          acquireClaim(act.interactedPersonId, act.informationId, act.id, act.id, time)
+        }
       }
     }
   }
@@ -234,5 +285,5 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
     byActId.set(b.actId, arr)
   }
 
-  return { nodes, edges, breakages, byActId }
+  return { nodes, edges, breakages, byActId, contradictions }
 }

@@ -53,6 +53,13 @@ export interface Information {
   requiresContext?: string[]
   enablesActions?: string[]
   revealsInformation?: string[]
+  // 構造化言明（誤情報・矛盾の検出用、すべて任意）。
+  // 同一 (subject, aspect) で value が異なる情報どうしが矛盾とみなされる。
+  subject?: number // 何についての情報か（person/location/prop の id）
+  aspect?: string // どの観点か（例: "髪色", "居場所"）= 同一論点判定のキー
+  value?: string // その観点での値（例: "茶色"）
+  truth?: boolean // この value が (subject, aspect) の真実か（slot ごとに最大1つ）
+  misinfoType?: 'lie' | 'mistake' // 誤情報の発生原因（嘘 / 見間違い）
 }
 
 export interface InitialState {

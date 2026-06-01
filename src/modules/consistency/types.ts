@@ -31,9 +31,29 @@ export interface Breakage {
   message: string
 }
 
+// ある人物が、同一 (subject, aspect) で value の異なる情報を同時に保有した瞬間。
+export interface ClaimRef {
+  infoId: number
+  value: string
+  producer: NodeId
+}
+
+export interface Contradiction {
+  id: string
+  personId: number // 矛盾に気づいた人物
+  subject: number
+  aspect: string
+  actId: number // 発覚ポイントとなった act（後から来た言明を取得した act）
+  incoming: ClaimRef // 後から来た言明
+  existing: ClaimRef // 既に保有していた言明
+  kind: 'truth-conflict' | 'testimony-conflict'
+  time: number
+}
+
 export interface ConsistencyReport {
   nodes: GraphNode[]
   edges: DependencyEdge[]
   breakages: Breakage[]
   byActId: Map<number, Breakage[]>
+  contradictions: Contradiction[]
 }
