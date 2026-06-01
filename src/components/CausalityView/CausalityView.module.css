@@ -55,8 +55,112 @@
   stroke: var(--color-border-hover);
   stroke-width: 1.5;
 }
+.edgeExisting {
+  stroke: #2563eb;
+  stroke-width: 2.5;
+}
+.edgeIncoming {
+  stroke: #dc2626;
+  stroke-width: 2.5;
+}
 .dim {
   opacity: 0.2;
+}
+
+/* 誤情報ノードの着色 */
+.misinfoLie {
+  fill: color-mix(in srgb, #dc2626 14%, transparent);
+  stroke: #dc2626;
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+.misinfoMistake {
+  fill: color-mix(in srgb, #f59e0b 16%, transparent);
+  stroke: #f59e0b;
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+.misinfoIcon {
+  font-size: 13px;
+  pointer-events: none;
+}
+.contradictionIcon {
+  font-size: 14px;
+  pointer-events: none;
+}
+
+/* 凡例 */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  align-items: center;
+}
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--color-border);
+}
+.swatchTruth {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-hover);
+}
+.swatchLie {
+  background: color-mix(in srgb, #dc2626 30%, transparent);
+  border-color: #dc2626;
+}
+.swatchMistake {
+  background: color-mix(in srgb, #f59e0b 30%, transparent);
+  border-color: #f59e0b;
+}
+.legendMark {
+  font-size: 0.9rem;
+}
+
+/* 矛盾の詳細パネル */
+.panel {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  padding: 0.75rem 1rem;
+}
+.panelTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+.panelItem {
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+.panelItem:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+.panelHead {
+  font-size: 0.88rem;
+  margin-bottom: 0.35rem;
+}
+.panelClaims {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+}
+.claimExisting {
+  color: #2563eb;
+}
+.claimIncoming {
+  color: #dc2626;
 }
 .empty {
   color: var(--color-text-disabled);
