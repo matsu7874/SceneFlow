@@ -89,6 +89,15 @@
   pointer-events: none;
 }
 
+.truthWarning {
+  font-size: 0.82rem;
+  color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 8%, transparent);
+  border: 1px solid var(--color-error);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+}
+
 /* 凡例 */
 .legend {
   display: flex;

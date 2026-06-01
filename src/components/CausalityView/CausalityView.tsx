@@ -1,6 +1,11 @@
 import React, { useMemo, useState } from 'react'
 import type { StoryData } from '../../types/StoryData'
-import { analyzeStory, isMisinformation, misinfoChain } from '../../modules/consistency'
+import {
+  analyzeStory,
+  isMisinformation,
+  misinfoChain,
+  duplicateTruthSlots,
+} from '../../modules/consistency'
 import type { GraphNode, NodeId, Contradiction } from '../../modules/consistency'
 import styles from './CausalityView.module.css'
 
@@ -175,6 +180,8 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
     return ''
   }
 
+  const truthWarnings = useMemo(() => duplicateTruthSlots(storyData), [storyData])
+
   const claimSource = (producer: NodeId): string => {
     if (typeof producer === 'number') {
       const a = actById.get(producer)
@@ -192,6 +199,13 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
       <p className={styles.hint}>
         ノードをクリックすると、その事実の上流（供給元）と下流（依存先）が強調されます。赤いノードは破綻（前提が満たされていない箇所）、⚡は矛盾の発覚点です。矛盾ノードを選ぶと、食い違う2つの証言の流れが2色で表示されます。
       </p>
+      {truthWarnings.length > 0 && (
+        <div className={styles.truthWarning} data-testid="truth-warning">
+          ⚠ 同一の対象・観点に「真実」が複数指定されています（
+          {truthWarnings.map(s => `${entityName(s.subject)}/${s.aspect}`).join('、')}
+          ）。誤情報の判定が不安定になります。
+        </div>
+      )}
       <div className={styles.legend} data-testid="causality-legend">
         <span className={styles.legendItem}>
           <span className={`${styles.swatch} ${styles.swatchTruth}`} />

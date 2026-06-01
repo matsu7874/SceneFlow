@@ -22,6 +22,27 @@ export function isMisinformation(info: Information, story: StoryData): boolean {
   return truthValue != null && truthValue !== info.value
 }
 
+export interface TruthSlot {
+  subject: number
+  aspect: string
+}
+
+// 同一 (subject, aspect) に truth:true が複数ある slot を返す（オーサリングの不整合警告用）。
+export function duplicateTruthSlots(story: StoryData): TruthSlot[] {
+  const counts = new Map<string, { slot: TruthSlot; count: number }>()
+  for (const i of story.informations) {
+    if (i.truth === true && i.subject != null && i.aspect != null) {
+      const key = `${i.subject}|${i.aspect}`
+      const entry = counts.get(key) ?? { slot: { subject: i.subject, aspect: i.aspect }, count: 0 }
+      entry.count += 1
+      counts.set(key, entry)
+    }
+  }
+  return Array.from(counts.values())
+    .filter(e => e.count > 1)
+    .map(e => e.slot)
+}
+
 export interface MisinfoChain {
   nodes: Set<string>
   edges: DependencyEdge[]

@@ -4,6 +4,7 @@ import {
   isMisinformation,
   truthValueFor,
   misinfoChain,
+  duplicateTruthSlots,
 } from '../../../src/modules/consistency/misinformation'
 import type { StoryData, Information, Act } from '../../../src/types/StoryData'
 
@@ -125,5 +126,23 @@ describe('misinfoChain', () => {
     const report = analyzeStory(build([misinfo, truth], [learn(1, 1, 501, 1)]))
     const chain = misinfoChain(501, report)
     expect(chain.edges).toHaveLength(0)
+  })
+})
+
+describe('duplicateTruthSlots', () => {
+  it('同一(subject,aspect)に真実が複数あれば検出する', () => {
+    const dup = build(
+      [
+        { id: 1, content: '黒', subject: 4, aspect: '髪色', value: '黒', truth: true },
+        { id: 2, content: '茶', subject: 4, aspect: '髪色', value: '茶', truth: true },
+      ],
+      [],
+    )
+    const slots = duplicateTruthSlots(dup)
+    expect(slots).toHaveLength(1)
+    expect(slots[0]).toMatchObject({ subject: 4, aspect: '髪色' })
+  })
+  it('真実が1つずつなら検出しない', () => {
+    expect(duplicateTruthSlots(story)).toHaveLength(0)
   })
 })

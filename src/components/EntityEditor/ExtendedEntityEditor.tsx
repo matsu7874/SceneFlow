@@ -148,11 +148,25 @@ const entitySchemas: Record<EntityType, any> = {
         itemType: 'reference',
         entityType: 'information',
       },
+      subject: { type: 'reference', label: '対象（誰/何について）', entityType: 'anyEntity' },
+      aspect: { type: 'string', label: '観点（例: 髪色、居場所。同一論点のキー）' },
+      value: { type: 'string', label: '値（例: 茶色）' },
+      truth: { type: 'boolean', label: 'この値が真実（観点ごとに1つ）' },
+      misinfoType: {
+        type: 'select',
+        label: '誤情報の種別',
+        options: [
+          { value: '', label: '（指定なし）' },
+          { value: 'lie', label: '嘘（意図的）' },
+          { value: 'mistake', label: '見間違い・勘違い' },
+        ],
+      },
     },
     groups: {
       基本情報: ['name', 'content', 'description', 'category'],
       プロパティ: ['isSecret', 'requiresContext'],
       効果: ['enablesActions', 'revealsInformation'],
+      '言明（矛盾検出用）': ['subject', 'aspect', 'value', 'truth', 'misinfoType'],
     },
     required: ['name', 'content', 'category'],
   },
@@ -252,6 +266,12 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
         id: e.id.toString(),
         name: `Event ${e.id}`,
       })),
+      // 情報の「対象」は人物・場所・小道具のいずれも取り得るため統合リストを提供する。
+      anyEntity: [
+        ...storyData.persons.map(p => ({ id: p.id.toString(), name: `👤 ${p.name}` })),
+        ...storyData.locations.map(l => ({ id: l.id.toString(), name: `📍 ${l.name}` })),
+        ...storyData.props.map(p => ({ id: p.id.toString(), name: `📦 ${p.name}` })),
+      ],
     }
     return result
   }, [storyData])
@@ -262,6 +282,17 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
       data.connections = data.connectedTo.map((id: string | number) =>
         typeof id === 'string' ? parseInt(id) : id,
       )
+    }
+
+    // 情報の構造化言明: subject は参照のため文字列で入る。矛盾検出は数値idで比較するため変換する。
+    // 未選択や空文字の任意項目は保存対象から除外する。
+    if (entity.type === 'information') {
+      if (data.subject === '' || data.subject == null) {
+        delete data.subject
+      } else {
+        data.subject = typeof data.subject === 'string' ? parseInt(data.subject, 10) : data.subject
+      }
+      if (!data.misinfoType) delete data.misinfoType
     }
 
     const updatedEntity: ExtendedEntity = {
