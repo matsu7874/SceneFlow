@@ -104,3 +104,18 @@ export interface StoryData {
   initialStates: InitialState[]
   acts: Act[]
 }
+
+/**
+ * 何も入力されていない空の物語データを生成する。
+ * イベント入力をゼロから始める場合や、JSON表示の初期値として利用する。
+ */
+export function createEmptyStoryData(): StoryData {
+  return {
+    persons: [],
+    locations: [],
+    props: [],
+    informations: [],
+    initialStates: [],
+    acts: [],
+  }
+}

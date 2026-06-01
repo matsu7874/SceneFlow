@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { StoryData } from '../types/StoryData'
+import { StoryData, createEmptyStoryData } from '../types/StoryData'
 import { validateStoryData } from '../utils/validation'
 import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
 import academyMystery from '../data/sample-academy-mystery.json'
@@ -563,16 +563,18 @@ const defaultJsonData = {
 }
 
 export const JsonDataInput: React.FC<JsonDataInputProps> = ({ onDataLoad, currentData }) => {
-  const [jsonText, setJsonText] = useState(JSON.stringify(defaultJsonData, null, 2))
+  // 画面上で入力されている内容（currentData = storyData）をそのまま表示する。
+  // 何も入力されていない場合は空の物語データを示す。
+  const [jsonText, setJsonText] = useState(() =>
+    JSON.stringify(currentData ?? createEmptyStoryData(), null, 2),
+  )
   const [error, setError] = useState<string | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(true)
   const { showNotification } = useVisualFeedback()
 
-  // Update JSON text when currentData changes
+  // 各ページでの編集（イベント入力・エンティティ編集など）に追従してJSON表示を更新する
   React.useEffect(() => {
-    if (currentData) {
-      setJsonText(JSON.stringify(currentData, null, 2))
-    }
+    setJsonText(JSON.stringify(currentData ?? createEmptyStoryData(), null, 2))
   }, [currentData, JSON.stringify(currentData)])
 
   const handleLoadData = (): void => {
@@ -608,6 +610,13 @@ export const JsonDataInput: React.FC<JsonDataInputProps> = ({ onDataLoad, curren
           />
           <div className="json-data-input-actions">
             <button onClick={handleLoadData}>物語データをロード</button>
+            <button
+              type="button"
+              className="sample-button"
+              onClick={() => setJsonText(JSON.stringify(defaultJsonData, null, 2))}
+            >
+              桃太郎のサンプルを入力
+            </button>
             <button
               type="button"
               className="sample-button"

@@ -15,22 +15,12 @@ export const QuickLogPage: React.FC = () => {
     createLocation,
   } = useQuickLog()
 
-  if (!storyData) {
-    return (
-      <div className="page quick-log-page">
-        <h2>イベント入力</h2>
-        <div className="no-data-message">
-          <p>
-            データが読み込まれていません。シミュレーションページで物語データを読み込んでください。
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="page quick-log-page">
       <h2>イベント入力</h2>
+      <p className="quick-log-hint">
+        誰が・どこで・何をしたかを入力すると物語データが作られます。データの読み込みは不要です。
+      </p>
       <QuickActInput
         persons={storyData.persons.map(p => ({ id: p.id, name: p.name }))}
         locations={storyData.locations.map(l => ({ id: l.id, name: l.name }))}

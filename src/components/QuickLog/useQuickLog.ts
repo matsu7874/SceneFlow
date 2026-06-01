@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { useAppContext } from '../../contexts/AppContext'
-import type { Act, StoryData } from '../../types/StoryData'
+import { createEmptyStoryData, type Act, type StoryData } from '../../types/StoryData'
 import { analyzeStory, type Breakage } from '../../modules/consistency'
 import {
   appendAct,
@@ -13,7 +13,7 @@ import {
 } from './quickLogLogic'
 
 export interface UseQuickLogReturn {
-  storyData: StoryData | null
+  storyData: StoryData
   sortedActs: Act[]
   breakagesByActId: Map<number, Breakage[]>
   addAct: (input: AppendActInput) => number | null
@@ -26,60 +26,59 @@ export interface UseQuickLogReturn {
 export function useQuickLog(): UseQuickLogReturn {
   const { storyData, setStoryData } = useAppContext()
 
+  // データ未読み込みでもゼロから入力を始められるよう、空の物語データを土台にする。
+  // 最初の入力で setStoryData が呼ばれ、以降は通常の物語データとして扱われる。
+  const story = useMemo(() => storyData ?? createEmptyStoryData(), [storyData])
+
   const addAct = useCallback(
     (input: AppendActInput): number | null => {
-      if (!storyData) return null
-      const { data, id } = appendAct(storyData, input)
+      const { data, id } = appendAct(story, input)
       setStoryData(data)
       return id
     },
-    [storyData, setStoryData],
+    [story, setStoryData],
   )
 
   const updateAct = useCallback(
     (id: number, patch: Partial<Act>) => {
-      if (!storyData) return
-      setStoryData(applyActPatch(storyData, id, patch))
+      setStoryData(applyActPatch(story, id, patch))
     },
-    [storyData, setStoryData],
+    [story, setStoryData],
   )
 
   const deleteAct = useCallback(
     (id: number) => {
-      if (!storyData) return
-      setStoryData(removeAct(storyData, id))
+      setStoryData(removeAct(story, id))
     },
-    [storyData, setStoryData],
+    [story, setStoryData],
   )
 
   const createPerson = useCallback(
     (name: string): number | null => {
-      if (!storyData) return null
-      const { data, id } = appendPerson(storyData, name)
+      const { data, id } = appendPerson(story, name)
       setStoryData(data)
       return id
     },
-    [storyData, setStoryData],
+    [story, setStoryData],
   )
 
   const createLocation = useCallback(
     (name: string): number | null => {
-      if (!storyData) return null
-      const { data, id } = appendLocation(storyData, name)
+      const { data, id } = appendLocation(story, name)
       setStoryData(data)
       return id
     },
-    [storyData, setStoryData],
+    [story, setStoryData],
   )
 
-  const sortedActs = useMemo(() => (storyData ? sortActs(storyData.acts) : []), [storyData])
-  const breakagesByActId = useMemo(
-    () => (storyData ? analyzeStory(storyData).byActId : new Map<number, Breakage[]>()),
-    [storyData],
+  const sortedActs = useMemo(() => sortActs(story.acts), [story])
+  const breakagesByActId = useMemo<Map<number, Breakage[]>>(
+    () => analyzeStory(story).byActId,
+    [story],
   )
 
   return {
-    storyData,
+    storyData: story,
     sortedActs,
     breakagesByActId,
     addAct,

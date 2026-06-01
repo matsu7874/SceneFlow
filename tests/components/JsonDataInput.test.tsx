@@ -123,7 +123,7 @@ describe('JsonDataInput', () => {
     expect(mockOnDataLoad).not.toHaveBeenCalled()
   })
 
-  it('uses default Momotaro data initially', () => {
+  it('shows an empty story structure when no data is loaded', () => {
     render(
       <TestWrapper>
         <JsonDataInput onDataLoad={mockOnDataLoad} />
@@ -131,14 +131,56 @@ describe('JsonDataInput', () => {
     )
 
     const textarea = screen.getByRole<HTMLTextAreaElement>('textbox')
-    const value = textarea.value
+    const parsed = JSON.parse(textarea.value)
 
-    // Check that default data contains Momotaro
+    // 何も入力されていないときは空の物語データを表示する（サンプルは表示しない）
+    expect(parsed).toEqual({
+      persons: [],
+      locations: [],
+      props: [],
+      informations: [],
+      initialStates: [],
+      acts: [],
+    })
+    expect(textarea.value).not.toContain('桃太郎')
+  })
+
+  it('reflects the current data passed in (screen input is mirrored in JSON)', () => {
+    const current = {
+      persons: [{ id: 1, name: '太郎', color: '#FF0000' }],
+      locations: [],
+      props: [],
+      informations: [],
+      initialStates: [],
+      acts: [{ id: 1, personId: 1, locationId: 0, time: '09:00', description: '到着' }],
+    }
+
+    render(
+      <TestWrapper>
+        <JsonDataInput onDataLoad={mockOnDataLoad} currentData={current} />
+      </TestWrapper>,
+    )
+
+    const textarea = screen.getByRole<HTMLTextAreaElement>('textbox')
+    expect(JSON.parse(textarea.value)).toEqual(current)
+  })
+
+  it('fills the Momotaro sample when the sample button is clicked', () => {
+    render(
+      <TestWrapper>
+        <JsonDataInput onDataLoad={mockOnDataLoad} />
+      </TestWrapper>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '桃太郎のサンプルを入力' }))
+
+    const textarea = screen.getByRole<HTMLTextAreaElement>('textbox')
+    const value = textarea.value
     expect(value).toContain('桃太郎')
     expect(value).toContain('おじいさん')
     expect(value).toContain('おばあさん')
 
-    // Check that it does NOT contain events field
+    // events フィールドは含まない
     const parsed = JSON.parse(value)
     expect(parsed.events).toBeUndefined()
   })
