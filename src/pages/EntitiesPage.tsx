@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { ExtendedEntityEditor } from '../components/EntityEditor/ExtendedEntityEditor'
 import { useAppContext } from '../contexts/AppContext'
-import { ExtendedEntity, EntityType } from '../types/extendedEntities'
+import { ExtendedEntity, EntityType, entityTypeLabel } from '../types/extendedEntities'
 import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
 import { generateEventsFromActs } from '../utils/eventGeneration'
+import { replaceEntityInList } from './entitiesPageLogic'
 
-const getEntityTypeLabel = (type: EntityType): string => {
-  const labels: Record<EntityType, string> = {
-    person: '人物',
-    location: '場所',
-    prop: '小道具',
-    information: '情報',
-    act: '行動',
-    event: 'イベント',
-  }
-  return labels[type] || type
-}
+const getEntityTypeLabel = (type: EntityType): string => entityTypeLabel(type)
 
 export const EntitiesPage: React.FC = () => {
   const { storyData, setStoryData } = useAppContext()
@@ -106,7 +97,8 @@ export const EntitiesPage: React.FC = () => {
   }, [storyData])
 
   const handleEntityUpdate = (updatedEntity: ExtendedEntity): void => {
-    setEntities(prev => prev.map(e => (e.id === updatedEntity.id ? updatedEntity : e)))
+    setEntities(prev => replaceEntityInList(prev, updatedEntity))
+    setSelectedEntity(updatedEntity)
 
     // Update story data with all fields
     if (storyData) {
@@ -458,8 +450,12 @@ export const EntitiesPage: React.FC = () => {
                 </h4>
                 {typeEntities.map(entity => (
                   <div
-                    key={entity.id}
-                    className={`entity-item ${selectedEntity?.id === entity.id ? 'selected' : ''}`}
+                    key={`${entity.type}-${entity.id}`}
+                    className={`entity-item ${
+                      selectedEntity?.id === entity.id && selectedEntity?.type === entity.type
+                        ? 'selected'
+                        : ''
+                    }`}
                     onClick={() => setSelectedEntity(entity)}
                   >
                     <span className="entity-type-badge">{entity.type}</span>

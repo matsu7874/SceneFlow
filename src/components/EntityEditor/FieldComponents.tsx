@@ -193,7 +193,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
         ))}
       </div>
       <button type="button" onClick={handleAdd} disabled={disabled} className={styles.addButton}>
-        + Add Item
+        + 項目を追加
       </button>
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>

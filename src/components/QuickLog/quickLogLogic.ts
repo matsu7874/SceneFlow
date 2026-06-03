@@ -72,7 +72,16 @@ export function appendAct(
     time: minutesToTimeString(input.startTime),
     ...(input.type ? { type: input.type } : {}),
   }
-  return { data: { ...story, acts: [...story.acts, act] }, id }
+  // 初期位置が未設定の人物には、この行動の場所を初期状態としてシードする。
+  // これがないとシミュレーション（初期状態を起点とする）でデータが反映されない。
+  const hasInitial = story.initialStates.some(s => s.personId === input.personId)
+  const initialStates = hasInitial
+    ? story.initialStates
+    : [
+        ...story.initialStates,
+        { personId: input.personId, locationId: input.locationId, time: '00:00' },
+      ]
+  return { data: { ...story, initialStates, acts: [...story.acts, act] }, id }
 }
 
 export function applyActPatch(story: StoryData, id: number, patch: Partial<Act>): StoryData {

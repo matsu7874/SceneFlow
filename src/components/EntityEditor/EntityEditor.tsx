@@ -12,6 +12,7 @@ import {
   ColorField,
 } from './FieldComponents'
 import styles from './EntityEditor.module.css'
+import { entityTypeLabel, type EntityType } from '../../types/extendedEntities'
 
 // Set a (possibly dot-delimited) nested path on an object, returning a new
 // object with each level along the path copied so nested edits aren't lost.
@@ -418,7 +419,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
   return (
     <div className={styles.entityEditor}>
       <div className={styles.header}>
-        <h2>Edit {entityType}</h2>
+        <h2>{entityTypeLabel(entityType as EntityType)}の編集</h2>
       </div>
 
       <form
@@ -433,12 +434,12 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
         <div className={styles.actions}>
           {onCancel && (
             <button type="button" onClick={onCancel} className={styles.cancelButton}>
-              Cancel
+              キャンセル
             </button>
           )}
           {onSave && !readOnly && (
             <button type="submit" className={styles.saveButton}>
-              Save
+              保存
             </button>
           )}
         </div>

@@ -9,9 +9,11 @@ export const CausalityPage: React.FC = () => {
   if (!storyData) {
     return (
       <div className="page causality-page">
-        <h2>Causality Analysis</h2>
+        <h2>因果関係ビュー</h2>
         <div className="no-data-message">
-          <p>No story data loaded. Please load data from the Simulation page first.</p>
+          <p>
+            物語データが読み込まれていません。先にシミュレーションページでデータを読み込んでください。
+          </p>
         </div>
       </div>
     )
@@ -19,7 +21,7 @@ export const CausalityPage: React.FC = () => {
 
   return (
     <div className="page causality-page">
-      <h2>Causality Analysis</h2>
+      <h2>因果関係ビュー</h2>
       <div className="page-content">
         <ErrorBoundary>
           <CausalityView storyData={storyData} />

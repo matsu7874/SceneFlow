@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { StoryData } from '../types/StoryData'
+import { loadStoredStory, saveStoredStory } from './storyPersistence'
 
 interface AppContextType {
   storyData: StoryData | null
@@ -15,8 +16,17 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }): React.ReactElement => {
-  const [storyData, setStoryData] = useState<StoryData | null>(null)
+  const [storyData, setStoryData] = useState<StoryData | null>(() =>
+    typeof window !== 'undefined' ? loadStoredStory(window.localStorage) : null,
+  )
   const [isLoading, setIsLoading] = useState(false)
+
+  // storyData の変更を localStorage に反映し、リロードしてもデータが消えないようにする。
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      saveStoredStory(window.localStorage, storyData)
+    }
+  }, [storyData])
 
   return (
     <AppContext.Provider

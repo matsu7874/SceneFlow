@@ -90,6 +90,29 @@ describe('appendAct', () => {
       time: '09:30',
     })
   })
+  it('初期位置が未設定の人物にはその場所の初期状態を追加する', () => {
+    const { data } = appendAct(emptyStory(), {
+      personId: 1,
+      locationId: 2,
+      description: '到着した',
+      startTime: 570,
+    })
+    expect(data.initialStates).toContainEqual({ personId: 1, locationId: 2, time: '00:00' })
+  })
+  it('既に初期位置がある人物には初期状態を追加しない', () => {
+    const base: StoryData = {
+      ...emptyStory(),
+      initialStates: [{ personId: 1, locationId: 5, time: '00:00' }],
+    }
+    const { data } = appendAct(base, {
+      personId: 1,
+      locationId: 2,
+      description: '移動した',
+      startTime: 570,
+    })
+    expect(data.initialStates).toHaveLength(1)
+    expect(data.initialStates[0]).toMatchObject({ personId: 1, locationId: 5 })
+  })
 })
 
 describe('applyActPatch', () => {

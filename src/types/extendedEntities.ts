@@ -12,6 +12,20 @@ import type { EntityId } from './causality'
 export type EntityType = 'person' | 'location' | 'prop' | 'information' | 'act' | 'event'
 
 /**
+ * エンティティタイプの日本語表示名。UI上で生のタイプ名（英語）を出さないために使う。
+ */
+export const entityTypeLabels: Record<EntityType, string> = {
+  person: '人物',
+  location: '場所',
+  prop: '小道具',
+  information: '情報',
+  act: '行動',
+  event: 'イベント',
+}
+
+export const entityTypeLabel = (type: EntityType): string => entityTypeLabels[type] ?? type
+
+/**
  * Extended Person type with additional fields
  */
 export interface ExtendedPerson {
