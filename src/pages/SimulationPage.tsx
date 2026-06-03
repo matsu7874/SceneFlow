@@ -31,7 +31,7 @@ export const SimulationPage: React.FC = () => {
 
   return (
     <div className="page simulation-page">
-      <h2>Simulation</h2>
+      <h2>シミュレーション</h2>
       <div className="container">
         <div className="input-area">
           <JsonDataInput onDataLoad={handleDataLoad} currentData={storyData} />

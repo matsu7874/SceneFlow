@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { ExtendedEntity, EntityType } from '../../types/extendedEntities'
+import { ExtendedEntity, EntityType, entityTypeLabel } from '../../types/extendedEntities'
 import { EntityEditor } from './EntityEditor'
 import { useVisualFeedback } from '../../contexts/VisualFeedbackContext'
 import { useAppContext } from '../../contexts/AppContext'
@@ -301,7 +301,7 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
       updated_at: new Date().toISOString(),
     }
     onUpdate(updatedEntity)
-    showNotification(`${entity.type}を保存しました`, { type: 'success' })
+    showNotification(`${entityTypeLabel(entity.type)}を保存しました`, { type: 'success' })
   }
 
   const handleChange = (_data: any): void => {
@@ -312,14 +312,14 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
     <div className={styles.extendedEditor}>
       <div className={styles.editorHeader}>
         <h3>
-          {entity.type}を編集: {entity.name}
+          {entityTypeLabel(entity.type)}を編集: {entity.name}
         </h3>
         <button
           className={styles.deleteButton}
           onClick={() => {
-            if (confirm(`この${entity.type}を削除してもよろしいですか？`)) {
+            if (confirm(`この${entityTypeLabel(entity.type)}を削除してもよろしいですか？`)) {
               onDelete()
-              showNotification(`${entity.type}を削除しました`, { type: 'info' })
+              showNotification(`${entityTypeLabel(entity.type)}を削除しました`, { type: 'info' })
             }
           }}
         >

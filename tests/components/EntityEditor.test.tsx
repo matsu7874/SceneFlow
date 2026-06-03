@@ -122,7 +122,7 @@ describe('EntityEditor', () => {
       />,
     )
 
-    const saveButton = screen.getByText('Save')
+    const saveButton = screen.getByText('保存')
     await user.click(saveButton)
 
     // The save should not be called with invalid data
@@ -162,7 +162,7 @@ describe('EntityEditor', () => {
       />,
     )
 
-    const saveButton = screen.getByText('Save')
+    const saveButton = screen.getByText('保存')
     await user.click(saveButton)
 
     expect(mockOnSave).toHaveBeenCalledWith(testData)
@@ -179,7 +179,7 @@ describe('EntityEditor', () => {
       />,
     )
 
-    const cancelButton = screen.getByText('Cancel')
+    const cancelButton = screen.getByText('キャンセル')
     await user.click(cancelButton)
 
     expect(mockOnCancel).toHaveBeenCalled()
@@ -254,7 +254,7 @@ describe('EntityEditor', () => {
     expect(screen.getByDisplayValue('tag1')).toBeInTheDocument()
     expect(screen.getByDisplayValue('tag2')).toBeInTheDocument()
 
-    const addButton = screen.getByText(/Add Item/i)
+    const addButton = screen.getByText(/項目を追加/)
     await user.click(addButton)
 
     expect(mockOnChange).toHaveBeenCalledWith(

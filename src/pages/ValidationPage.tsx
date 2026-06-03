@@ -7,13 +7,15 @@ export const ValidationPage: React.FC = () => {
 
   return (
     <div className="page validation-page">
-      <h2>Story Validation</h2>
+      <h2>検証</h2>
       <div className="page-content">
         {storyData ? (
           <ValidationReporter storyData={storyData} />
         ) : (
           <div className="no-data-message">
-            <p>No story data loaded. Please load data from the Simulation page first.</p>
+            <p>
+              物語データが読み込まれていません。先にシミュレーションページでデータを読み込んでください。
+            </p>
           </div>
         )}
       </div>
