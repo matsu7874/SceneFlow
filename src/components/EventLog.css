@@ -1,51 +1,124 @@
+/* =========================================================================
+   EventLog ― スクロール可能な計器ログ。等幅タイムスタンプ、人物カラー。
+   ========================================================================= */
+
 .event-log {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-4);
+}
+
+/* ---------- セクション見出し ---------- */
+.event-log-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .event-log h3 {
-  margin-bottom: 10px;
-  font-size: 1.1em;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
 }
 
 .event-log h3 span {
-  color: #007bff;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+  text-transform: none;
 }
 
+/* ---------- ログ本体 ---------- */
 .log-output {
-  background: white;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  min-height: 200px;
-  max-height: 300px;
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  min-height: 12rem;
+  max-height: 18rem;
   overflow-y: auto;
-  font-size: 14px;
+  /* スクロールバーを薄めに */
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
 }
 
+.log-output::-webkit-scrollbar {
+  width: 5px;
+}
+
+.log-output::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.log-output::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: var(--r-pill);
+}
+
+/* ---------- ログ行 ---------- */
 .log-entry {
-  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  align-items: baseline;
+  gap: 0 var(--space-3);
+  padding: 0.42rem var(--space-4);
+  border-bottom: 1px solid var(--line);
   line-height: 1.5;
+  transition: background 0.1s;
 }
 
 .log-entry:last-child {
-  margin-bottom: 0;
+  border-bottom: none;
 }
 
+.log-entry:hover {
+  background: var(--color-surface-hover);
+}
+
+/* 等幅タイムスタンプ */
 .log-time {
-  color: #6c757d;
-  margin-right: 8px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
+  color: var(--ink-3);
+  white-space: nowrap;
 }
 
+/* 本文列（人物名 + テキスト） */
+.log-entry-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  min-width: 0;
+}
+
+/* 人物名（color は data で注入） */
 .log-person {
-  margin-right: 5px;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .log-text {
-  color: #333;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: var(--ink);
+  line-height: 1.55;
 }
 
+/* ---------- 空状態 ---------- */
 .empty-message {
-  color: #6c757d;
+  padding: var(--space-6) var(--space-4);
   text-align: center;
-  padding: 40px 20px;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: var(--ink-3);
 }

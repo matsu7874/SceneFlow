@@ -209,6 +209,8 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
         </div>
       )}
       <div className={styles.legend} data-testid="causality-legend">
+        <span className={styles.legendCaption}>凡例</span>
+        <span className={styles.legendDivider} aria-hidden="true" />
         <span className={styles.legendItem}>
           <span className={`${styles.swatch} ${styles.swatchTruth}`} />
           真実
@@ -285,6 +287,15 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
                 transform={`translate(${xOf(n)}, ${yOf(n)})`}
                 className={`${styles.node} ${isDimNode(id) ? styles.dim : ''}`}
                 onClick={() => setSelected(prev => (prev === id ? null : id))}
+                tabIndex={0}
+                role="button"
+                aria-pressed={selectedNow}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setSelected(prev => (prev === id ? null : id))
+                  }
+                }}
               >
                 <title>{hasBreak ? breakMsgs : n.label}</title>
                 <rect
@@ -293,6 +304,10 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
                   rx={6}
                   className={`${isSeed ? styles.seedRect : hasBreak ? styles.breakRect : styles.actRect} ${misinfoClass} ${selectedNow ? styles.selectedRect : ''}`}
                 />
+                {/* 等幅で時刻を右下に小さく表示 */}
+                <text x={8} y={NODE_H - 7} className={styles.nodeTime}>
+                  {`t=${n.startTime}`}
+                </text>
                 {misinfo !== 'none' && (
                   <text
                     x={NODE_W - 30}
@@ -307,7 +322,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
                     ⚡
                   </text>
                 )}
-                <text x={8} y={NODE_H / 2 + 4} className={styles.nodeLabel}>
+                <text x={8} y={NODE_H / 2 - 1} className={styles.nodeLabel}>
                   {n.label.length > 16 ? `${n.label.slice(0, 15)}…` : n.label}
                 </text>
               </g>
@@ -317,6 +332,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
       </div>
       {selectedContradictions && selectedContradictions.length > 0 && (
         <div className={styles.panel} data-testid="contradiction-panel">
+          <span className={styles.panelEyebrow}>矛盾レポート</span>
           <h4 className={styles.panelTitle}>矛盾の発覚</h4>
           {selectedContradictions.map(c => {
             const existingInfo = infoById.get(c.existing.infoId)

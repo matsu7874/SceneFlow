@@ -6,6 +6,7 @@ import { LocationLayout } from '../components/LocationLayout'
 import { JsonDataInput } from '../components/JsonDataInput'
 import { useSimulation } from '../hooks/useSimulation'
 import { useAppContext } from '../contexts/AppContext'
+import './SimulationPage.css'
 
 export const SimulationPage: React.FC = () => {
   const { storyData, setStoryData } = useAppContext()
@@ -31,7 +32,11 @@ export const SimulationPage: React.FC = () => {
 
   return (
     <div className="page simulation-page">
-      <h2>シミュレーション</h2>
+      <header className="simulation-page-header">
+        <span className="simulation-page-eyebrow">Simulation</span>
+        <h2 className="simulation-page-title">シミュレーション</h2>
+      </header>
+
       <div className="container">
         <div className="input-area">
           <JsonDataInput onDataLoad={handleDataLoad} currentData={storyData} />

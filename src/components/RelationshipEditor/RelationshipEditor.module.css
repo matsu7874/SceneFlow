@@ -1,135 +1,238 @@
+/* =========================================================================
+   RelationshipEditor ― 関係グラフエディタ（D3 力学グラフ）
+   計器的ライト基調。var() トークンのみ使用。
+   ========================================================================= */
+
 .container {
   position: relative;
   height: 100%;
   width: 100%;
-  background-color: var(--bg-secondary);
-  border-radius: 8px;
+  background: var(--app-bg);
+  border-radius: var(--r-lg);
   overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--ink);
 }
 
+/* ---------- ヘッダー帯 ---------- */
 .header {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: 10;
-  background-color: var(--bg-primary);
-  border-bottom: 1px solid var(--border-color);
-  padding: 16px;
+  background: var(--color-background);
+  border-bottom: 1px solid var(--line);
+  padding: var(--space-3) var(--space-4);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .title {
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--ink);
   margin: 0;
+  letter-spacing: 0.01em;
 }
 
 .controls {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   align-items: center;
 }
 
+/* ---------- 検索 ---------- */
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--space-2);
+  font-size: 0.85rem;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+
 .searchInput {
-  padding: 8px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
+  padding: 0.45rem 0.6rem 0.45rem 2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--color-background);
+  color: var(--ink);
+  font-family: var(--font-sans);
   font-size: 0.875rem;
   width: 200px;
-  transition: border-color 0.2s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.searchInput::placeholder {
+  color: var(--ink-3);
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+.searchInput:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 1px;
+}
+
+/* ---------- フィルタードロップダウン ---------- */
 .filterDropdown {
   position: relative;
 }
 
 .filterButton {
-  padding: 8px 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--color-background);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
   font-size: 0.875rem;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.2s;
+  gap: var(--space-2);
+  transition:
+    border-color 0.15s,
+    background 0.12s;
 }
 
 .filterButton:hover {
-  background-color: var(--bg-hover);
-  border-color: var(--primary-color);
+  background: var(--color-surface-hover);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.filterButton:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 1px;
+}
+
+.filterBadge {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: 2px;
 }
 
 .filterMenu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px);
   right: 0;
-  margin-top: 4px;
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--color-background);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-pop);
   min-width: 200px;
   z-index: 100;
+  padding: var(--space-1) 0;
+}
+
+.filterSection {
+  padding: var(--space-2) 0;
+}
+
+.filterSectionTitle {
+  padding: var(--space-1) var(--space-4);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
 
 .filterOption {
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
-  transition: background-color 0.2s;
   font-size: 0.875rem;
-  color: var(--text-primary);
+  color: var(--ink);
+  transition: background 0.12s;
 }
 
 .filterOption:hover {
-  background-color: var(--bg-hover);
+  background: var(--color-surface-hover);
 }
 
+.filterOption.active {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.filterMenuDivider {
+  height: 1px;
+  background: var(--line);
+  margin: var(--space-1) 0;
+}
+
+/* ---------- モード切替 ---------- */
 .modeToggle {
   display: flex;
-  gap: 4px;
-  background-color: var(--bg-secondary);
-  border-radius: 4px;
+  gap: 2px;
+  background: var(--color-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   padding: 2px;
 }
 
 .modeButton {
-  padding: 6px 12px;
+  padding: 0.35rem 0.75rem;
   border: none;
-  background-color: transparent;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
   cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.2s;
+  border-radius: calc(var(--r-sm) - 2px);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.modeButton:hover {
+  background: var(--color-surface-hover);
+  color: var(--ink);
 }
 
 .modeButton.active {
-  background-color: var(--primary-color);
-  color: white;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
 }
 
+.modeButton:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 1px;
+}
+
+/* ---------- グラフエリア ---------- */
 .graphContainer {
   position: absolute;
-  top: 73px;
+  top: 57px;
   left: 0;
   right: 0;
   bottom: 0;
   overflow: hidden;
+  background: var(--color-surface);
 }
 
 .svg {
@@ -142,65 +245,69 @@
   cursor: grabbing;
 }
 
-/* Graph Elements */
+/* ---------- グラフ要素 ---------- */
 .link {
   fill: none;
-  stroke: var(--text-secondary);
-  stroke-opacity: 0.6;
-  transition: stroke-opacity 0.2s;
+  stroke: var(--line-strong);
+  stroke-opacity: 0.7;
+  transition:
+    stroke-opacity 0.15s,
+    stroke 0.15s;
+  cursor: pointer;
 }
 
 .link:hover {
   stroke-opacity: 1;
+  stroke: var(--ink-3);
 }
 
 .link.highlighted {
-  stroke: var(--primary-color);
+  stroke: var(--accent);
   stroke-opacity: 1;
 }
 
 .node {
   cursor: pointer;
-  transition: all 0.2s;
 }
 
 .nodeCircle {
-  fill: var(--primary-color);
-  stroke: var(--bg-primary);
+  fill: var(--accent);
+  stroke: var(--color-background);
   stroke-width: 2;
-  transition: all 0.2s;
+  transition:
+    fill 0.15s,
+    stroke-width 0.15s;
 }
 
 .node:hover .nodeCircle {
-  fill: var(--primary-hover);
   stroke-width: 3;
+  stroke: var(--color-background);
 }
 
 .node.highlighted .nodeCircle {
-  fill: var(--accent-color);
-  stroke: var(--accent-color);
+  stroke: var(--accent-strong);
   stroke-width: 3;
 }
 
 .nodeLabel {
+  font-family: var(--font-sans);
   font-size: 0.75rem;
-  fill: var(--text-primary);
+  fill: var(--ink);
   text-anchor: middle;
   pointer-events: none;
   user-select: none;
-  text-shadow: 0 0 3px var(--bg-primary), 0 0 3px var(--bg-primary);
 }
 
-/* Tooltip */
+/* ---------- ツールチップ ---------- */
 .tooltip {
   position: absolute;
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 8px 12px;
+  background: var(--color-background);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  padding: var(--space-2) var(--space-3);
   font-size: 0.875rem;
-  color: var(--text-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: var(--ink);
+  box-shadow: var(--shadow-pop);
   pointer-events: none;
   z-index: 1000;
   max-width: 250px;
@@ -208,61 +315,67 @@
 
 .tooltipTitle {
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
+  color: var(--ink);
 }
 
 .tooltipContent {
-  color: var(--text-secondary);
+  color: var(--ink-2);
   font-size: 0.75rem;
 }
 
-/* Context Menu */
+/* ---------- コンテキストメニュー ---------- */
 .contextMenu {
   position: absolute;
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--color-background);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-pop);
   z-index: 1000;
   min-width: 180px;
+  padding: var(--space-1) 0;
 }
 
 .contextMenuItem {
-  padding: 10px 16px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
   font-size: 0.875rem;
-  color: var(--text-primary);
+  color: var(--ink);
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: background-color 0.2s;
+  gap: var(--space-2);
+  transition: background 0.12s;
 }
 
 .contextMenuItem:hover {
-  background-color: var(--bg-hover);
+  background: var(--color-surface-hover);
 }
 
 .contextMenuItem.danger {
-  color: var(--error-color);
+  color: var(--danger);
+}
+
+.contextMenuItem.danger:hover {
+  background: var(--danger-soft);
 }
 
 .contextMenuDivider {
   height: 1px;
-  background-color: var(--border-color);
-  margin: 4px 0;
+  background: var(--line);
+  margin: var(--space-1) 0;
 }
 
-/* Details Panel */
+/* ---------- 詳細パネル（スライドイン） ---------- */
 .detailsPanel {
   position: absolute;
   right: 0;
-  top: 73px;
+  top: 57px;
   bottom: 0;
-  width: 320px;
-  background-color: var(--bg-primary);
-  border-left: 1px solid var(--border-color);
+  width: 300px;
+  background: var(--color-background);
+  border-left: 1px solid var(--line);
   transform: translateX(100%);
-  transition: transform 0.3s ease;
+  transition: transform 0.25s ease;
   z-index: 20;
   overflow-y: auto;
 }
@@ -272,111 +385,155 @@
 }
 
 .detailsHeader {
-  padding: 16px;
-  border-bottom: 1px solid var(--border-color);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: var(--color-surface-dark);
 }
 
 .detailsTitle {
-  font-size: 1.125rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--ink);
   margin: 0;
+  letter-spacing: 0.01em;
 }
 
 .closeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
   background: none;
   border: none;
-  color: var(--text-secondary);
+  border-radius: var(--r-sm);
+  color: var(--ink-3);
   cursor: pointer;
-  padding: 4px;
-  transition: color 0.2s;
+  font-size: 1rem;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 
 .closeButton:hover {
-  color: var(--text-primary);
+  background: var(--color-surface-hover);
+  color: var(--ink);
+}
+
+.closeButton:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 1px;
 }
 
 .detailsContent {
-  padding: 16px;
+  padding: var(--space-4);
 }
 
 .detailsSection {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-5);
 }
 
 .detailsSectionTitle {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--ink-3);
+  margin-bottom: var(--space-3);
 }
 
 .detailsField {
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .detailsLabel {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: var(--space-1);
 }
 
 .detailsValue {
-  font-size: 0.875rem;
-  color: var(--text-primary);
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+/* 関係タイプを pill で表示 */
+.typePill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .strengthSlider {
   width: 100%;
-  margin-top: 8px;
+  margin-top: var(--space-2);
+  accent-color: var(--accent);
 }
 
 .actionButtons {
   display: flex;
-  gap: 8px;
-  margin-top: 16px;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
 }
 
 .actionButton {
   flex: 1;
-  padding: 8px 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--color-background);
+  color: var(--ink);
+  font-family: var(--font-sans);
   font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  transition:
+    background 0.12s,
+    border-color 0.12s;
 }
 
 .actionButton:hover {
-  background-color: var(--bg-hover);
-  border-color: var(--primary-color);
+  background: var(--color-surface-hover);
+  border-color: var(--line-strong);
+}
+
+.actionButton:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 1px;
 }
 
 .actionButton.danger {
-  color: var(--error-color);
-  border-color: var(--error-color);
+  color: var(--danger);
+  border-color: var(--danger);
 }
 
 .actionButton.danger:hover {
-  background-color: var(--error-color);
-  color: white;
+  background: var(--danger-soft);
 }
 
-/* Loading and Empty States */
+/* ---------- 空状態 ---------- */
 .loading {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
-  color: var(--text-secondary);
-  font-size: 1.125rem;
+  color: var(--ink-3);
+  font-size: 1rem;
 }
 
 .empty {
@@ -385,32 +542,36 @@
   justify-content: center;
   align-items: center;
   height: 100%;
-  gap: 16px;
-  color: var(--text-secondary);
+  gap: var(--space-3);
+  padding: var(--space-6);
   text-align: center;
-  padding: 32px;
 }
 
 .emptyIcon {
-  font-size: 3rem;
-  opacity: 0.5;
+  font-size: 2.5rem;
+  opacity: 0.35;
+  filter: grayscale(0.5);
 }
 
 .emptyText {
-  font-size: 1.125rem;
   margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink-2);
 }
 
 .emptyHint {
-  font-size: 0.875rem;
-  color: var(--text-tertiary);
   margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink-3);
+  max-width: 28rem;
 }
 
-/* Responsive */
+/* ---------- レスポンシブ ---------- */
 @media (max-width: 768px) {
   .header {
     flex-wrap: wrap;
+    padding: var(--space-2) var(--space-3);
   }
 
   .controls {
@@ -419,7 +580,7 @@
   }
 
   .searchInput {
-    width: 150px;
+    width: 140px;
   }
 
   .detailsPanel {

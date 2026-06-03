@@ -45,7 +45,7 @@ describe('RelationshipEditor', () => {
       </AppProvider>,
     )
 
-    expect(screen.getByText(/No relationships to display/i)).toBeInTheDocument()
+    expect(screen.getByText('関係性がありません')).toBeInTheDocument()
   })
 
   it('derives relationship nodes from the loaded story data', async () => {

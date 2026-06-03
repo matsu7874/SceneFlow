@@ -24,6 +24,15 @@ interface Link {
   type: string
 }
 
+// Design-token colors resolved at runtime (canvas cannot use CSS vars)
+const EDGE_COLOR = '#cdd3dc' // --line-strong
+const EDGE_LABEL_BG = '#ffffff' // --color-background
+const EDGE_LABEL_COLOR = '#566173' // --ink-2
+const NODE_STROKE = '#ffffff' // --color-background
+const NODE_SELECTED_STROKE = '#1d4ed8' // --accent-strong
+const NODE_HOVER_STROKE = '#2563eb' // --accent
+const NODE_LABEL_COLOR = '#18202c' // --ink
+
 export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagramProps> = ({
   persons,
 }) => {
@@ -148,9 +157,9 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
       node.y = Math.max(50, Math.min(550, node.y))
     })
 
-    // Draw links
-    ctx.strokeStyle = '#94A3B8'
-    ctx.lineWidth = 2
+    // Draw links — token-aligned neutral color
+    ctx.strokeStyle = EDGE_COLOR
+    ctx.lineWidth = 1.5
     links.forEach(link => {
       const source = nodes.find(n => n.id === link.source)
       const target = nodes.find(n => n.id === link.target)
@@ -164,49 +173,59 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
         const midX = (source.x + target.x) / 2
         const midY = (source.y + target.y) / 2
         ctx.save()
-        ctx.fillStyle = '#475569'
-        ctx.font = '12px sans-serif'
+        ctx.font = "11px 'IBM Plex Mono', monospace"
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
 
         // Background for text
         const textWidth = ctx.measureText(link.type).width
-        ctx.fillStyle = 'white'
-        ctx.fillRect(midX - textWidth / 2 - 4, midY - 8, textWidth + 8, 16)
+        ctx.fillStyle = EDGE_LABEL_BG
+        ctx.fillRect(midX - textWidth / 2 - 5, midY - 9, textWidth + 10, 18)
 
-        ctx.fillStyle = '#475569'
+        ctx.fillStyle = EDGE_LABEL_COLOR
         ctx.fillText(link.type, midX, midY)
         ctx.restore()
       }
     })
 
-    // Draw nodes
+    // Draw nodes — use person.color for fill
     nodes.forEach(node => {
       const isHovered = node.id === hoveredNode
       const isSelected = node.id === selectedNode
+      const radius = isHovered ? 33 : 28
 
-      // Node circle
+      // Node circle with person.color
       ctx.beginPath()
-      ctx.arc(node.x, node.y, isHovered ? 35 : 30, 0, 2 * Math.PI)
+      ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI)
       ctx.fillStyle = node.color
       ctx.fill()
 
+      // Stroke: selected → accent-strong, hovered → accent, default → white
       if (isSelected) {
-        ctx.strokeStyle = '#1E40AF'
+        ctx.strokeStyle = NODE_SELECTED_STROKE
         ctx.lineWidth = 3
-        ctx.stroke()
       } else if (isHovered) {
-        ctx.strokeStyle = '#60A5FA'
+        ctx.strokeStyle = NODE_HOVER_STROKE
         ctx.lineWidth = 2
-        ctx.stroke()
+      } else {
+        ctx.strokeStyle = NODE_STROKE
+        ctx.lineWidth = 2
       }
+      ctx.stroke()
 
-      // Node label
-      ctx.fillStyle = 'white'
-      ctx.font = `${isHovered ? '14px' : '12px'} sans-serif`
+      // Node label inside circle (white for readability over any color)
+      ctx.fillStyle = '#ffffff'
+      ctx.font = `${isHovered ? '700 13px' : '600 11px'} 'IBM Plex Sans JP', sans-serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(node.name, node.x, node.y)
+      ctx.fillText(node.name.length > 6 ? node.name.slice(0, 5) + '…' : node.name, node.x, node.y)
+
+      // Name label below circle
+      ctx.fillStyle = NODE_LABEL_COLOR
+      ctx.font = "500 11px 'IBM Plex Sans JP', sans-serif"
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'top'
+      ctx.fillText(node.name, node.x, node.y + radius + 5)
     })
 
     animationFrameRef.current = requestAnimationFrame(animate)
@@ -311,7 +330,7 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
             />
           </div>
           <div className={styles.relationships}>
-            <h5>関係性:</h5>
+            <h5>関係性</h5>
             {links
               .filter(link => link.source === selectedNode || link.target === selectedNode)
               .map((link, index) => {
@@ -320,7 +339,10 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
                 const direction = link.source === selectedNode ? '→' : '←'
                 return (
                   <div key={index} className={styles.relationship}>
-                    {direction} {otherNode?.name}: {link.type}
+                    <span>
+                      {direction} {otherNode?.name}
+                    </span>
+                    <span className={styles.relType}>{link.type}</span>
                   </div>
                 )
               })}

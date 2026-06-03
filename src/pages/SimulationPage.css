@@ -1,0 +1,41 @@
+/* =========================================================================
+   SimulationPage ― シミュレーション画面のページレイアウト。
+   ========================================================================= */
+
+/* ---------- ページ見出し ---------- */
+.simulation-page-header {
+  margin: 0 0 var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+
+.simulation-page-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 3rem;
+  height: 2px;
+  background: var(--accent);
+}
+
+.simulation-page-eyebrow {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: var(--space-1);
+}
+
+.simulation-page-title {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}

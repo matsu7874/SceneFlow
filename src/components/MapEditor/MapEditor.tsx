@@ -62,8 +62,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     canvas.height = height
 
     const render = (): void => {
-      // Clear canvas
-      ctx.fillStyle = '#1a1a1a'
+      // Clear canvas — light instrument background
+      ctx.fillStyle = '#f6f7f9'
       ctx.fillRect(0, 0, width, height)
 
       // Save context state
@@ -104,7 +104,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
         const fromNode = editor.state.mapData.locations.find(loc => loc.id === connectingFrom)
         if (fromNode) {
           const worldPos = editor.screenToWorld(mousePos.x, mousePos.y)
-          ctx.strokeStyle = '#007bff'
+          ctx.strokeStyle = '#2563eb'
           ctx.lineWidth = 2
           ctx.setLineDash([5, 5])
           ctx.beginPath()
@@ -123,8 +123,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
       // Draw rubber band selection
       if (editor.state.selection.rubberBand) {
         const { startX, startY, endX, endY } = editor.state.selection.rubberBand
-        ctx.strokeStyle = '#007bff'
-        ctx.fillStyle = 'rgba(0, 123, 255, 0.1)'
+        ctx.strokeStyle = '#2563eb'
+        ctx.fillStyle = 'rgba(37, 99, 235, 0.08)'
         ctx.lineWidth = 1
         ctx.strokeRect(
           Math.min(startX, endX),
@@ -470,8 +470,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     gridSize: number,
     viewState: any,
   ): void => {
-    ctx.strokeStyle = '#2a2a2a'
-    ctx.lineWidth = 1
+    ctx.strokeStyle = '#e3e7ed'
+    ctx.lineWidth = 0.5
 
     const startX = Math.floor(-viewState.panX / viewState.zoom / gridSize) * gridSize
     const startY = Math.floor(-viewState.panY / viewState.zoom / gridSize) * gridSize
@@ -512,8 +512,9 @@ export const MapEditor: React.FC<MapEditorProps> = ({
       state.pathfinding.path.includes(from.id) &&
       state.pathfinding.path.includes(to.id)
 
-    ctx.strokeStyle = isSelected ? '#ffc107' : isInPath ? '#28a745' : '#666'
-    ctx.lineWidth = isSelected ? 3 : isInPath ? 2.5 : 2
+    // Accent (#2563eb) for selected, ok-green (#16a34a) for path, ink-3 (#8a93a3) for default
+    ctx.strokeStyle = isSelected ? '#2563eb' : isInPath ? '#16a34a' : '#8a93a3'
+    ctx.lineWidth = isSelected ? 2.5 : isInPath ? 2.5 : 1.5
 
     ctx.beginPath()
     ctx.moveTo(from.x, from.y)
@@ -523,7 +524,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     // Draw arrow for directional connections
     if (!connection.bidirectional) {
       const angle = Math.atan2(to.y - from.y, to.x - from.x)
-      const headLength = 15
+      const headLength = 12
       const nodeRadius = 20
 
       // Calculate arrow position (at edge of target node)
@@ -551,11 +552,16 @@ export const MapEditor: React.FC<MapEditorProps> = ({
       const midX = (from.x + to.x) / 2
       const midY = (from.y + to.y) / 2
 
-      ctx.fillStyle = '#1a1a1a'
-      ctx.fillRect(midX - 15, midY - 10, 30, 20)
+      ctx.fillStyle = '#ffffff'
+      ctx.strokeStyle = '#e3e7ed'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.roundRect(midX - 14, midY - 9, 28, 18, 4)
+      ctx.fill()
+      ctx.stroke()
 
-      ctx.fillStyle = isSelected ? '#ffc107' : '#999'
-      ctx.font = '12px Arial'
+      ctx.fillStyle = isSelected ? '#2563eb' : '#566173'
+      ctx.font = '11px "IBM Plex Mono", monospace'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText(connection.weight.toString(), midX, midY)
@@ -568,25 +574,71 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     const isEnd = state.pathfinding.end === location.id
     const isInPath = state.pathfinding.path?.includes(location.id)
 
-    const radius = 20
+    const radius = 22
 
-    // Node fill
-    ctx.fillStyle = isStart ? '#007bff' : isEnd ? '#dc3545' : isSelected ? '#444' : '#333'
+    // Drop shadow for selected nodes
+    if (isSelected) {
+      ctx.save()
+      ctx.shadowColor = 'rgba(37, 99, 235, 0.25)'
+      ctx.shadowBlur = 10
+      ctx.shadowOffsetX = 0
+      ctx.shadowOffsetY = 2
+    }
+
+    // Node fill — light card background; path-start/end get status tints
+    if (isStart) {
+      ctx.fillStyle = '#e8f0fe' // accent-soft
+    } else if (isEnd) {
+      ctx.fillStyle = '#fee2e2' // danger-soft
+    } else {
+      ctx.fillStyle = '#ffffff' // color-background
+    }
     ctx.beginPath()
     ctx.arc(location.x, location.y, radius, 0, Math.PI * 2)
     ctx.fill()
 
-    // Node border
-    ctx.strokeStyle = isSelected ? '#007bff' : isInPath ? '#28a745' : '#666'
-    ctx.lineWidth = isSelected ? 3 : 2
+    if (isSelected) {
+      ctx.restore()
+    }
+
+    // Node border — accent for selected/path markers, line-strong otherwise
+    if (isStart) {
+      ctx.strokeStyle = '#2563eb' // accent
+      ctx.lineWidth = 2.5
+    } else if (isEnd) {
+      ctx.strokeStyle = '#dc2626' // danger
+      ctx.lineWidth = 2.5
+    } else if (isSelected) {
+      ctx.strokeStyle = '#2563eb' // accent
+      ctx.lineWidth = 2.5
+    } else if (isInPath) {
+      ctx.strokeStyle = '#16a34a' // ok
+      ctx.lineWidth = 2
+    } else {
+      ctx.strokeStyle = '#cdd3dc' // line-strong
+      ctx.lineWidth = 1.5
+    }
+    ctx.beginPath()
+    ctx.arc(location.x, location.y, radius, 0, Math.PI * 2)
     ctx.stroke()
 
-    // Node label
-    ctx.fillStyle = 'white'
-    ctx.font = '12px Arial'
+    // Selection ring (outer glow ring)
+    if (isSelected) {
+      ctx.strokeStyle = 'rgba(37, 99, 235, 0.22)'
+      ctx.lineWidth = 5
+      ctx.beginPath()
+      ctx.arc(location.x, location.y, radius + 4, 0, Math.PI * 2)
+      ctx.stroke()
+    }
+
+    // Node label — dark ink on light background; mono for IDs
+    ctx.fillStyle = isStart ? '#1d4ed8' : isEnd ? '#dc2626' : '#18202c'
+    ctx.font = '600 12px "IBM Plex Sans JP", -apple-system, sans-serif'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(location.name, location.x, location.y)
+    // Truncate label to fit circle
+    const maxWidth = radius * 1.6
+    ctx.fillText(location.name, location.x, location.y, maxWidth)
   }
 
   const drawMinimap = (
@@ -603,8 +655,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     canvas.width = minimapWidth
     canvas.height = minimapHeight
 
-    // Background
-    ctx.fillStyle = '#0a0a0a'
+    // Background — light surface
+    ctx.fillStyle = '#f6f7f9'
     ctx.fillRect(0, 0, minimapWidth, minimapHeight)
 
     // Calculate bounds
@@ -638,8 +690,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     const offsetX = (minimapWidth - (maxX - minX) * scale) / 2
     const offsetY = (minimapHeight - (maxY - minY) * scale) / 2
 
-    // Draw connections
-    ctx.strokeStyle = '#444'
+    // Draw connections — line-strong (#cdd3dc)
+    ctx.strokeStyle = '#cdd3dc'
     ctx.lineWidth = 1
     state.mapData.connections.forEach((conn: Connection) => {
       const from = state.mapData.locations.find((loc: Location) => loc.id === conn.from)
@@ -652,23 +704,30 @@ export const MapEditor: React.FC<MapEditorProps> = ({
       ctx.stroke()
     })
 
-    // Draw nodes
-    ctx.fillStyle = '#666'
+    // Draw nodes — white fill, ink-3 border
     state.mapData.locations.forEach((loc: Location) => {
+      const cx = (loc.x - minX) * scale + offsetX
+      const cy = (loc.y - minY) * scale + offsetY
+      ctx.fillStyle = '#ffffff'
+      ctx.strokeStyle = '#8a93a3'
+      ctx.lineWidth = 1
       ctx.beginPath()
-      ctx.arc((loc.x - minX) * scale + offsetX, (loc.y - minY) * scale + offsetY, 3, 0, Math.PI * 2)
+      ctx.arc(cx, cy, 3, 0, Math.PI * 2)
       ctx.fill()
+      ctx.stroke()
     })
 
-    // Draw viewport
-    ctx.strokeStyle = '#007bff'
-    ctx.lineWidth = 2
+    // Draw viewport — accent (#2563eb) dashed rect
+    ctx.strokeStyle = '#2563eb'
+    ctx.lineWidth = 1.5
+    ctx.setLineDash([3, 3])
     ctx.strokeRect(
       (-state.viewState.panX / state.viewState.zoom - minX) * scale + offsetX,
       (-state.viewState.panY / state.viewState.zoom - minY) * scale + offsetY,
       (mainWidth / state.viewState.zoom) * scale,
       (mainHeight / state.viewState.zoom) * scale,
     )
+    ctx.setLineDash([])
   }
 
   const getCursorStyle = (): string => {

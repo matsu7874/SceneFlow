@@ -32,21 +32,27 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
 
   return (
     <div className="simulation-controls">
-      <h2>シミュレーション制御</h2>
+      <div className="simulation-controls-header">
+        <span className="simulation-controls-eyebrow">Transport</span>
+      </div>
       <div className="controls">
         <div className="control-group">
           <button
             onClick={onPlayPause}
             disabled={disabled}
             className="play-pause-button"
+            data-playing={isPlaying ? 'true' : 'false'}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? '⏸ Pause' : '▶ Play'}
           </button>
-          <label htmlFor="speedControl">速度:</label>
+          <label htmlFor="speedControl" className="speed-label">
+            速度:
+          </label>
           <select
             id="speedControl"
             value={speed}
-            onChange={(e) => onSpeedChange(Number(e.target.value))}
+            onChange={e => onSpeedChange(Number(e.target.value))}
             disabled={disabled}
           >
             <option value="0.5">0.5x</option>
@@ -57,7 +63,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
             <option value="20">20x</option>
           </select>
         </div>
-        <div className="control-group">
+        <div className="control-group timeline-row">
           <input
             type="range"
             className="timeline"
@@ -65,12 +71,11 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
             min="0"
             max={maxTime}
             step="0.0167"
-            onChange={(e) => onTimeChange(Number(e.target.value))}
+            onChange={e => onTimeChange(Number(e.target.value))}
             disabled={disabled}
+            aria-label="再生位置"
           />
-          <span className="current-time-display">
-            {formatTime(currentTime)}
-          </span>
+          <span className="current-time-display">{formatTime(currentTime)}</span>
         </div>
       </div>
     </div>

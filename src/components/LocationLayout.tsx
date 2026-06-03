@@ -385,9 +385,11 @@ export const LocationLayout: React.FC<LocationLayoutProps> = ({
 
   return (
     <div className="location-layout">
-      <h2>
-        場所のレイアウト表示 (<span>{currentTime}</span>)
-      </h2>
+      <div className="location-layout-header">
+        <h2>
+          場所のレイアウト表示 (<span>{currentTime}</span>)
+        </h2>
+      </div>
       <canvas ref={canvasRef} width={600} height={400} className="layout-canvas" />
       <div className="layout-legend">
         <p>● キャラクターは色付きの円で表示されます</p>

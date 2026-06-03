@@ -1,292 +1,465 @@
-.container {
+/* =========================================================================
+   ValidationReporter ― 診断リスト。計器的「instrument」ライト基調。
+   サマリーバー + フィルタ + 問題リスト + クリーン状態パネル。
+   配色トークンは .reportRoot にスコープ。
+   ========================================================================= */
+
+.reportRoot {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  height: 100%;
-  overflow: hidden;
+  gap: var(--space-4);
+  color: var(--ink);
+  font-family: var(--font-sans);
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e5e7eb;
+/* ------------------------------------------------------------------ */
+/* ページ見出し                                                          */
+/* ------------------------------------------------------------------ */
+.pageHeader {
+  margin: 0 0 var(--space-1);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+  position: relative;
 }
 
-.header h3 {
+.pageHeader::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 4.5rem;
+  height: 2px;
+  background: var(--accent);
+}
+
+.pageEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+
+.pageTitle {
+  margin: 0.3rem 0 0.35rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+
+.pageHint {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  line-height: 1.6;
 }
 
-.refreshButton {
-  padding: 8px 16px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.refreshButton:hover:not(:disabled) {
-  background: #2563eb;
-}
-
-.refreshButton:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-
-.summary {
+/* ------------------------------------------------------------------ */
+/* サマリーバー（重大度ごとの件数チップ）                                   */
+/* ------------------------------------------------------------------ */
+.summaryBar {
   display: flex;
-  gap: 20px;
-  padding: 16px;
-  background: #f9fafb;
-  border-radius: 6px;
-}
-
-.summaryItem {
-  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
 }
 
-.summaryItem.error {
-  background: #fee2e2;
-  color: #b91c1c;
+.summaryChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--r-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
 
-.summaryItem.warning {
-  background: #fef3c7;
-  color: #b45309;
+.summaryChip.chipError {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 20%, transparent);
 }
 
-.summaryItem.info {
-  background: #dbeafe;
-  color: #1e40af;
+.summaryChip.chipWarn {
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 20%, transparent);
 }
 
-.icon {
-  font-size: 16px;
+.summaryChip.chipOk {
+  background: var(--ok-soft);
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 20%, transparent);
 }
 
-.filters {
+.summaryChip.chipInfo {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  border-color: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.chipCount {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.chipLabel {
+  font-size: 0.78em;
+}
+
+/* ------------------------------------------------------------------ */
+/* フィルターバー                                                        */
+/* ------------------------------------------------------------------ */
+.filterBar {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.filterLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+  margin-right: var(--space-1);
 }
 
 .filterSelect {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--color-background);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
   cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
-.filterSelect:focus {
+.filterSelect:hover {
+  border-color: var(--line-strong);
+}
+
+.filterSelect:focus-visible {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-.issuesList {
-  flex: 1;
-  overflow-y: auto;
+/* ------------------------------------------------------------------ */
+/* 問題リスト                                                            */
+/* ------------------------------------------------------------------ */
+.issueList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--color-background);
 }
 
-.noIssues {
-  text-align: center;
-  padding: 40px;
-  color: #6b7280;
-  font-size: 16px;
+/* カテゴリセクション */
+.categorySection {
+  /* sections stack inside the list */
 }
 
-.issue {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: white;
+.categorySection + .categorySection {
+  border-top: 1.5px solid var(--line-strong);
 }
 
-.issue:hover {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.issue.error {
-  border-left: 4px solid #ef4444;
-}
-
-.issue.warning {
-  border-left: 4px solid #f59e0b;
-}
-
-.issue.info {
-  border-left: 4px solid #3b82f6;
-}
-
-.issueHeader {
+/* カテゴリヘッダー帯 */
+.categoryHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface-dark);
+  border-bottom: 1px solid var(--line);
 }
 
-.issueIcon {
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.issueCategory {
-  font-size: 12px;
-  font-weight: 600;
+.categoryName {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #6b7280;
-  padding: 2px 8px;
-  background: #f3f4f6;
-  border-radius: 4px;
-  flex-shrink: 0;
+  color: var(--ink-2);
 }
 
-.issueMessage {
+.categoryCount {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+
+/* ------------------------------------------------------------------ */
+/* 個別問題行                                                            */
+/* ------------------------------------------------------------------ */
+.issueRow {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+  background: var(--color-background);
+  transition: background 0.1s;
+  min-height: 2.75rem;
+}
+
+.issueRow:last-child {
+  border-bottom: none;
+}
+
+.issueRow:hover {
+  background: var(--color-surface-hover);
+}
+
+/* 左側の重大度カラーレール（3px） */
+.issueRail {
+  flex: 0 0 3px;
+  align-self: stretch;
+}
+
+.issueRail.railError {
+  background: var(--danger);
+}
+
+.issueRail.railWarn {
+  background: var(--warn);
+}
+
+.issueRail.railInfo {
+  background: var(--accent);
+}
+
+/* 問題本体（レール右） */
+.issueBody {
   flex: 1;
-  font-size: 14px;
-  color: #1f2937;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  min-width: 0;
 }
 
-.issueDetails {
-  padding: 0 16px 16px 16px;
-  border-top: 1px solid #f3f4f6;
-  margin-top: 8px;
-  padding-top: 12px;
-  animation: slideDown 0.2s ease-out;
+/* 重大度バッジ */
+.severityBadge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  align-self: flex-start;
+  margin-top: 1px;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.severityBadge.badgeError {
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
-.detail,
-.suggestion,
-.entity {
-  margin: 8px 0;
-  font-size: 13px;
-  color: #4b5563;
+.severityBadge.badgeWarn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.severityBadge.badgeInfo {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+/* メインコンテンツ列 */
+.issueContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/* 問題メッセージ */
+.issueMessage {
+  font-size: 0.9rem;
+  color: var(--ink);
   line-height: 1.5;
 }
 
-.detail strong,
-.suggestion strong,
-.entity strong {
-  color: #1f2937;
+/* 関係エンティティ（act ref、等幅） */
+.issueActRef {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+
+.issueActId {
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  color: var(--ink-3);
+  background: var(--color-surface);
+  padding: 0 var(--space-1);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  margin-right: var(--space-1);
+}
+
+/* fact参照（エンティティIDなど等幅） */
+.issueFact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.factPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.76rem;
+  font-family: var(--font-mono);
+  color: var(--ink-2);
+  background: var(--color-surface);
+  border: 1px solid var(--line);
+  padding: 1px var(--space-2);
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+
+.factKind {
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-right: 2px;
+}
+
+/* カテゴリーピル（右端） */
+.categoryPill {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-top: 1px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+  background: var(--color-surface);
+  border: 1px solid var(--line);
+  padding: 2px var(--space-2);
+  border-radius: var(--r-pill);
+  white-space: nowrap;
 }
 
-.suggestion {
-  color: #059669;
+/* ------------------------------------------------------------------ */
+/* クリーン（問題なし）状態                                              */
+/* ------------------------------------------------------------------ */
+.cleanState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-5);
+  background: var(--ok-soft);
+  border: 1px dashed color-mix(in srgb, var(--ok) 35%, transparent);
+  border-radius: var(--r-lg);
+  text-align: center;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .container {
-    background: #1f2937;
-  }
-
-  .header h3 {
-    color: #f9fafb;
-  }
-
-  .header {
-    border-bottom-color: #374151;
-  }
-
-  .summary {
-    background: #111827;
-  }
-
-  .filterSelect {
-    background: #1f2937;
-    border-color: #374151;
-    color: #f9fafb;
-  }
-
-  .issue {
-    background: #1f2937;
-    border-color: #374151;
-  }
-
-  .issueMessage {
-    color: #f9fafb;
-  }
-
-  .issueCategory {
-    background: #374151;
-    color: #d1d5db;
-  }
-
-  .detail,
-  .entity {
-    color: #d1d5db;
-  }
-
-  .detail strong,
-  .suggestion strong,
-  .entity strong {
-    color: #f9fafb;
-  }
+.cleanIcon {
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--ok);
 }
 
-/* Responsive design */
+.cleanTitle {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ok);
+}
+
+.cleanHint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--ok) 70%, var(--ink));
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------------ */
+/* フィルター結果ゼロ状態                                                 */
+/* ------------------------------------------------------------------ */
+.emptyFilter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-5);
+  background: var(--color-surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-lg);
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.emptyFilterTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.emptyFilterHint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink-3);
+}
+
+/* ------------------------------------------------------------------ */
+/* 狭幅レスポンシブ                                                       */
+/* ------------------------------------------------------------------ */
 @media (max-width: 640px) {
-  .container {
-    padding: 16px;
+  .summaryBar {
+    gap: var(--space-1);
   }
 
-  .summary {
-    flex-direction: column;
-    gap: 8px;
+  .filterBar {
+    gap: var(--space-2);
   }
 
-  .filters {
-    flex-direction: column;
-  }
-
-  .issueHeader {
+  .issueBody {
     flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
   }
 
-  .issueCategory {
-    order: 3;
-    width: 100%;
-    margin-top: 8px;
+  .categoryPill {
+    display: none;
   }
-}
 
-.category {
-  margin-bottom: 1rem;
+  .severityBadge {
+    font-size: 0.64rem;
+  }
 }

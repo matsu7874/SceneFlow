@@ -21,9 +21,11 @@ export const LocationDisplay: React.FC<LocationDisplayProps> = ({
 
   return (
     <div className="location-display">
-      <h3>
-        登場人物の現在位置 (<span>{currentTime}</span>)
-      </h3>
+      <div className="location-display-header">
+        <h3>
+          登場人物の現在位置 (<span>{currentTime}</span>)
+        </h3>
+      </div>
       <div className="location-output">
         {locations.map(location => {
           const personsHere = getPersonsAtLocation(location.id)

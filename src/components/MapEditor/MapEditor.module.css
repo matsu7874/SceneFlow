@@ -1,12 +1,23 @@
+/* =========================================================================
+   MapEditor ― ノードベース場所エディタ。「精密な計器」ライトテーマ。
+   オーバーレイUI（ツールバー・パネル・コンテキストメニュー）を
+   グローバルデザイントークンで統一。Canvasは別途TSX内で描画。
+   ========================================================================= */
+
+/* ---------- コンテナ ---------- */
 .container {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #1a1a1a;
+  /* canvas背景は描画コードで制御 */
+  background: var(--color-surface);
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
 }
 
+/* ---------- キャンバス ---------- */
 .canvas {
   position: absolute;
   top: 0;
@@ -14,6 +25,7 @@
   width: 100%;
   height: 100%;
   cursor: grab;
+  display: block;
 }
 
 .canvas.grabbing {
@@ -28,302 +40,388 @@
   cursor: pointer;
 }
 
+/* ---------- ツールバー（計器パネル） ---------- */
 .controls {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: var(--space-3);
+  left: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-2);
   z-index: 10;
 }
 
 .controlGroup {
   display: flex;
-  gap: 5px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 8px;
-  padding: 8px;
-  backdrop-filter: blur(10px);
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: var(--space-1) var(--space-2);
+  box-shadow: var(--shadow-2);
 }
 
+/* ---------- ボタン共通 ---------- */
 .button {
-  background: #333;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--r-sm);
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.4;
   white-space: nowrap;
+  transition:
+    background 0.12s,
+    border-color 0.12s,
+    box-shadow 0.12s;
 }
 
 .button:hover {
-  background: #444;
-  transform: translateY(-1px);
+  background: var(--color-surface-hover);
+  border-color: var(--line-strong);
 }
 
 .button:active {
-  transform: translateY(0);
+  background: var(--color-surface-dark);
 }
 
+.button:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* アクティブ（選択中・保存など強調） */
 .button.active {
-  background: #007bff;
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent-strong);
 }
 
+.button.active:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+/* 破壊的操作 */
 .button.danger {
-  background: #dc3545;
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: var(--danger);
 }
 
 .button.danger:hover {
-  background: #c82333;
+  background: var(--danger);
+  color: #fff;
 }
 
+/* アイコンボタン（ズームコントロール等） */
 .iconButton {
-  width: 36px;
-  height: 36px;
+  width: 2rem;
+  height: 2rem;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 1rem;
+  border-radius: var(--r-sm);
 }
 
+/* ---------- セパレータ ---------- */
 .separator {
   width: 1px;
-  background: #555;
-  margin: 0 5px;
+  align-self: stretch;
+  background: var(--line);
+  margin: 0 var(--space-1);
 }
 
+/* ---------- ズームコントロール ---------- */
 .zoomControls {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: var(--space-3);
+  right: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 8px;
-  padding: 8px;
-  backdrop-filter: blur(10px);
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: var(--space-2);
+  box-shadow: var(--shadow-2);
   z-index: 10;
 }
 
 .zoomLevel {
-  color: white;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
   text-align: center;
-  margin: 5px 0;
+  padding: var(--space-1) 0;
+  letter-spacing: 0.02em;
 }
 
+/* ---------- ミニマップ ---------- */
 .minimap {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
+  bottom: var(--space-3);
+  left: var(--space-3);
   width: 200px;
   height: 150px;
-  background: rgba(0, 0, 0, 0.8);
-  border: 2px solid #333;
-  border-radius: 8px;
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
   overflow: hidden;
   z-index: 10;
+  box-shadow: var(--shadow-2);
 }
 
 .minimapCanvas {
   width: 100%;
   height: 100%;
+  display: block;
 }
 
+/* ---------- ノードエディタ（ダイアログ） ---------- */
 .nodeEditor {
   position: absolute;
-  background: rgba(0, 0, 0, 0.9);
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 16px;
-  color: white;
+  background: var(--color-background);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  padding: var(--space-4);
+  color: var(--ink);
   z-index: 20;
-  min-width: 250px;
-  backdrop-filter: blur(10px);
+  min-width: 260px;
+  box-shadow: var(--shadow-pop);
 }
 
 .nodeEditor h3 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  color: #007bff;
+  margin: 0 0 var(--space-3) 0;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
+/* ---------- 接続エディタ（ダイアログ） ---------- */
+.connectionEditor {
+  position: absolute;
+  background: var(--color-background);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  padding: var(--space-4);
+  color: var(--ink);
+  z-index: 20;
+  min-width: 220px;
+  box-shadow: var(--shadow-pop);
+}
+
+.connectionEditor h3 {
+  margin: 0 0 var(--space-3) 0;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--warn);
+}
+
+/* ---------- フォームグループ ---------- */
 .formGroup {
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .formGroup label {
   display: block;
-  margin-bottom: 4px;
-  font-size: 12px;
-  color: #aaa;
+  margin-bottom: var(--space-1);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
 }
 
 .formGroup input,
 .formGroup textarea {
   width: 100%;
-  background: #222;
-  border: 1px solid #444;
-  border-radius: 4px;
-  padding: 8px;
-  color: white;
-  font-size: 14px;
+  padding: 0.45rem 0.6rem;
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .formGroup input:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.formGroup input:focus-visible,
+.formGroup textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .formGroup textarea {
-  min-height: 60px;
+  min-height: 64px;
   resize: vertical;
+  font-family: var(--font-sans);
 }
 
-.formActions {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
-  justify-content: flex-end;
-}
-
-.connectionEditor {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.9);
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 16px;
-  color: white;
-  z-index: 20;
-  min-width: 200px;
-  backdrop-filter: blur(10px);
-}
-
-.connectionEditor h3 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  color: #ffc107;
-}
-
+/* ---------- チェックボックス ---------- */
 .checkbox {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
-.checkbox input[type="checkbox"] {
-  width: auto;
+.checkbox input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
   margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
+.checkbox input[type='checkbox']:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 2px;
+}
+
+.checkbox label {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* ---------- フォームアクション ---------- */
+.formActions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  justify-content: flex-end;
+}
+
+/* ---------- 統計パネル ---------- */
 .stats {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 8px;
-  padding: 12px;
-  color: white;
-  font-size: 12px;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: var(--space-2) var(--space-3);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
   z-index: 10;
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-1);
+  line-height: 1.8;
 }
 
 .stats div {
-  margin-bottom: 4px;
+  color: var(--ink-2);
 }
 
-.stats div:last-child {
-  margin-bottom: 0;
-}
-
-.tooltip {
+/* ---------- パス情報 ---------- */
+.pathInfo {
   position: absolute;
-  background: rgba(0, 0, 0, 0.9);
-  border: 1px solid #333;
-  border-radius: 4px;
-  padding: 8px 12px;
-  color: white;
-  font-size: 12px;
-  pointer-events: none;
-  z-index: 30;
-  white-space: nowrap;
+  bottom: 180px;
+  left: var(--space-3);
+  background: var(--color-background);
+  border: 1px solid var(--ok);
+  border-left: 3px solid var(--ok);
+  border-radius: var(--r);
+  padding: var(--space-2) var(--space-3);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  z-index: 10;
+  box-shadow: var(--shadow-1);
 }
 
+.pathInfo h4 {
+  margin: 0 0 var(--space-1) 0;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ok);
+}
+
+.pathInfo div {
+  margin-bottom: var(--space-1);
+  color: var(--ink-2);
+}
+
+/* ---------- コンテキストメニュー ---------- */
 .contextMenu {
   position: absolute;
-  background: rgba(0, 0, 0, 0.9);
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 4px;
+  background: var(--color-background);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  padding: var(--space-1);
   z-index: 25;
-  min-width: 150px;
-  backdrop-filter: blur(10px);
+  min-width: 160px;
+  box-shadow: var(--shadow-pop);
 }
 
 .contextMenuItem {
-  padding: 8px 16px;
-  color: white;
+  padding: var(--space-2) var(--space-3);
+  color: var(--ink);
   cursor: pointer;
-  font-size: 14px;
-  border-radius: 4px;
-  transition: background 0.2s;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  border-radius: var(--r-sm);
+  transition: background 0.1s;
 }
 
 .contextMenuItem:hover {
-  background: #333;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.contextMenuItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
 }
 
 .contextMenuSeparator {
   height: 1px;
-  background: #444;
-  margin: 4px 8px;
+  background: var(--line);
+  margin: var(--space-1) var(--space-2);
 }
 
-.pathInfo {
-  position: absolute;
-  bottom: 180px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 8px;
-  padding: 12px;
-  color: white;
-  font-size: 12px;
-  z-index: 10;
-  backdrop-filter: blur(10px);
-}
-
-.pathInfo h4 {
-  margin: 0 0 8px 0;
-  color: #28a745;
-  font-size: 14px;
-}
-
-.pathInfo div {
-  margin-bottom: 4px;
-}
-
-.helpText {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 20px;
-  padding: 8px 16px;
-  color: #aaa;
-  font-size: 12px;
-  z-index: 5;
-  backdrop-filter: blur(10px);
-}
-
+/* ---------- レイアウトメニュー ---------- */
 .layoutMenu {
   position: relative;
   display: inline-block;
@@ -331,29 +429,66 @@
 
 .layoutDropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px);
   left: 0;
-  margin-top: 4px;
-  background: rgba(0, 0, 0, 0.9);
-  border: 1px solid #333;
-  border-radius: 4px;
+  background: var(--color-background);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
   overflow: hidden;
   z-index: 100;
-  min-width: 120px;
+  min-width: 130px;
+  box-shadow: var(--shadow-pop);
 }
 
 .layoutOption {
-  padding: 8px 16px;
-  color: white;
+  padding: var(--space-2) var(--space-3);
+  color: var(--ink);
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  transition: background 0.1s;
 }
 
 .layoutOption:hover {
-  background: #333;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 .layoutOption.active {
-  background: #007bff;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---------- ツールチップ ---------- */
+.tooltip {
+  position: absolute;
+  background: var(--ink);
+  border-radius: var(--r-sm);
+  padding: var(--space-1) var(--space-2);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  pointer-events: none;
+  z-index: 30;
+  white-space: nowrap;
+  box-shadow: var(--shadow-2);
+}
+
+/* ---------- ヘルプテキスト ---------- */
+.helpText {
+  position: absolute;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: var(--space-1) var(--space-3);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  z-index: 5;
+  box-shadow: var(--shadow-1);
+  pointer-events: none;
 }

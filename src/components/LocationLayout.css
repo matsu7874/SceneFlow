@@ -1,34 +1,70 @@
+/* =========================================================================
+   LocationLayout ― 動線 Canvas カード。背景面とトークンに揃える。
+   ========================================================================= */
+
 .location-layout {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-4);
+}
+
+/* ---------- セクション見出し ---------- */
+.location-layout-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .location-layout h2 {
-  margin-bottom: 15px;
-  font-size: 1.2em;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
 }
 
 .location-layout h2 span {
-  color: #007bff;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+  text-transform: none;
 }
 
+/* ---------- Canvas ---------- */
 .layout-canvas {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background: white;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--color-background);
   width: 100%;
   max-width: 600px;
   height: auto;
+  box-shadow: var(--shadow-1);
 }
 
+/* ---------- 凡例 ---------- */
 .layout-legend {
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 5px;
-  font-size: 0.9em;
-  color: #666;
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  max-width: 600px;
 }
 
 .layout-legend p {
-  margin: 5px 0;
+  margin: 0;
+  padding: var(--space-1) 0;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+.layout-legend p + p {
+  border-top: 1px solid var(--line);
 }

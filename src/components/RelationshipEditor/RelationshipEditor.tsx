@@ -121,14 +121,16 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
       .text(d => d.name)
       .style('font-size', '12px')
 
-    // Add icons to nodes
+    // Add type indicator to nodes
     nodes
       .append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', 5)
-      .style('font-size', '14px')
+      .style('font-size', '11px')
       .style('fill', 'white')
-      .text(d => (d.type === 'person' ? '👤' : '📍'))
+      .style('font-family', 'var(--font-sans)')
+      .style('font-weight', '600')
+      .text(d => (d.type === 'person' ? 'P' : 'L'))
   }, [
     graphData,
     hoveredNode,
@@ -186,20 +188,21 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
     <div className={`${styles.container} ${className || ''}`}>
       {/* Header */}
       <div className={styles.header}>
-        <h2 className={styles.title}>
-          {mode === 'relationships' ? 'Relationship Graph' : 'Connection Map'}
-        </h2>
+        <h2 className={styles.title}>{mode === 'relationships' ? '関係グラフ' : '接続マップ'}</h2>
 
         <div className={styles.controls}>
           {/* Search */}
           <div className={styles.searchWrapper}>
-            <span className={styles.searchIcon}>🔍</span>
+            <span className={styles.searchIcon} aria-hidden="true">
+              ⌕
+            </span>
             <input
               type="text"
               className={styles.searchInput}
-              placeholder="Search..."
+              placeholder="検索..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
+              aria-label="グラフを検索"
             />
           </div>
 
@@ -208,17 +211,18 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
             <button
               className={styles.filterButton}
               onClick={() => setShowFilterMenu(!showFilterMenu)}
+              aria-label="フィルター"
+              aria-expanded={showFilterMenu}
             >
-              <span>🔽</span>
-              Filter
-              {hasActiveFilters && <span className={styles.filterBadge}>•</span>}
+              フィルター
+              {hasActiveFilters && <span className={styles.filterBadge} aria-hidden="true" />}
             </button>
 
             {showFilterMenu && (
-              <div className={styles.filterMenu}>
+              <div className={styles.filterMenu} role="menu">
                 <div className={styles.filterSection}>
                   <div className={styles.filterSectionTitle}>
-                    By {mode === 'relationships' ? 'Person' : 'Location'}
+                    {mode === 'relationships' ? '人物' : '場所'}で絞込
                   </div>
                   {availableFilters.entityOptions.map(entity => (
                     <div
@@ -227,6 +231,8 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                         filterOptions.entityId === entity.id ? styles.active : ''
                       }`}
                       onClick={() => handleFilterSelect('entity', entity.id)}
+                      role="menuitemcheckbox"
+                      aria-checked={filterOptions.entityId === entity.id}
                     >
                       {entity.name}
                     </div>
@@ -237,7 +243,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                   <>
                     <div className={styles.filterMenuDivider} />
                     <div className={styles.filterSection}>
-                      <div className={styles.filterSectionTitle}>By Type</div>
+                      <div className={styles.filterSectionTitle}>タイプで絞込</div>
                       {availableFilters.typeOptions.map(type => (
                         <div
                           key={type}
@@ -245,6 +251,8 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                             filterOptions.relationshipType === type ? styles.active : ''
                           }`}
                           onClick={() => handleFilterSelect('type', type)}
+                          role="menuitemcheckbox"
+                          aria-checked={filterOptions.relationshipType === type}
                         >
                           {type}
                         </div>
@@ -256,8 +264,8 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                 {hasActiveFilters && (
                   <>
                     <div className={styles.filterMenuDivider} />
-                    <div className={styles.filterOption} onClick={clearFilters}>
-                      Clear Filters
+                    <div className={styles.filterOption} onClick={clearFilters} role="menuitem">
+                      フィルターをクリア
                     </div>
                   </>
                 )}
@@ -266,20 +274,20 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
           </div>
 
           {/* Mode Toggle */}
-          <div className={styles.modeToggle}>
+          <div className={styles.modeToggle} role="group" aria-label="表示モード">
             <button
               className={`${styles.modeButton} ${mode === 'relationships' ? styles.active : ''}`}
               onClick={() => setMode('relationships')}
+              aria-pressed={mode === 'relationships'}
             >
-              <span>👥</span>
-              Relationships
+              関係
             </button>
             <button
               className={`${styles.modeButton} ${mode === 'connections' ? styles.active : ''}`}
               onClick={() => setMode('connections')}
+              aria-pressed={mode === 'connections'}
             >
-              <span>📍</span>
-              Connections
+              接続
             </button>
           </div>
         </div>
@@ -289,16 +297,16 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
       <div className={styles.graphContainer}>
         {graphData.nodes.length === 0 ? (
           <div className={styles.empty}>
-            <div className={styles.emptyIcon}>
-              <span style={{ fontSize: '48px' }}>{mode === 'relationships' ? '👥' : '📍'}</span>
+            <div className={styles.emptyIcon} aria-hidden="true">
+              {mode === 'relationships' ? '◎' : '◇'}
             </div>
             <p className={styles.emptyText}>
-              No {mode === 'relationships' ? 'relationships' : 'connections'} to display
+              {mode === 'relationships' ? '関係性がありません' : '接続がありません'}
             </p>
             <p className={styles.emptyHint}>
               {mode === 'relationships'
-                ? 'Create relationships between persons to see them here'
-                : 'Create connections between locations to see them here'}
+                ? '人物同士の関係性を追加するとここに表示されます'
+                : '場所同士の接続を追加するとここに表示されます'}
             </p>
           </div>
         ) : (
@@ -317,31 +325,29 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
           className={styles.contextMenu}
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={e => e.stopPropagation()}
+          role="menu"
         >
           {contextMenu.type === 'node' ? (
             <>
-              <div className={styles.contextMenuItem}>
-                <span>🔗</span>
-                View All Connections
+              <div className={styles.contextMenuItem} role="menuitem">
+                すべての接続を表示
               </div>
-              <div className={styles.contextMenuItem}>
-                <span>✏️</span>
-                Edit {(contextMenu.item as GraphNode).type === 'person' ? 'Person' : 'Location'}
+              <div className={styles.contextMenuItem} role="menuitem">
+                {(contextMenu.item as GraphNode).type === 'person' ? '人物' : '場所'}を編集
               </div>
             </>
           ) : (
             <>
-              <div className={styles.contextMenuItem}>
-                <span>✏️</span>
-                Edit {mode === 'relationships' ? 'Relationship' : 'Connection'}
+              <div className={styles.contextMenuItem} role="menuitem">
+                {mode === 'relationships' ? '関係性' : '接続'}を編集
               </div>
               <div className={styles.contextMenuDivider} />
               <div
                 className={`${styles.contextMenuItem} ${styles.danger}`}
                 onClick={() => handleDelete((contextMenu.item as GraphLink).id)}
+                role="menuitem"
               >
-                <span>🗑️</span>
-                Delete
+                削除
               </div>
             </>
           )}
@@ -353,54 +359,50 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
         <div className={`${styles.detailsPanel} ${styles.open}`}>
           <div className={styles.detailsHeader}>
             <h3 className={styles.detailsTitle}>
-              {mode === 'relationships' ? 'Relationship Details' : 'Connection Details'}
+              {mode === 'relationships' ? '関係性の詳細' : '接続の詳細'}
             </h3>
-            <button className={styles.closeButton} onClick={() => setSelectedItem(null)}>
-              <span style={{ fontSize: '20px' }}>✕</span>
+            <button
+              className={styles.closeButton}
+              onClick={() => setSelectedItem(null)}
+              aria-label="詳細パネルを閉じる"
+            >
+              ✕
             </button>
           </div>
 
           <div className={styles.detailsContent}>
             <div className={styles.detailsSection}>
-              <div className={styles.detailsSectionTitle}>Information</div>
+              <div className={styles.detailsSectionTitle}>情報</div>
 
               <div className={styles.detailsField}>
-                <div className={styles.detailsLabel}>Type</div>
-                <div className={styles.detailsValue}>{selectedItem.type}</div>
+                <div className={styles.detailsLabel}>タイプ</div>
+                <div className={styles.detailsValue}>
+                  <span className={styles.typePill}>{selectedItem.type}</span>
+                </div>
               </div>
 
               {mode === 'relationships' && 'person1Id' in selectedItem && (
-                <>
-                  <div className={styles.detailsField}>
-                    <div className={styles.detailsLabel}>Between</div>
-                    <div className={styles.detailsValue}>
-                      {graphData.nodes.find(n => n.id === selectedItem.person1Id)?.name ||
-                        'Unknown'}{' '}
-                      &{' '}
-                      {graphData.nodes.find(n => n.id === selectedItem.person2Id)?.name ||
-                        'Unknown'}
-                    </div>
+                <div className={styles.detailsField}>
+                  <div className={styles.detailsLabel}>対象</div>
+                  <div className={styles.detailsValue}>
+                    {graphData.nodes.find(n => n.id === selectedItem.person1Id)?.name || '不明'} &{' '}
+                    {graphData.nodes.find(n => n.id === selectedItem.person2Id)?.name || '不明'}
                   </div>
-                </>
+                </div>
               )}
 
               {mode === 'connections' && 'location1Id' in selectedItem && (
-                <>
-                  <div className={styles.detailsField}>
-                    <div className={styles.detailsLabel}>Between</div>
-                    <div className={styles.detailsValue}>
-                      {graphData.nodes.find(n => n.id === selectedItem.location1Id)?.name ||
-                        'Unknown'}{' '}
-                      &{' '}
-                      {graphData.nodes.find(n => n.id === selectedItem.location2Id)?.name ||
-                        'Unknown'}
-                    </div>
+                <div className={styles.detailsField}>
+                  <div className={styles.detailsLabel}>対象</div>
+                  <div className={styles.detailsValue}>
+                    {graphData.nodes.find(n => n.id === selectedItem.location1Id)?.name || '不明'} &{' '}
+                    {graphData.nodes.find(n => n.id === selectedItem.location2Id)?.name || '不明'}
                   </div>
-                </>
+                </div>
               )}
 
               <div className={styles.detailsField}>
-                <div className={styles.detailsLabel}>Strength</div>
+                <div className={styles.detailsLabel}>強度</div>
                 <input
                   type="range"
                   className={styles.strengthSlider}
@@ -409,6 +411,7 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
                   step="0.1"
                   value={selectedItem.strength || 0.5}
                   onChange={e => handleUpdateStrength(selectedItem.id, parseFloat(e.target.value))}
+                  aria-label="関係強度"
                 />
                 <div className={styles.detailsValue}>
                   {((selectedItem.strength || 0.5) * 100).toFixed(0)}%
@@ -417,23 +420,20 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
 
               {selectedItem.description && (
                 <div className={styles.detailsField}>
-                  <div className={styles.detailsLabel}>Description</div>
+                  <div className={styles.detailsLabel}>説明</div>
                   <div className={styles.detailsValue}>{selectedItem.description}</div>
                 </div>
               )}
             </div>
 
             <div className={styles.actionButtons}>
-              <button className={styles.actionButton}>
-                <span>✏️</span>
-                Edit
-              </button>
+              <button className={styles.actionButton}>編集</button>
               <button
                 className={`${styles.actionButton} ${styles.danger}`}
                 onClick={() => handleDelete(selectedItem.id)}
+                aria-label="削除"
               >
-                <span>🗑️</span>
-                Delete
+                削除
               </button>
             </div>
           </div>

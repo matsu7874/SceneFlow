@@ -1,54 +1,103 @@
+/* =========================================================================
+   LocationDisplay ― 「登場人物の現在位置」パネル。
+   場所ラベル + 人物チップ（人物カラー）の清潔なグリッド。
+   ========================================================================= */
+
 .location-display {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-4);
+}
+
+/* ---------- セクション見出し ---------- */
+.location-display-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .location-display h3 {
-  margin-bottom: 10px;
-  font-size: 1.1em;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
 }
 
 .location-display h3 span {
-  color: #007bff;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+  text-transform: none;
 }
 
+/* ---------- パネル本体 ---------- */
 .location-output {
-  background: white;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  min-height: 100px;
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  min-height: 6rem;
+  padding: var(--space-1) 0;
 }
 
+/* ---------- 場所行 ---------- */
 .location-group {
-  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--line);
 }
 
 .location-group:last-child {
-  margin-bottom: 0;
+  border-bottom: none;
 }
 
+/* 場所名ラベル */
 .location-group strong {
-  display: inline-block;
-  margin-right: 10px;
+  flex: 0 0 auto;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  white-space: nowrap;
+  min-width: 7rem;
 }
 
+/* ---------- 人物チップリスト ---------- */
 .persons-list {
-  display: inline-flex;
-  gap: 8px;
+  display: flex;
   flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
 }
 
+/* 人物チップ（background-color は data から注入） */
 .person-tag {
-  font-weight: bold;
-  padding: 4px 10px;
-  border-radius: 4px;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--r-pill);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  /* 薄い内側 shadow で色の視認性を補助 */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  line-height: 1.5;
 }
 
+/* ---------- 空状態 ---------- */
 .empty-message {
-  color: #6c757d;
+  padding: var(--space-5) var(--space-4);
   text-align: center;
-  padding: 20px;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: var(--ink-3);
 }

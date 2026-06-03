@@ -92,7 +92,10 @@ export const MapEditorPage: React.FC = () => {
 
   return (
     <div className="page map-editor-page">
-      <h2>マップエディタ</h2>
+      <header className="map-editor-page-header">
+        <p className="map-editor-eyebrow">MAP EDITOR</p>
+        <h2 className="map-editor-title">マップエディタ</h2>
+      </header>
       <div className="page-content">
         {storyData ? (
           <>

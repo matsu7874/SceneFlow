@@ -35,9 +35,11 @@ export const EventLog: React.FC<EventLogProps> = ({ logEntries, persons, current
 
   return (
     <div className="event-log">
-      <h3>
-        実行ログ (<span>{currentTime}</span>まで)
-      </h3>
+      <div className="event-log-header">
+        <h3>
+          実行ログ (<span>{currentTime}</span>まで)
+        </h3>
+      </div>
       <div className="log-output" ref={logRef}>
         {logEntries.length === 0 ? (
           <div className="empty-message">ログはありません</div>
@@ -45,10 +47,12 @@ export const EventLog: React.FC<EventLogProps> = ({ logEntries, persons, current
           logEntries.map((entry, index) => (
             <div key={index} className="log-entry">
               <span className="log-time">[{entry.time}]</span>
-              <strong className="log-person" style={{ color: getPersonColor(entry.personId) }}>
-                {getPersonName(entry.personId)}
-              </strong>
-              <span className="log-text">{entry.text}</span>
+              <div className="log-entry-body">
+                <strong className="log-person" style={{ color: getPersonColor(entry.personId) }}>
+                  {getPersonName(entry.personId)}
+                </strong>
+                <span className="log-text">{entry.text}</span>
+              </div>
             </div>
           ))
         )}

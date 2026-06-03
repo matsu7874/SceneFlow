@@ -1,84 +1,140 @@
+/* =========================================================================
+   CharacterRelationshipDiagram ― キャラクター相関図（Canvas）
+   計器的なライト基調。人物色（person.color）をノードに反映。
+   ========================================================================= */
+
 .container {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-3);
+  background: var(--app-bg);
+  font-family: var(--font-sans);
 }
 
+/* ---------- ヘッダー帯 ---------- */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 8px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
 }
 
 .header h3 {
   margin: 0;
-  font-size: 18px;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--ink);
+  letter-spacing: 0.01em;
 }
 
 .hint {
   margin: 0;
-  font-size: 12px;
-  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  color: var(--ink-3);
 }
 
+/* ---------- Canvas ---------- */
 .canvas {
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  flex: 1;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
   background: var(--color-background);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-1);
+  cursor: default;
+  /* Canvas内部サイズは属性で固定するが、表示は親に合わせる */
+  max-width: 100%;
 }
 
+/* ---------- 選択中ノードの詳細パネル ---------- */
 .selectedInfo {
   position: absolute;
-  top: 80px;
-  right: 20px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 16px;
+  top: var(--space-5);
+  right: var(--space-4);
+  background: var(--color-background);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  padding: var(--space-4);
   min-width: 200px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-2);
   z-index: 100;
 }
 
+/* overline + タイトル */
 .selectedInfo h4 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
+  margin: 0 0 var(--space-3) 0;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--ink);
 }
 
 .colorSection {
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
 }
 
 .relationships h5 {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2) 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
 
 .relationship {
-  padding: 4px 0;
-  font-size: 14px;
-  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  font-size: 0.85rem;
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .canvas {
-    background: #1a1a1a;
-  }
-  
-  .selectedInfo {
-    background: #2a2a2a;
-  }
+.relationship:last-child {
+  border-bottom: none;
+}
+
+/* 関係タイプを pill で表示 */
+.relType {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ---------- 空状態 ---------- */
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-lg);
+  background: var(--color-background);
+  text-align: center;
+  color: var(--ink-3);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.9rem;
 }
