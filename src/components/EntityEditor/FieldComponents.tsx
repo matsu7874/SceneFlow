@@ -60,7 +60,7 @@ export const NumberField: React.FC<FieldProps & { min?: number; max?: number; st
         step={step}
         required={required}
         disabled={disabled}
-        className={error ? styles.error : ''}
+        className={[styles.numberInput, error ? styles.error : ''].filter(Boolean).join(' ')}
       />
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
@@ -267,13 +267,6 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
   )
 }
 
-// Field Group Component for organizing fields
-interface FieldGroupProps {
-  title: string
-  children: React.ReactNode
-  defaultExpanded?: boolean
-}
-
 // Color Field Component
 export const ColorField: React.FC<FieldProps> = ({ name, value, onChange, error, disabled }) => {
   return (
@@ -304,10 +297,15 @@ export const FieldGroup: React.FC<FieldGroupProps> = ({
 
   return (
     <div className={styles.fieldGroup}>
-      <div className={styles.fieldGroupHeader} onClick={() => setExpanded(!expanded)}>
+      <button
+        type="button"
+        className={styles.fieldGroupHeader}
+        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+      >
         <span className={styles.collapseIcon}>{expanded ? '▼' : '▶'}</span>
         <h3>{title}</h3>
-      </div>
+      </button>
       {expanded && <div className={styles.fieldGroupContent}>{children}</div>}
     </div>
   )

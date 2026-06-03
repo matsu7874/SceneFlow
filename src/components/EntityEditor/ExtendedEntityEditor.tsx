@@ -49,6 +49,7 @@ const entitySchemas: Record<EntityType, any> = {
   location: {
     fields: {
       name: { type: 'string', label: '名前', validation: { required: true, minLength: 1 } },
+      color: { type: 'color', label: '色' },
       description: { type: 'string', label: '説明' },
       type: {
         type: 'select',
@@ -79,7 +80,7 @@ const entitySchemas: Record<EntityType, any> = {
       },
     },
     groups: {
-      基本情報: ['name', 'description', 'type', 'capacity'],
+      基本情報: ['name', 'color', 'description', 'type', 'capacity'],
       接続: ['connectedTo'],
       プロパティ: ['properties'],
     },

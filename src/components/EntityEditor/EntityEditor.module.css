@@ -1,158 +1,331 @@
-.entityEditor {
-  background: var(--color-surface);
-  border-radius: 8px;
-  padding: 24px;
-  max-width: 800px;
-  margin: 0 auto;
-  position: relative;
+/* =========================================================================
+   EntityEditor ― エンティティ編集フォーム（右ペイン）。
+   「精密な計器」デザインシステム準拠。ライト固定。トークンのみ使用。
+   ========================================================================= */
+
+/* ---------- Extended Editor shell (outermost div rendered by ExtendedEntityEditor) ---------- */
+.extendedEditor {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-sans);
+  background: var(--color-background);
 }
 
+/* ---------- Editor header: entity name + 削除 button ---------- */
+.editorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--color-surface-dark);
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.editorHeader h3 {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.deleteButton {
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-4);
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: var(--r);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.05s;
+}
+
+.deleteButton:hover {
+  background: var(--color-error-dark);
+}
+
+.deleteButton:active {
+  transform: translateY(1px);
+}
+
+.deleteButton:focus-visible {
+  outline: 3px solid var(--danger-soft);
+  outline-offset: 2px;
+}
+
+/* ---------- EntityEditor root (inner, rendered by EntityEditor) ---------- */
+.entityEditor {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+  background: var(--color-background);
+}
+
+/* The .header inside EntityEditor (sub-heading "XXXの編集") */
 .header {
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
 }
 
 .header h2 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 500;
-  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
 }
 
+/* ---------- Form layout ---------- */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-4);
 }
 
+/* Field row: label on the left, field on the right */
 .fieldRow {
   display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 16px;
+  grid-template-columns: 11rem 1fr;
+  gap: var(--space-3) var(--space-4);
   align-items: flex-start;
-  position: relative;
 }
 
+/* Label: overline style */
 .fieldLabel {
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  padding-top: 8px;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding-top: 9px; /* aligns baseline with input text */
+  line-height: 1.3;
 }
 
 .required {
-  color: var(--color-error);
-  margin-left: 4px;
+  color: var(--danger);
+  margin-left: 3px;
 }
 
+/* ---------- Field wrapper (shared across StringField, NumberField, etc.) ---------- */
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
+/* All base inputs, selects, textareas in this editor */
 .field input,
 .field select,
 .field textarea {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  padding: 7px var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   background: var(--color-background);
-  color: var(--color-text-primary);
-  font-size: 14px;
-  transition: border-color 0.2s;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  box-sizing: border-box;
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--ink-3);
 }
 
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .field input.error,
 .field select.error,
 .field textarea.error {
-  border-color: var(--color-error);
+  border-color: var(--danger);
 }
 
 .field input:disabled,
 .field select:disabled,
 .field textarea:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
+  background: var(--color-surface);
 }
 
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
+/* ---------- Number inputs: monospace ---------- */
+.numberInput {
+  font-family: var(--font-mono) !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
 }
 
-.checkboxLabel input[type="checkbox"] {
-  width: auto;
-  margin: 0;
-}
-
+/* ---------- Error message ---------- */
 .errorMessage {
-  font-size: 12px;
-  color: var(--color-error);
-  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--danger);
+  margin-top: var(--space-1);
+  line-height: 1.4;
 }
 
-/* Field Group Styles */
-.fieldGroup {
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-}
-
-.fieldGroupHeader {
-  padding: 12px 16px;
-  background: var(--color-background);
-  cursor: pointer;
-  display: flex;
+/* ---------- Boolean / Toggle ---------- */
+.checkboxLabel {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
+  cursor: pointer;
+  padding: 6px 0;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--ink);
   user-select: none;
 }
 
+.checkboxLabel input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--color-background);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition:
+    border-color 0.14s,
+    background 0.14s;
+}
+
+.checkboxLabel input[type='checkbox']:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.checkboxLabel input[type='checkbox']:checked::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.checkboxLabel input[type='checkbox']:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.checkboxLabel input[type='checkbox']:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Field Group (collapsible sections) ---------- */
+.fieldGroup {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.fieldGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface-dark);
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-sans);
+  transition: background 0.12s;
+}
+
 .fieldGroupHeader:hover {
-  background: var(--color-surface-hover);
+  background: var(--color-border-hover, var(--line-strong));
+}
+
+.fieldGroupHeader:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--accent);
 }
 
 .fieldGroupHeader h3 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--color-text-primary);
-}
-
-.fieldGroupContent {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
 }
 
 .collapseIcon {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  transition: transform 0.2s;
+  font-size: 0.65rem;
+  color: var(--ink-3);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
-/* Array Field Styles */
+.fieldGroupContent {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--color-background);
+}
+
+/* ---------- Array Field ---------- */
 .arrayField {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .arrayItems {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .arrayItem {
@@ -161,99 +334,176 @@
 
 .arrayItemContent {
   display: flex;
-  gap: 8px;
-  align-items: flex-start;
+  gap: var(--space-2);
+  align-items: center;
 }
 
 .arrayItemContent input,
 .arrayItemContent select {
   flex: 1;
+  padding: 6px var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--color-background);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  box-sizing: border-box;
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s;
+}
+
+.arrayItemContent input:focus,
+.arrayItemContent select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.arrayItemContent input:focus-visible,
+.arrayItemContent select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .referenceSelect {
   flex: 1;
 }
 
+/* Object nested inside an array item */
 .objectInArray {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
 }
 
 .inlineField {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-3);
 }
 
 .inlineField label {
-  min-width: 80px;
-  font-size: 12px;
-  color: var(--color-text-secondary);
+  min-width: 5.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  flex-shrink: 0;
 }
 
 .inlineField input,
 .inlineField select {
   flex: 1;
-  padding: 4px 8px;
-  font-size: 13px;
+  padding: 5px var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--color-background);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  box-sizing: border-box;
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s;
 }
 
+.inlineField input:focus,
+.inlineField select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Array "add" button */
 .addButton {
-  padding: 8px 16px;
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: 4px;
+  align-self: flex-start;
+  padding: 6px var(--space-4);
+  background: var(--color-background);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--r);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
+  transition:
+    background 0.14s,
+    color 0.14s;
 }
 
 .addButton:hover:not(:disabled) {
-  background: var(--color-primary-dark);
+  background: var(--accent-soft);
+}
+
+.addButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .addButton:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
+/* Remove button (×) for array items */
 .removeButton {
-  padding: 4px 8px;
-  background: var(--color-error);
-  color: white;
-  border: none;
-  border-radius: 4px;
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  color: var(--ink-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-size: 0.95rem;
+  line-height: 1;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
 }
 
 .removeButton:hover:not(:disabled) {
-  background: var(--color-error-dark);
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: var(--danger);
 }
 
-/* Object Field Styles */
+.removeButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--danger-soft);
+}
+
+/* ---------- Object Field (collapsible nested object) ---------- */
 .objectField {
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   overflow: hidden;
 }
 
 .objectHeader {
-  padding: 8px 12px;
-  background: var(--color-background);
-  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
+  padding: 6px var(--space-3);
+  background: var(--color-surface);
+  cursor: pointer;
   user-select: none;
+  transition: background 0.12s;
 }
 
 .objectHeader:hover {
@@ -261,63 +511,110 @@
 }
 
 .objectContent {
-  padding: 12px;
+  padding: var(--space-3);
   background: var(--color-background);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
-/* Action Buttons */
+/* ---------- Color Field inline swatch + hex input ---------- */
+.colorField {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.colorSwatch {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-strong);
+  cursor: pointer;
+  transition: border-color 0.14s;
+  overflow: hidden;
+  padding: 0;
+}
+
+.colorSwatch:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ---------- Action bar (保存 / キャンセル) ---------- */
 .actions {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   justify-content: flex-end;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--color-border);
-}
-
-.saveButton,
-.cancelButton {
-  padding: 10px 24px;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
 }
 
 .saveButton {
-  background: var(--color-primary);
-  color: white;
+  padding: var(--space-2) var(--space-5);
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent-strong);
+  border-radius: var(--r);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.14s,
+    transform 0.05s;
 }
 
 .saveButton:hover {
-  background: var(--color-primary-dark);
+  background: var(--accent-strong);
+}
+
+.saveButton:active {
+  transform: translateY(1px);
+}
+
+.saveButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .cancelButton {
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-background);
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.14s,
+    color 0.14s;
 }
 
 .cancelButton:hover {
   background: var(--color-surface-hover);
-  color: var(--color-text-primary);
+  color: var(--ink);
 }
 
-/* Responsive Design */
+.cancelButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ---------- Responsive ---------- */
 @media (max-width: 768px) {
   .entityEditor {
-    padding: 16px;
+    padding: var(--space-4);
   }
 
   .fieldRow {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: var(--space-1);
   }
 
   .fieldLabel {
@@ -331,65 +628,6 @@
   .saveButton,
   .cancelButton {
     width: 100%;
+    text-align: center;
   }
-}
-
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .field input,
-  .field select,
-  .field textarea {
-    background: var(--color-surface);
-  }
-
-  .fieldGroupHeader,
-  .objectHeader {
-    background: var(--color-surface);
-  }
-
-  .objectContent {
-    background: var(--color-surface-dark);
-  }
-}
-
-/* Extended Editor Styles */
-.extendedEditor {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.editorHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.editorHeader h3 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.deleteButton {
-  padding: 8px 16px;
-  background: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.deleteButton:hover {
-  background: #dc2626;
-}
-
-.deleteButton:active {
-  transform: translateY(1px);
 }

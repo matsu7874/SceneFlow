@@ -5,6 +5,7 @@ import { ExtendedEntity, EntityType, entityTypeLabel } from '../types/extendedEn
 import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
 import { generateEventsFromActs } from '../utils/eventGeneration'
 import { replaceEntityInList } from './entitiesPageLogic'
+import { assignPersonColor, assignLocationColor } from '../components/QuickLog/quickLogLogic'
 
 const getEntityTypeLabel = (type: EntityType): string => entityTypeLabel(type)
 
@@ -43,6 +44,7 @@ export const EntitiesPage: React.FC = () => {
           updated_at: new Date().toISOString(),
           attributes: location,
           relationships: [],
+          color: location.color,
           connectedTo: location.connections?.map(conn => conn.toString()) || [],
         })),
         ...storyData.props.map(prop => ({
@@ -130,6 +132,7 @@ export const EntitiesPage: React.FC = () => {
                   ...updatedEntity.attributes,
                   id: numericId,
                   name: updatedEntity.name,
+                  color: updatedEntity.color || updatedEntity.attributes?.color || l.color,
                   connections: (updatedEntity.connectedTo || updatedEntity.connections || []).map(
                     (id: string | number) => (typeof id === 'string' ? parseInt(id) : id),
                   ),
@@ -223,7 +226,7 @@ export const EntitiesPage: React.FC = () => {
               {
                 id: newId,
                 name: newEntity.name,
-                color: '#3B82F6',
+                color: assignPersonColor(storyData.persons),
                 description: '',
                 age: 30,
                 occupation: '',
@@ -243,6 +246,7 @@ export const EntitiesPage: React.FC = () => {
                 id: newId,
                 name: newEntity.name,
                 connections: [],
+                color: assignLocationColor(storyData.locations),
                 description: '',
                 type: 'indoor',
                 capacity: 10,

@@ -133,14 +133,3 @@
   border-radius: 6px;
   cursor: pointer;
 }
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .colorButton {
-    background: var(--color-surface);
-  }
-  
-  .popover {
-    background: var(--color-surface);
-  }
-}
