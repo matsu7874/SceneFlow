@@ -70,6 +70,18 @@ describe('appendLocation', () => {
     expect(id).toBe(1)
     expect(data.locations[0]).toMatchObject({ id: 1, name: '広場', connections: [] })
   })
+  it('初期座標(x, y)を割り当てる（空間ビューに即時反映するため）', () => {
+    const { data } = appendLocation(emptyStory(), '広場')
+    expect(typeof data.locations[0].x).toBe('number')
+    expect(typeof data.locations[0].y).toBe('number')
+  })
+  it('複数の場所には重ならない座標を割り当てる', () => {
+    const first = appendLocation(emptyStory(), 'A')
+    const second = appendLocation(first.data, 'B')
+    const a = first.data.locations[0]
+    const b = second.data.locations[1]
+    expect(a.x === b.x && a.y === b.y).toBe(false)
+  })
 })
 
 describe('appendAct', () => {

@@ -23,9 +23,23 @@ export function appendPerson(story: StoryData, name: string): { data: StoryData;
   return { data: { ...story, persons: [...story.persons, person] }, id }
 }
 
+// マップエディタで配置する前でも空間ビューに表示できるよう、新規場所には初期座標を与える。
+// 既存の場所数を元にグリッド状へ配置し、重なりを避ける。利用者はマップエディタで再配置できる。
+const LOCATION_GRID_ORIGIN = 100
+const LOCATION_GRID_SPACING = 150
+const LOCATION_GRID_COLUMNS = 5
+
+export function defaultLocationPosition(index: number): { x: number; y: number } {
+  return {
+    x: LOCATION_GRID_ORIGIN + (index % LOCATION_GRID_COLUMNS) * LOCATION_GRID_SPACING,
+    y: LOCATION_GRID_ORIGIN + Math.floor(index / LOCATION_GRID_COLUMNS) * LOCATION_GRID_SPACING,
+  }
+}
+
 export function appendLocation(story: StoryData, name: string): { data: StoryData; id: number } {
   const id = nextId(story.locations)
-  const location = { id, name, connections: [] as number[] }
+  const { x, y } = defaultLocationPosition(story.locations.length)
+  const location = { id, name, connections: [] as number[], x, y }
   return { data: { ...story, locations: [...story.locations, location] }, id }
 }
 
