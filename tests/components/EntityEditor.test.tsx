@@ -264,6 +264,39 @@ describe('EntityEditor', () => {
     )
   })
 
+  it('updates nested object fields without flattening the path', async () => {
+    const schemaWithObject = {
+      fields: {
+        address: {
+          type: 'object' as const,
+          label: '住所',
+          schema: {
+            fields: {
+              city: { type: 'string' as const, label: '市区町村' },
+            },
+          },
+        },
+      },
+    }
+
+    render(
+      <EntityEditor
+        entityType="person"
+        entityData={{ address: { city: 'Tokyo' } }}
+        schema={schemaWithObject}
+        onChange={mockOnChange}
+      />,
+    )
+
+    const cityInput = screen.getByDisplayValue('Tokyo')
+    await user.type(cityInput, '!')
+
+    const lastCall = mockOnChange.mock.calls.at(-1)?.[0]
+    // The edit must land on the nested object, not on a flat "address.city" key.
+    expect(lastCall).not.toHaveProperty(['address.city'])
+    expect(lastCall.address.city).toBe('Tokyo!')
+  })
+
   it('groups fields when groups are defined', () => {
     const schemaWithGroups = {
       fields: {
@@ -273,8 +306,8 @@ describe('EntityEditor', () => {
         phone: { type: 'string' as const, label: '電話' },
       },
       groups: {
-        '基本情報': ['firstName', 'lastName'],
-        '連絡先': ['email', 'phone'],
+        基本情報: ['firstName', 'lastName'],
+        連絡先: ['email', 'phone'],
       },
     }
 

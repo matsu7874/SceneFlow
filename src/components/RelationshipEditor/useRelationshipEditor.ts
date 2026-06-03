@@ -68,7 +68,7 @@ export function useRelationshipEditor(mode: EditorMode) {
     ;(storyData?.locations ?? []).forEach(location => {
       ;(location.connections ?? []).forEach(targetId => {
         // Avoid duplicating the reverse of an already-seen undirected edge.
-        const key = [location.id, targetId].sort((a, b) => a - b).join('-')
+        const key = [String(location.id), String(targetId)].sort().join('-')
         if (seen.has(key)) return
         seen.add(key)
         result.push({

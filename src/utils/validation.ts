@@ -3,6 +3,12 @@ interface ValidationResult {
   errors: string[]
 }
 
+// An id/required value counts as missing only when it is null, undefined, or an
+// empty string. Numeric 0 is a legitimate id (the parser accepts id >= 0).
+function isMissing(value: unknown): boolean {
+  return value === undefined || value === null || value === ''
+}
+
 export function validateStoryData(data: unknown): ValidationResult {
   const errors: string[] = []
   const dataObj = data as Record<string, unknown>
@@ -25,7 +31,7 @@ export function validateStoryData(data: unknown): ValidationResult {
     errors.push('少なくとも1人の登場人物が必要です')
   } else if (persons) {
     persons.forEach((person, index: number) => {
-      if (!person.id || !person.name) {
+      if (isMissing(person.id) || isMissing(person.name)) {
         errors.push(`persons[${index}]: idとnameは必須です`)
       }
     })
@@ -37,7 +43,7 @@ export function validateStoryData(data: unknown): ValidationResult {
     errors.push('少なくとも1つの場所が必要です')
   } else if (locations) {
     locations.forEach((location, index: number) => {
-      if (!location.id || !location.name) {
+      if (isMissing(location.id) || isMissing(location.name)) {
         errors.push(`locations[${index}]: idとnameは必須です`)
       }
     })
@@ -70,7 +76,13 @@ export function validateStoryData(data: unknown): ValidationResult {
   const infoIds = new Set(informations?.map(i => i.id) || [])
 
   acts?.forEach((act, index: number) => {
-    if (!act.id || !act.personId || !act.locationId || !act.time || !act.description) {
+    if (
+      isMissing(act.id) ||
+      isMissing(act.personId) ||
+      isMissing(act.locationId) ||
+      isMissing(act.time) ||
+      isMissing(act.description)
+    ) {
       errors.push(`acts[${index}]: id, personId, locationId, time, descriptionは必須です`)
     }
     if (!personIds.has(act.personId)) {
@@ -101,12 +113,12 @@ export function validateStoryData(data: unknown): ValidationResult {
 
     events.forEach((event, index: number) => {
       if (
-        !event.id ||
-        !event.triggerType ||
-        !event.triggerValue ||
-        !event.eventTime ||
-        !event.personId ||
-        !event.actId
+        isMissing(event.id) ||
+        isMissing(event.triggerType) ||
+        isMissing(event.triggerValue) ||
+        isMissing(event.eventTime) ||
+        isMissing(event.personId) ||
+        isMissing(event.actId)
       ) {
         errors.push(`events[${index}]: すべてのフィールドは必須です`)
       }

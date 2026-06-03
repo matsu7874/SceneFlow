@@ -60,6 +60,44 @@ describe('GiveItemAct', () => {
       expect(result.errors[0].code).toBe('NOT_SAME_LOCATION')
     })
 
+    it('should treat location id 0 as a valid location, not "unknown"', () => {
+      const state: WorldState = {
+        timestamp: 0,
+        personPositions: { p1: 0, p2: 0 },
+        itemOwnership: { item1: 'p1' },
+        knowledge: {},
+        itemLocations: {},
+      }
+      const act = new GiveItemAct('act1', 'p1', 100, {
+        itemId: 'item1',
+        toPersonId: 'p2',
+      })
+
+      const result = act.checkPreconditions(state)
+
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
+    })
+
+    it('should still flag different locations when giver is at location id 0', () => {
+      const state: WorldState = {
+        timestamp: 0,
+        personPositions: { p1: 0, p2: 5 },
+        itemOwnership: { item1: 'p1' },
+        knowledge: {},
+        itemLocations: {},
+      }
+      const act = new GiveItemAct('act1', 'p1', 100, {
+        itemId: 'item1',
+        toPersonId: 'p2',
+      })
+
+      const result = act.checkPreconditions(state)
+
+      expect(result.valid).toBe(false)
+      expect(result.errors.map(e => e.code)).toContain('NOT_SAME_LOCATION')
+    })
+
     it('should fail when trying to give to oneself', () => {
       const state = createInitialState()
       const act = new GiveItemAct('act1', 'person1', 100, {

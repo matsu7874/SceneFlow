@@ -41,7 +41,7 @@ export class GiveItemAct extends BaseAct {
     const giverLocation = state.personPositions[this.personId]
     const receiverLocation = state.personPositions[this.payload.toPersonId]
 
-    if (!giverLocation) {
+    if (giverLocation === undefined) {
       errors.push(
         this.createError(
           'GIVER_LOCATION_UNKNOWN',
@@ -52,7 +52,7 @@ export class GiveItemAct extends BaseAct {
       )
     }
 
-    if (!receiverLocation) {
+    if (receiverLocation === undefined) {
       errors.push(
         this.createError(
           'RECEIVER_LOCATION_UNKNOWN',
@@ -63,7 +63,11 @@ export class GiveItemAct extends BaseAct {
       )
     }
 
-    if (giverLocation && receiverLocation && giverLocation !== receiverLocation) {
+    if (
+      giverLocation !== undefined &&
+      receiverLocation !== undefined &&
+      giverLocation !== receiverLocation
+    ) {
       errors.push(
         this.createError(
           'NOT_SAME_LOCATION',

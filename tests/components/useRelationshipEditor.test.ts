@@ -64,6 +64,26 @@ describe('useRelationshipEditor derivation', () => {
     expect(links[0]).toMatchObject({ source: '1', target: '2' })
   })
 
+  it('deduplicates a bidirectional connection with non-numeric string ids', () => {
+    // Numeric subtraction comparison returns NaN for these ids, which used to
+    // leave the canonical key unsorted and fail to collapse the reverse edge.
+    ctx.storyData = {
+      persons: [],
+      locations: [
+        { id: 'hall', name: 'Hall', connections: ['garden'] },
+        { id: 'garden', name: 'Garden', connections: ['hall'] },
+      ],
+      props: [],
+      informations: [],
+      initialStates: [],
+      acts: [],
+    }
+
+    const { result } = renderHook(() => useRelationshipEditor('connections'))
+
+    expect(result.current.graphData.links).toHaveLength(1)
+  })
+
   it('keeps distinct connections between different location pairs', () => {
     ctx.storyData = {
       persons: [],

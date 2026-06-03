@@ -13,6 +13,18 @@ import {
 } from './FieldComponents'
 import styles from './EntityEditor.module.css'
 
+// Set a (possibly dot-delimited) nested path on an object, returning a new
+// object with each level along the path copied so nested edits aren't lost.
+function setNestedValue(obj: any, path: string, value: any): any {
+  const dot = path.indexOf('.')
+  if (dot === -1) {
+    return { ...obj, [path]: value }
+  }
+  const head = path.slice(0, dot)
+  const rest = path.slice(dot + 1)
+  return { ...obj, [head]: setNestedValue(obj?.[head] ?? {}, rest, value) }
+}
+
 export interface EntityEditorProps {
   entityType: string
   entityData: any
@@ -135,7 +147,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
   // Handle field change
   const handleFieldChange = useCallback(
     (name: string, value: any) => {
-      const newData = { ...data, [name]: value }
+      const newData = setNestedValue(data, name, value)
       setData(newData)
 
       // Mark field as touched
