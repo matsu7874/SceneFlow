@@ -98,6 +98,30 @@ describe('analyzeStory: colocation', () => {
     )
     expect(cat(r, 1)).not.toContain('colocation')
   })
+  it('startTimeが無くtimeのみの別時刻Actは分身にしない', () => {
+    const r = analyzeStory(
+      story({
+        acts: [
+          { id: 1, personId: 1, locationId: 10, time: '00:00', description: '' },
+          { id: 2, personId: 1, locationId: 11, time: '00:10', description: '' },
+        ],
+      }),
+    )
+    expect(cat(r, 1)).not.toContain('colocation')
+    expect(cat(r, 2)).not.toContain('colocation')
+  })
+  it('startTimeが無くtimeが同一で別場所なら分身にする', () => {
+    const r = analyzeStory(
+      story({
+        acts: [
+          { id: 1, personId: 1, locationId: 10, time: '00:05', description: '' },
+          { id: 2, personId: 1, locationId: 11, time: '00:05', description: '' },
+        ],
+      }),
+    )
+    expect(cat(r, 1)).toContain('colocation')
+    expect(cat(r, 2)).toContain('colocation')
+  })
 })
 
 describe('analyzeStory: 対人共在', () => {

@@ -1,6 +1,14 @@
 import type { StoryData, Act } from '../../types/StoryData'
 import { getActKind } from './actKinds'
 import { initWorldState } from './worldState'
+import { timeToMinutes } from '../utils/timeUtils'
+
+// startTime（分）を解決する。未設定なら time 文字列（"HH:MM" / "HH:MM:SS"）から導出する。
+// 桃太郎サンプルやJSONインポートのActは time のみを持つため、startTime だけに依存すると
+// 全Actが時刻0に潰れて同時刻共在を誤検出してしまう。
+function actMinutes(a: Act): number {
+  return a.startTime ?? timeToMinutes(a.time)
+}
 import type {
   Breakage,
   ClaimRef,
@@ -14,7 +22,7 @@ import type {
 } from './types'
 
 function sortForReplay(acts: Act[]): Act[] {
-  return [...acts].sort((a, b) => (a.startTime ?? 0) - (b.startTime ?? 0) || a.id - b.id)
+  return [...acts].sort((a, b) => actMinutes(a) - actMinutes(b) || a.id - b.id)
 }
 
 export function analyzeStory(story: StoryData): ConsistencyReport {
@@ -97,7 +105,7 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
 
   const groups = new Map<string, Act[]>()
   for (const a of sorted) {
-    const key = `${a.personId}@${a.startTime ?? 0}`
+    const key = `${a.personId}@${actMinutes(a)}`
     const arr = groups.get(key) ?? []
     arr.push(a)
     groups.set(key, arr)
@@ -114,7 +122,7 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
       actId: act.id,
       personId: act.personId,
       locationId: act.locationId,
-      startTime: act.startTime ?? 0,
+      startTime: actMinutes(act),
       label: act.description || `Act ${act.id}`,
     })
 
@@ -251,7 +259,7 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
     }
 
     if (act.informationId != null && (kind === 'LEARN' || kind === 'SPEAK')) {
-      const time = act.startTime ?? 0
+      const time = actMinutes(act)
       if (kind === 'LEARN') {
         ws.setKnows(act.personId, act.informationId, act.id)
         acquireClaim(act.personId, act.informationId, act.id, act.id, time)
