@@ -31,10 +31,20 @@ export const QuickActInput: React.FC<QuickActInputProps> = ({
   const [locationId, setLocationId] = useState<number | null>(null)
   const [description, setDescription] = useState('')
   const [timeText, setTimeText] = useState('00:00')
+  const [error, setError] = useState('')
   const descriptionRef = useRef<HTMLInputElement>(null)
 
   const submit = (): void => {
-    if (personId === null || locationId === null || !description.trim()) return
+    // 未入力・未確定のまま追加されると無反応に見えるため、不足項目を明示する。
+    const missing: string[] = []
+    if (personId === null) missing.push('誰が')
+    if (locationId === null) missing.push('どこで')
+    if (!description.trim()) missing.push('何をした')
+    if (personId === null || locationId === null || missing.length > 0) {
+      setError(`${missing.join('・')}を入力してください（候補を選ぶかEnterで確定）`)
+      return
+    }
+    setError('')
     const minutes = timeStringToMinutes(timeText) ?? 0
     onAdd({ personId, locationId, description: description.trim(), startTime: minutes })
     setDescription('')
@@ -43,46 +53,62 @@ export const QuickActInput: React.FC<QuickActInputProps> = ({
   }
 
   return (
-    <div className={styles.inputBar}>
-      <EntityCombobox
-        label="誰が"
-        options={persons}
-        value={personId}
-        onSelect={setPersonId}
-        onCreate={onCreatePerson}
-      />
-      <span className={styles.particle}>が</span>
-      <EntityCombobox
-        label="どこで"
-        options={locations}
-        value={locationId}
-        onSelect={setLocationId}
-        onCreate={onCreateLocation}
-      />
-      <span className={styles.particle}>で</span>
-      <input
-        ref={descriptionRef}
-        aria-label="何をした"
-        className={styles.description}
-        placeholder="何をした"
-        value={description}
-        onChange={event => setDescription(event.target.value)}
-        onKeyDown={event => {
-          if (event.key === 'Enter') {
-            event.preventDefault()
-            submit()
-          }
-        }}
-      />
-      <input
-        aria-label="時刻"
-        className={styles.timeInput}
-        value={timeText}
-        onChange={event => setTimeText(event.target.value)}
-      />
-      <button type="button" onClick={submit}>
-        追加
-      </button>
+    <div className={styles.inputBarWrap}>
+      <div className={styles.inputBar}>
+        <EntityCombobox
+          label="誰が"
+          options={persons}
+          value={personId}
+          onSelect={id => {
+            setPersonId(id)
+            setError('')
+          }}
+          onCreate={onCreatePerson}
+        />
+        <span className={styles.particle}>が</span>
+        <EntityCombobox
+          label="どこで"
+          options={locations}
+          value={locationId}
+          onSelect={id => {
+            setLocationId(id)
+            setError('')
+          }}
+          onCreate={onCreateLocation}
+        />
+        <span className={styles.particle}>で</span>
+        <input
+          ref={descriptionRef}
+          aria-label="何をした"
+          className={styles.description}
+          placeholder="何をした"
+          value={description}
+          onChange={event => {
+            setDescription(event.target.value)
+            if (error) setError('')
+          }}
+          onKeyDown={event => {
+            if (event.key === 'Enter') {
+              event.preventDefault()
+              submit()
+            }
+          }}
+        />
+        <input
+          aria-label="時刻"
+          className={styles.timeInput}
+          value={timeText}
+          onChange={event => setTimeText(event.target.value)}
+        />
+        <button type="button" onClick={submit}>
+          追加
+        </button>
+      </div>
+      {error && (
+        <p className={styles.inputError} role="alert">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

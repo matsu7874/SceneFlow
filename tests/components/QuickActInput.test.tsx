@@ -73,4 +73,45 @@ describe('QuickActInput', () => {
     await user.type(screen.getByLabelText('何をした'), '{Enter}')
     expect(onAdd).not.toHaveBeenCalled()
   })
+
+  it('未確定のまま追加すると不足項目を知らせ、無反応にならない', async () => {
+    const onAdd = vi.fn()
+    render(
+      <QuickActInput
+        persons={persons}
+        locations={locations}
+        onAdd={onAdd}
+        onCreatePerson={() => 99}
+        onCreateLocation={() => 88}
+      />,
+    )
+    // 候補を確定せずテキストだけ入力（personId/locationIdは未確定）
+    await user.type(screen.getByLabelText('誰が'), '太郎')
+    await user.click(screen.getByRole('button', { name: '追加' }))
+
+    expect(onAdd).not.toHaveBeenCalled()
+    const alert = screen.getByRole('alert')
+    expect(alert.textContent).toContain('誰が')
+    expect(alert.textContent).toContain('どこで')
+    expect(alert.textContent).toContain('何をした')
+  })
+
+  it('項目を確定するとエラー表示が消える', async () => {
+    const onAdd = vi.fn()
+    render(
+      <QuickActInput
+        persons={persons}
+        locations={locations}
+        onAdd={onAdd}
+        onCreatePerson={() => 99}
+        onCreateLocation={() => 88}
+      />,
+    )
+    await user.click(screen.getByRole('button', { name: '追加' }))
+    expect(screen.getByRole('alert')).toBeTruthy()
+
+    await user.click(screen.getByLabelText('誰が'))
+    await user.keyboard('太郎{Enter}')
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
 })

@@ -1,3 +1,8 @@
+.inputBarWrap {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
 .inputBar {
   display: flex;
   align-items: center;
@@ -6,9 +11,15 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  position: sticky;
-  top: 0;
-  z-index: 5;
+}
+.inputError {
+  margin: 0.4rem 0 0;
+  padding: 0.4rem 0.6rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-error);
+  border-radius: 4px;
+  color: var(--color-error);
+  font-size: 0.85rem;
 }
 .particle {
   color: var(--color-text-secondary);
