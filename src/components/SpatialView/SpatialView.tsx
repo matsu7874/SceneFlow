@@ -67,7 +67,11 @@ export const SpatialView: React.FC<SpatialViewProps> = ({ storyData }) => {
       <p className={styles.hint}>
         各人物の動線を物理配置上に表示します。赤い場所は破綻が起きた地点です。
       </p>
-      <svg width={WIDTH} height={HEIGHT} className={styles.svg}>
+      <svg
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        preserveAspectRatio="xMidYMid meet"
+        className={styles.svg}
+      >
         {bgRect !== null && background.image !== null && (
           <image
             href={background.image.src}
