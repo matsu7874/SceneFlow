@@ -1,35 +1,42 @@
+/* グローバルなアプリクローム。トークンは /DESIGN.md・src/index.css を参照。
+   クラス名は既存のまま（コンポーネント・テストが参照）、値のみ計器ライクに統一。 */
 .app {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--app-bg);
+  /* デスクトップ計器ツールとして最小幅を確保。これ未満は崩さず横スクロールにする。 */
+  min-width: 720px;
 }
 
 .app-header {
-  background-color: #282c34;
-  color: white;
-  padding: 15px 20px;
+  background: var(--ink);
+  color: #fff;
+  padding: var(--space-3) var(--space-5);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--line-strong);
 }
 
 .app-header h1 {
   margin: 0;
-  font-size: 1.8em;
+  font-size: 1.4em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .app-main {
   flex: 1;
   overflow: hidden;
-  background-color: #f5f5f5;
+  background: var(--app-bg);
 }
 
 .container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 20px;
-  padding: 20px;
+  gap: var(--space-5);
+  padding: var(--space-5);
   height: 100%;
   overflow: auto;
 }
@@ -56,7 +63,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 700px) {
   .container {
     grid-template-columns: 1fr;
   }
@@ -68,51 +75,55 @@
   }
 }
 
-/* Page Styles */
+/* ページ枠 */
 .page {
-  padding: 20px;
+  padding: var(--space-5);
   height: 100%;
   overflow: auto;
 }
 
 .page h2 {
   margin-top: 0;
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: var(--space-5);
+  color: var(--ink);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .page-content {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-2);
   height: calc(100% - 60px);
   overflow: auto;
 }
 
 .no-data-message {
   text-align: center;
-  padding: 40px;
-  color: #666;
+  padding: var(--space-6);
+  color: var(--ink-2);
 }
 
 .quick-log-hint {
-  margin: 0 0 12px;
-  color: #666;
+  margin: 0 0 var(--space-3);
+  color: var(--ink-2);
   font-size: 0.9em;
 }
 
-/* Entities Page Styles */
+/* エンティティ管理ページ */
 .entities-page .page-content {
   display: grid;
   grid-template-columns: 300px 1fr;
-  gap: 20px;
+  gap: var(--space-5);
   height: calc(100% - 60px);
 }
 
 .entities-list {
-  border-right: 1px solid #eee;
-  padding-right: 20px;
+  border-right: 1px solid var(--line);
+  padding-right: var(--space-5);
   overflow: auto;
 }
 
@@ -120,60 +131,69 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: var(--space-4);
 }
 
 .entities-header h3 {
   margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
 }
 
 .create-button {
-  background: #4caf50;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent-strong);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--r);
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  transition: background 0.15s;
 }
 
 .create-button:hover {
-  background: #45a049;
+  background: var(--accent-strong);
 }
 
 .entity-items {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .entity-item {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
   cursor: pointer;
   display: flex;
-  gap: 10px;
+  gap: var(--space-3);
   align-items: center;
-  transition: background-color 0.2s;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
 }
 
 .entity-item:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-surface-hover);
+  border-color: var(--line-strong);
 }
 
 .entity-item.selected {
-  background-color: #e3f2fd;
-  border-color: #2196f3;
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
 }
 
 .entity-type {
   font-size: 12px;
-  background: #666;
-  color: white;
+  background: var(--ink-2);
+  color: #fff;
   padding: 2px 8px;
-  border-radius: 3px;
+  border-radius: var(--r-sm);
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .entity-name {
@@ -190,53 +210,67 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #666;
+  color: var(--ink-2);
 }
 
-/* Entity controls */
+/* エンティティ操作 */
 .entities-controls {
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .search-input {
   flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   font-size: 14px;
+  font-family: var(--font-sans);
+  background: var(--color-background);
+  color: var(--ink);
+}
+
+.search-input:focus,
+.type-filter:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .type-filter {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   font-size: 14px;
-  background: white;
+  background: var(--color-background);
+  color: var(--ink);
+  font-family: var(--font-sans);
   cursor: pointer;
 }
 
-/* Entity groups */
+/* エンティティグループ */
 .entity-group {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
 }
 
 .entity-group-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #666;
-  margin: 0 0 8px 0;
-  text-transform: capitalize;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-2);
+  margin: 0 0 var(--space-2) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .entity-type-badge {
   font-size: 11px;
-  background: #666;
-  color: white;
+  background: var(--ink-2);
+  color: #fff;
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: var(--r-sm);
   text-transform: uppercase;
+  letter-spacing: 0.04em;
   flex-shrink: 0;
 }
 
@@ -257,7 +291,8 @@
 
 .entity-id {
   font-size: 11px;
-  color: #999;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -265,19 +300,19 @@
 
 .no-results {
   text-align: center;
-  color: #666;
-  padding: 40px 20px;
+  color: var(--ink-2);
+  padding: var(--space-6) var(--space-5);
   font-size: 14px;
 }
 
-/* Modal styles */
+/* モーダル */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(16, 24, 40, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -285,65 +320,80 @@
 }
 
 .modal-content {
-  background: white;
-  border-radius: 8px;
-  padding: 30px;
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--space-6);
   max-width: 500px;
   width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-pop);
 }
 
 .modal-content h3 {
-  margin: 0 0 10px 0;
-  font-size: 24px;
+  margin: 0 0 var(--space-2) 0;
+  font-size: 1.35rem;
+  font-weight: 700;
 }
 
 .modal-content p {
-  color: #666;
-  margin-bottom: 20px;
+  color: var(--ink-2);
+  margin-bottom: var(--space-5);
 }
 
 .entity-type-buttons {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
 }
 
 .type-button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 20px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: white;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--color-background);
   cursor: pointer;
-  transition: all 0.2s;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.05s;
+  font-family: var(--font-sans);
+  color: var(--ink);
 }
 
 .type-button:hover {
-  border-color: #2196f3;
-  background: #f5f5f5;
-  transform: translateY(-2px);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.type-button:active {
+  transform: translateY(1px);
 }
 
 .type-icon {
-  font-size: 32px;
+  font-size: 28px;
 }
 
 .cancel-button {
   width: 100%;
-  padding: 10px;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: var(--space-3);
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
   cursor: pointer;
   font-size: 14px;
-  transition: background 0.2s;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 
 .cancel-button:hover {
-  background: #e0e0e0;
+  background: var(--color-surface-hover);
+  border-color: var(--line-strong);
 }

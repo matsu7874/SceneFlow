@@ -1,49 +1,80 @@
-/* CSS Variables */
+/* =========================================================================
+   SceneFlow デザインシステム ―「精密な計器」。詳細は /DESIGN.md。
+   ライト固定（OSのダーク設定には追従しない）。中立クールグレー＋青アクセント。
+   既存の --color-* / --shadow-* は値のみ新パレットへ張り替え、各画面を自動で寄せる。
+   ========================================================================= */
 :root {
-  /* Colors */
-  --color-primary: #3b82f6;
-  --color-primary-dark: #2563eb;
-  --color-secondary: #6b7280;
-  --color-success: #22c55e;
-  --color-error: #ef4444;
-  --color-error-dark: #dc2626;
-  --color-warning: #f59e0b;
-  --color-info: #3b82f6;
-  
-  /* Background colors */
-  --color-background: #ffffff;
-  --color-surface: #f9fafb;
-  --color-surface-hover: #f3f4f6;
-  --color-surface-dark: #e5e7eb;
-  
-  /* Text colors */
-  --color-text-primary: #111827;
-  --color-text-secondary: #6b7280;
-  --color-text-disabled: #9ca3af;
-  
-  /* Border colors */
-  --color-border: #e5e7eb;
-  --color-border-hover: #d1d5db;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
+  color-scheme: light;
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #0f172a;
-    --color-surface: #1e293b;
-    --color-surface-hover: #334155;
-    --color-surface-dark: #0f172a;
-    --color-text-primary: #f1f5f9;
-    --color-text-secondary: #94a3b8;
-    --color-text-disabled: #64748b;
-    --color-border: #334155;
-    --color-border-hover: #475569;
-  }
+  /* --- 意味別トークン（新規実装はこちらを使う） --- */
+  --app-bg: #eef1f5;
+
+  --ink: #18202c;
+  --ink-2: #566173;
+  --ink-3: #8a93a3;
+
+  --line: #e3e7ed;
+  --line-strong: #cdd3dc;
+
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft: #e8f0fe;
+
+  --ok: #16a34a;
+  --ok-soft: #dcfce7;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+
+  /* 余白（8pxグリッド）・角丸 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --r-sm: 6px;
+  --r: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+
+  /* --- 後方互換エイリアス（既存CSSが参照）。値は新パレットに統一 --- */
+  --color-primary: var(--accent);
+  --color-primary-dark: var(--accent-strong);
+  --color-secondary: #566173;
+  --color-success: var(--ok);
+  --color-error: var(--danger);
+  --color-error-dark: #b91c1c;
+  --color-warning: var(--warn);
+  --color-info: var(--accent);
+
+  --color-background: #ffffff;
+  --color-surface: #f6f7f9;
+  --color-surface-hover: #eef1f5;
+  --color-surface-dark: #e4e8ee;
+
+  --color-text: var(--ink);
+  --color-text-primary: var(--ink);
+  --color-text-secondary: var(--ink-2);
+  --color-text-disabled: var(--ink-3);
+
+  --color-border: var(--line);
+  --color-border-hover: var(--line-strong);
+
+  /* Shadows（クール・控えめ） */
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-2: 0 4px 12px -4px rgba(16, 24, 40, 0.14);
+  --shadow-pop: 0 14px 30px -12px rgba(16, 24, 40, 0.28);
+  --shadow-sm: var(--shadow-1);
+  --shadow: var(--shadow-1);
+  --shadow-md: var(--shadow-2);
+
+  /* Typography ― IBM Plex（技術的・精密。和文対応） */
+  --font-sans:
+    'IBM Plex Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans',
+    'Noto Sans JP', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
 }
 
 /* View mode selector */
@@ -83,11 +114,12 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--app-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -97,25 +129,31 @@ html, body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: var(--font-mono);
 }
 
-/* スクロールバーのスタイル */
+/* キーボード操作の可視性（計器ツールとして必須） */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* スクロールバー（クール・細め） */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background: var(--line-strong);
+  border: 2px solid var(--app-bg);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--ink-3);
 }
