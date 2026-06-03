@@ -19,6 +19,12 @@ export const Navigation: React.FC = () => {
           エンティティ編集
         </NavLink>
         <NavLink
+          to="/relationships"
+          className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
+        >
+          関係性
+        </NavLink>
+        <NavLink
           to="/map-editor"
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >

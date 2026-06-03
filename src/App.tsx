@@ -12,6 +12,7 @@ import { MapEditorPage } from './pages/MapEditorPage'
 import { ValidationPage } from './pages/ValidationPage'
 import { QuickLogPage } from './pages/QuickLogPage'
 import { SpatialPage } from './pages/SpatialPage'
+import { RelationshipsPage } from './pages/RelationshipsPage'
 import './App.css'
 
 /**
@@ -34,6 +35,7 @@ function App(): React.ReactNode {
                   <Route path="/simulation" element={<SimulationPage />} />
                   <Route path="/causality" element={<CausalityPage />} />
                   <Route path="/entities" element={<EntitiesPage />} />
+                  <Route path="/relationships" element={<RelationshipsPage />} />
                   <Route path="/map-editor" element={<MapEditorPage />} />
                   <Route path="/validation" element={<ValidationPage />} />
                   <Route path="/log" element={<QuickLogPage />} />
