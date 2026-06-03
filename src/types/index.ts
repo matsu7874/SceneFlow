@@ -8,6 +8,7 @@ export interface Location {
   id: number
   name: string
   connections: number[]
+  color?: string
   connectedTo?: string[]
   x?: number
   y?: number

@@ -54,61 +54,76 @@ export const QuickActInput: React.FC<QuickActInputProps> = ({
 
   return (
     <div className={styles.inputBarWrap}>
-      <div className={styles.inputBar}>
-        <EntityCombobox
-          label="誰が"
-          options={persons}
-          value={personId}
-          onSelect={id => {
-            setPersonId(id)
-            setError('')
-          }}
-          onCreate={onCreatePerson}
-        />
-        <span className={styles.particle}>が</span>
-        <EntityCombobox
-          label="どこで"
-          options={locations}
-          value={locationId}
-          onSelect={id => {
-            setLocationId(id)
-            setError('')
-          }}
-          onCreate={onCreateLocation}
-        />
-        <span className={styles.particle}>で</span>
-        <input
-          ref={descriptionRef}
-          aria-label="何をした"
-          className={styles.description}
-          placeholder="何をした"
-          value={description}
-          onChange={event => {
-            setDescription(event.target.value)
-            if (error) setError('')
-          }}
-          onKeyDown={event => {
-            if (event.key === 'Enter') {
-              event.preventDefault()
-              submit()
-            }
-          }}
-        />
-        <input
-          aria-label="時刻"
-          className={styles.timeInput}
-          value={timeText}
-          onChange={event => setTimeText(event.target.value)}
-        />
-        <button type="button" onClick={submit}>
-          追加
-        </button>
+      <div className={styles.composer}>
+        <span className={styles.composerLabel}>出来事を記録</span>
+        <div className={styles.inputBar}>
+          <div className={styles.field} data-grow="time">
+            <span className={styles.fieldCaption}>いつ</span>
+            <input
+              aria-label="時刻"
+              className={styles.timeInput}
+              value={timeText}
+              onChange={event => setTimeText(event.target.value)}
+            />
+          </div>
+          <div className={styles.field}>
+            <span className={styles.fieldCaption}>誰が</span>
+            <EntityCombobox
+              label="誰が"
+              options={persons}
+              value={personId}
+              onSelect={id => {
+                setPersonId(id)
+                setError('')
+              }}
+              onCreate={onCreatePerson}
+            />
+          </div>
+          <span className={styles.particle}>が</span>
+          <div className={styles.field}>
+            <span className={styles.fieldCaption}>どこで</span>
+            <EntityCombobox
+              label="どこで"
+              options={locations}
+              value={locationId}
+              onSelect={id => {
+                setLocationId(id)
+                setError('')
+              }}
+              onCreate={onCreateLocation}
+            />
+          </div>
+          <span className={styles.particle}>で</span>
+          <div className={styles.field} data-grow="what">
+            <span className={styles.fieldCaption}>何をした</span>
+            <input
+              ref={descriptionRef}
+              aria-label="何をした"
+              className={styles.description}
+              placeholder="例: 鍵を拾った"
+              value={description}
+              onChange={event => {
+                setDescription(event.target.value)
+                if (error) setError('')
+              }}
+              onKeyDown={event => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  submit()
+                }
+              }}
+            />
+          </div>
+          <button type="button" className={styles.addButton} onClick={submit}>
+            追加
+          </button>
+        </div>
+        {error && (
+          <p className={styles.inputError} role="alert">
+            {error}
+          </p>
+        )}
       </div>
-      {error && (
-        <p className={styles.inputError} role="alert">
-          {error}
-        </p>
-      )}
     </div>
   )
 }

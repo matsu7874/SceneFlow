@@ -2,6 +2,7 @@ import React from 'react'
 import { useQuickLog } from '../components/QuickLog/useQuickLog'
 import { QuickActInput } from '../components/QuickLog/QuickActInput'
 import { ActTimeline } from '../components/QuickLog/ActTimeline'
+import styles from '../components/QuickLog/QuickLog.module.css'
 
 export const QuickLogPage: React.FC = () => {
   const {
@@ -16,11 +17,14 @@ export const QuickLogPage: React.FC = () => {
   } = useQuickLog()
 
   return (
-    <div className="page quick-log-page">
-      <h2>イベント入力</h2>
-      <p className="quick-log-hint">
-        誰が・どこで・何をしたかを入力すると物語データが作られます。データの読み込みは不要です。
-      </p>
+    <div className={`page quick-log-page ${styles.logRoot}`}>
+      <header className={styles.pageHeader}>
+        <span className={styles.pageEyebrow}>SceneFlow ・ イベントログ</span>
+        <h2 className={styles.pageTitle}>イベント入力</h2>
+        <p className={styles.pageHint}>
+          誰が・どこで・何をしたかを綴ると、そのまま物語データになります。データの読み込みは要りません。
+        </p>
+      </header>
       <QuickActInput
         persons={storyData.persons.map(p => ({ id: p.id, name: p.name }))}
         locations={storyData.locations.map(l => ({ id: l.id, name: l.name }))}

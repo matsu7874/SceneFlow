@@ -17,6 +17,7 @@ export interface Location {
   id: number
   name: string
   connections: number[]
+  color?: string
   description?: string
   type?: 'indoor' | 'outdoor' | 'transit'
   capacity?: number

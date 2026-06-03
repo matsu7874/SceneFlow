@@ -1,165 +1,530 @@
+/* =========================================================================
+   QuickLog ― イベントログのタイムラインを主役にしたライト基調のリデザイン。
+   イマーシブシアターの「いつ・誰が・どこで・何をした」を台本のように綴る。
+   配色トークンは .logRoot にスコープし、他ページの配色には影響させない。
+   ========================================================================= */
+.logRoot {
+  /* グローバルの計器トークンに揃える（ローカル別名のみ定義） */
+  --card: var(--color-background);
+  --ink-soft: var(--ink-2);
+  --ink-faint: var(--ink-3);
+  --line-soft: var(--color-surface-hover);
+  --accent-ink: var(--accent-strong);
+  --accent-tint: var(--accent-soft);
+  /* データ（時刻）用の中立色。--loc は場所ごとの可視化色（インライン注入） */
+  --gold: var(--ink-2);
+
+  --row-pad-x: 1rem;
+  /* 列グリッド: 開閉 / 時刻 / 人物 / 場所 / 出来事 / 警告 / 削除 */
+  --cols: 1.1rem 4.75rem minmax(6rem, 8rem) minmax(5.5rem, 7.5rem) minmax(9rem, 1fr) auto 2.25rem;
+
+  background: var(--app-bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+/* ---------- ページ見出し ---------- */
+.pageHeader {
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+.pageHeader::after {
+  /* 見出し下に金の細線を重ね、台本扉の罫を思わせる */
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 4.5rem;
+  height: 2px;
+  background: var(--accent);
+}
+.pageEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.pageTitle {
+  margin: 0.3rem 0 0.35rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.85rem;
+  line-height: 1.2;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+.pageHint {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+/* ---------- 入力バー（出来事を綴るコンポーザー） ---------- */
 .inputBarWrap {
   position: sticky;
   top: 0;
   z-index: 5;
+  padding-bottom: 0.75rem;
+  /* スクロール時に背景の罫が透けて見えるのを防ぐ */
+  background: linear-gradient(var(--app-bg) 78%, transparent);
+}
+.composer {
+  padding: 0.9rem 1rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-2);
+}
+.composerLabel {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 .inputBar {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.field[data-grow='what'] {
+  flex: 1 1 12rem;
+}
+.field[data-grow='time'] {
+  flex: 0 0 auto;
+}
+.fieldCaption {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  padding-left: 0.15rem;
+}
+
+/* 入力要素の共通見た目 */
+.combobox input,
+.description,
+.timeInput {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--line);
   border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
-.inputError {
-  margin: 0.4rem 0 0;
-  padding: 0.4rem 0.6rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-error);
-  border-radius: 4px;
-  color: var(--color-error);
-  font-size: 0.85rem;
+.combobox input::placeholder,
+.description::placeholder {
+  color: var(--ink-faint);
 }
-.particle {
-  color: var(--color-text-secondary);
+.combobox input:focus,
+.description:focus,
+.timeInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 .combobox {
   position: relative;
 }
 .combobox input {
-  padding: 0.4rem 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background: var(--color-background);
-  color: var(--color-text-primary);
+  min-width: 7.5rem;
 }
-.description {
-  flex: 1;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background: var(--color-background);
-  color: var(--color-text-primary);
-}
-/* inputBar内の時刻入力欄 & タイムライン行の時刻表示を兼用 */
 .timeInput {
   width: 5rem;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background: var(--color-background);
-  color: var(--color-text-primary);
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  text-align: center;
+  letter-spacing: 0.02em;
 }
+.particle {
+  align-self: center;
+  padding-bottom: 0.5rem;
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+}
+.addButton {
+  flex: 0 0 auto;
+  padding: 0.55rem 1.4rem;
+  border: 1px solid var(--accent-ink);
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.05s,
+    box-shadow 0.15s;
+  box-shadow: var(--shadow-1);
+}
+.addButton:hover {
+  background: var(--accent-ink);
+}
+.addButton:active {
+  transform: translateY(1px);
+}
+.addButton:focus-visible {
+  outline: 3px solid var(--accent-tint);
+  outline-offset: 1px;
+}
+.inputError {
+  margin: 0.6rem 0 0;
+  padding: 0.45rem 0.7rem;
+  background: var(--accent-tint);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent-ink);
+  font-size: 0.85rem;
+}
+
+/* ---------- コンボボックスの候補 ---------- */
 .options {
   position: absolute;
   z-index: 10;
-  margin: 0.2rem 0 0;
-  padding: 0;
+  margin: 0.25rem 0 0;
+  padding: 0.25rem;
   list-style: none;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
   width: max-content;
   min-width: 100%;
-  max-height: 12rem;
+  max-height: 14rem;
   overflow-y: auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-pop);
 }
 .options li button {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 0.4rem 0.6rem;
+  padding: 0.45rem 0.6rem;
   border: none;
+  border-radius: 6px;
   background: none;
-  color: var(--color-text-primary);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
   cursor: pointer;
 }
 .options li button:hover {
-  background: var(--color-surface-hover);
+  background: var(--accent-tint);
+  color: var(--accent-ink);
 }
 .createOption {
-  color: var(--color-primary);
+  color: var(--accent);
+  font-weight: 600;
 }
+
+/* ---------- タイムライン（香盤） ---------- */
+.timelineWrap {
+  margin-top: 0.5rem;
+}
+.timelineCaption {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.timelineTitle {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.timelineCount {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 列見出しと各行は同じ --cols を共有して整列させる */
+.colHeader {
+  display: grid;
+  grid-template-columns: var(--cols);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem var(--row-pad-x);
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+.chevronSpacer {
+  grid-column: 1;
+}
+.colTime {
+  grid-column: 2;
+}
+.colWho {
+  grid-column: 3;
+}
+.colWhere {
+  grid-column: 4;
+}
+.colWhat {
+  grid-column: 5;
+}
+
 .timeline {
   list-style: none;
-  margin: 1rem 0 0;
+  margin: 0;
   padding: 0;
 }
 .row {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--line-soft);
 }
+.row:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
 .rowHeader {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--cols);
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  padding: 0.55rem var(--row-pad-x);
+  border-left: 3px solid transparent;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
 }
-.rowToggle {
-  flex: 1;
-  display: flex;
-  gap: 1rem;
-  align-items: baseline;
-  padding: 0.6rem 0.4rem;
-  border: none;
-  background: none;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  text-align: left;
-}
-.rowToggle:hover {
+.rowHeader:hover {
   background: var(--color-surface-hover);
+  border-left-color: var(--line-strong);
 }
-.deleteButton {
+.rowExpanded .rowHeader {
+  background: var(--accent-tint);
+  border-left-color: var(--accent);
+}
+/* 整合性警告のある行は左罫で目立たせる */
+.rowHeader[data-warn]:not(:hover) {
+  border-left-color: var(--color-warning);
+}
+
+/* 行全体を覆う透明ボタン（開閉のクリック領域・フォーカス対象） */
+.rowToggle {
+  position: absolute;
+  inset: 0;
   border: none;
   background: none;
-  color: var(--color-text-secondary);
   cursor: pointer;
-  padding: 0.4rem 0.6rem;
+  padding: 0;
 }
-.deleteButton:hover {
-  color: var(--color-error);
+.rowToggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+.chevron {
+  grid-column: 1;
+  color: var(--ink-faint);
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: transform 0.15s;
+  transform: rotate(0deg);
+}
+.rowExpanded .chevron {
+  transform: rotate(90deg);
+  color: var(--accent);
 }
 .time {
-  color: var(--color-text-secondary);
+  grid-column: 2;
+  color: var(--gold);
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-}
-.who {
+  font-size: 0.9rem;
   font-weight: 600;
 }
+.who {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1.02rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+/* 名前が長い場合のみ省略表示（ドットは縮めない） */
+.who > :not(.swatch) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 人物のメンバーカラー（可視化用）。同じ人物は常に同じ色のドットで示す */
+.swatch {
+  flex: 0 0 auto;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12) inset;
+}
 .where {
-  color: var(--color-primary-dark);
+  grid-column: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  /* --loc は場所ごとの可視化色（インラインで注入） */
+  color: color-mix(in srgb, var(--loc, var(--accent)) 65%, #1d1209);
+  background: color-mix(in srgb, var(--loc, var(--accent)) 14%, #fff);
+  border: 1px solid color-mix(in srgb, var(--loc, var(--accent)) 32%, #fff);
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  justify-self: start;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+.whereDot {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--loc, var(--accent));
 }
 .what {
-  flex: 1;
+  grid-column: 5;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  min-width: 0;
 }
 .breakIcons {
+  grid-column: 6;
   display: inline-flex;
   gap: 0.15rem;
-  margin-left: 0.4rem;
-  opacity: 0.7;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   cursor: help;
+  justify-self: end;
 }
 .breakIcon {
   line-height: 1;
 }
+.deleteButton {
+  grid-column: 7;
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.deleteButton:hover {
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+.deleteButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ---------- 詳細パネル ---------- */
 .detailPanel {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 0.6rem 1rem 1rem;
-  background: var(--color-surface);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.85rem 1rem;
+  padding: 0.9rem var(--row-pad-x) 1.1rem calc(var(--row-pad-x) + 0.75rem);
+  background: #fcf8ef;
+  border-left: 3px solid var(--accent);
 }
 .detailPanel label {
   display: flex;
   flex-direction: column;
-  font-size: 0.85rem;
-  gap: 0.2rem;
-  color: var(--color-text-secondary);
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
 }
+.detailPanel input,
+.detailPanel select {
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+.detailPanel input:focus,
+.detailPanel select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
+}
+
+/* ---------- 空状態 ---------- */
 .empty {
-  color: var(--color-text-disabled);
-  padding: 1rem;
+  margin-top: 1.5rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background: var(--card);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  color: var(--ink-soft);
+}
+.emptyMark {
+  display: block;
+  font-size: 2.2rem;
+  margin-bottom: 0.6rem;
+  filter: saturate(0.6);
+}
+.emptyTitle {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-sans);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.emptyHint {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--ink-faint);
 }

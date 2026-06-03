@@ -17,9 +17,61 @@ export function pickColor(index: number): string {
   return DEFAULT_COLORS[index % DEFAULT_COLORS.length]
 }
 
+// 場所用の可視化パレット。人物の暖色寄りパレットと区別しやすいよう寒色〜中間色を並べる。
+const LOCATION_COLORS = [
+  '#3B82F6',
+  '#8B5CF6',
+  '#0EA5E9',
+  '#14B8A6',
+  '#6366F1',
+  '#0891B2',
+  '#7C3AED',
+  '#2563EB',
+  '#0D9488',
+  '#4F46E5',
+]
+
+// プリセットから「まだ使われていない色」を優先的に選ぶ。
+// 全色が使用済みになったら seed を使って巡回し、なるべく均等に割り当てる。
+function pickUnusedColor(
+  palette: string[],
+  used: Iterable<string | undefined>,
+  seed: number,
+): string {
+  const set = new Set([...used].filter((c): c is string => Boolean(c)))
+  const free = palette.find(color => !set.has(color))
+  if (free) return free
+  return palette[((seed % palette.length) + palette.length) % palette.length]
+}
+
+// 新規人物に被りにくい色をプリセットから割り当てる。色はエンティティ編集で変更できる。
+export function assignPersonColor(persons: Array<{ color?: string }>): string {
+  return pickUnusedColor(
+    DEFAULT_COLORS,
+    persons.map(p => p.color),
+    persons.length,
+  )
+}
+
+// 新規場所に被りにくい色をプリセットから割り当てる。色はエンティティ編集で変更できる。
+export function assignLocationColor(locations: Array<{ color?: string }>): string {
+  return pickUnusedColor(
+    LOCATION_COLORS,
+    locations.map(l => l.color),
+    locations.length,
+  )
+}
+
+// 色が未設定の既存データ（旧バージョンで作成された場所）向けの表示フォールバック。
+// id は 1 始まり。削除されても色が安定するよう index ではなく id を基準にする。
+export function pickLocationColor(id: number): string {
+  const i = (((id - 1) % LOCATION_COLORS.length) + LOCATION_COLORS.length) % LOCATION_COLORS.length
+  return LOCATION_COLORS[i]
+}
+
 export function appendPerson(story: StoryData, name: string): { data: StoryData; id: number } {
   const id = nextId(story.persons)
-  const person = { id, name, color: pickColor(story.persons.length) }
+  const person = { id, name, color: assignPersonColor(story.persons) }
   return { data: { ...story, persons: [...story.persons, person] }, id }
 }
 
@@ -39,7 +91,8 @@ export function defaultLocationPosition(index: number): { x: number; y: number }
 export function appendLocation(story: StoryData, name: string): { data: StoryData; id: number } {
   const id = nextId(story.locations)
   const { x, y } = defaultLocationPosition(story.locations.length)
-  const location = { id, name, connections: [] as number[], x, y }
+  const color = assignLocationColor(story.locations)
+  const location = { id, name, connections: [] as number[], color, x, y }
   return { data: { ...story, locations: [...story.locations, location] }, id }
 }
 
