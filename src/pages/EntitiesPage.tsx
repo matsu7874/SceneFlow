@@ -6,6 +6,7 @@ import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
 import { generateEventsFromActs } from '../utils/eventGeneration'
 import { replaceEntityInList } from './entitiesPageLogic'
 import { assignPersonColor, assignLocationColor } from '../components/QuickLog/quickLogLogic'
+import { ExtractionPanel } from '../components/EntityExtraction/ExtractionPanel'
 
 const getEntityTypeLabel = (type: EntityType): string => entityTypeLabel(type)
 
@@ -414,6 +415,11 @@ export const EntitiesPage: React.FC = () => {
   return (
     <div className="page entities-page">
       <h2>エンティティ管理</h2>
+      <ExtractionPanel
+        storyData={storyData}
+        onCommit={next => setStoryData(next)}
+        onNotify={(message, type) => showNotification(message, { type })}
+      />
       <div className="page-content">
         <div className="entities-list">
           <div className="entities-header">

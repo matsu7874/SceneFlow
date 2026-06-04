@@ -5,6 +5,9 @@ node_modules/
 dist/
 build/
 
+# kuromoji 辞書（node_modules からコピーするためコミットしない）
+kuromoji-dict/
+
 # Development
 .vite/
 *.local
