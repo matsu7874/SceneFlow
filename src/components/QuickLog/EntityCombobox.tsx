@@ -23,6 +23,7 @@ export const EntityCombobox: React.FC<EntityComboboxProps> = ({
 }) => {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
+  const [focused, setFocused] = useState(false)
 
   const blurTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => () => clearTimeout(blurTimer.current), [])
@@ -45,6 +46,7 @@ export const EntityCombobox: React.FC<EntityComboboxProps> = ({
     onSelect(id)
     setQuery('')
     setOpen(false)
+    setFocused(false)
   }
 
   const create = (): void => {
@@ -55,21 +57,35 @@ export const EntityCombobox: React.FC<EntityComboboxProps> = ({
     onSelect(id)
     setQuery('')
     setOpen(false)
+    setFocused(false)
   }
+
+  // 編集中（フォーカス時）は入力中のクエリを、未編集時は確定済みの名前を表示する。
+  // 確定値を placeholder で見せると未入力（薄色）と見分けがつかないため、実値として通常色で描画する。
+  const isConfirmed = !focused && selectedName !== ''
+  const displayValue = focused ? query : selectedName
 
   return (
     <div className={styles.combobox}>
       <input
         aria-label={label}
-        placeholder={selectedName || label}
-        value={query}
+        className={isConfirmed ? styles.comboboxConfirmed : undefined}
+        placeholder={label}
+        value={displayValue}
         onChange={event => {
           setQuery(event.target.value)
           setOpen(true)
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          setFocused(true)
+          setQuery('')
+          setOpen(true)
+        }}
         onBlur={() => {
-          blurTimer.current = setTimeout(() => setOpen(false), 150)
+          blurTimer.current = setTimeout(() => {
+            setOpen(false)
+            setFocused(false)
+          }, 150)
         }}
         onKeyDown={event => {
           if (event.key === 'Enter') {
