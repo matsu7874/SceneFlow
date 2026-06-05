@@ -75,7 +75,10 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
       .selectAll<SVGLineElement, GraphLink>('line')
       .data(graphData.links)
       .join('line')
-      .attr('class', d => `${styles.link} ${hoveredLink === d.id ? styles.highlighted : ''}`)
+      // リテラルの `link` クラスは useRelationshipEditor の tick が
+      // svg.selectAll('.link') で位置更新する際のセレクタ契約。CSS modules の
+      // ハッシュ化クラスだけだと一致せず線が原点に張り付くため併記する。
+      .attr('class', d => `link ${styles.link} ${hoveredLink === d.id ? styles.highlighted : ''}`)
       .attr('stroke-width', d => Math.max(1, d.strength * 5))
       .on('click', (event, d) => {
         event.stopPropagation()
@@ -92,7 +95,9 @@ const RelationshipEditor: React.FC<RelationshipEditorProps> = ({
       .selectAll<SVGGElement, GraphNode>('g')
       .data(graphData.nodes)
       .join('g')
-      .attr('class', d => `${styles.node} ${hoveredNode === d.id ? styles.highlighted : ''}`)
+      // リテラルの `node` クラスは useRelationshipEditor の tick が
+      // svg.selectAll('.node') で位置更新する際のセレクタ契約（併記必須）。
+      .attr('class', d => `node ${styles.node} ${hoveredNode === d.id ? styles.highlighted : ''}`)
       .call(
         d3
           .drag<SVGGElement, GraphNode>()
