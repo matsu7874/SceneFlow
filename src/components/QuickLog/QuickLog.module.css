@@ -149,6 +149,12 @@
 .combobox input {
   min-width: 7.5rem;
 }
+/* 確定済みの選択値であることを、未入力プレースホルダーと区別して示す。 */
+.comboboxConfirmed {
+  font-weight: 600;
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
 .timeInput {
   width: 5rem;
   font-family: var(--font-mono);

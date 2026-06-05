@@ -61,4 +61,21 @@ describe('RelationshipEditor', () => {
       expect(screen.queryByText(/No relationships to display/i)).not.toBeInTheDocument()
     })
   })
+
+  it('力学シミュレーションが位置更新できるよう node/link クラスを要素に付与する', async () => {
+    const { container } = render(
+      <AppProvider>
+        <Seeder data={sampleStoryData}>
+          <RelationshipEditor initialMode="relationships" />
+        </Seeder>
+      </AppProvider>,
+    )
+
+    // useRelationshipEditor の tick は svg.selectAll('.node') / '.link') で位置を更新する。
+    // 生成要素にリテラルの node/link クラスが無いとセレクタが一致せず、全ノードが原点に潰れる。
+    await waitFor(() => {
+      expect(container.querySelectorAll('g.node').length).toBeGreaterThan(0)
+      expect(container.querySelectorAll('line.link').length).toBeGreaterThan(0)
+    })
+  })
 })

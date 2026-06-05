@@ -17,6 +17,7 @@ export const SimulationPage: React.FC = () => {
     currentTime,
     personPositions,
     logEntries,
+    minTime,
     maxTime,
     formatTime,
     togglePlayPause,
@@ -46,6 +47,7 @@ export const SimulationPage: React.FC = () => {
           <SimulationControls
             isPlaying={isPlaying}
             currentTime={currentTime}
+            minTime={minTime}
             maxTime={maxTime}
             speed={speed}
             onPlayPause={togglePlayPause}

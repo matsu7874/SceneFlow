@@ -3,6 +3,7 @@ import type { Act, Prop, Information, Person, Location } from '../../types/Story
 import type { Breakage, DiagnosticCategory } from '../../modules/consistency'
 import { ActDetailPanel } from './ActDetailPanel'
 import { pickLocationColor } from './quickLogLogic'
+import { missingEntityLabel } from '../../utils/entityLabels'
 import styles from './QuickLog.module.css'
 
 interface ActTimelineRowProps {
@@ -28,10 +29,10 @@ export const ActTimelineRow: React.FC<ActTimelineRowProps> = ({
 }) => {
   const [expanded, setExpanded] = useState(false)
   const person = persons.find(p => p.id === act.personId)
-  const personName = person?.name ?? `#${act.personId}`
+  const personName = person?.name ?? missingEntityLabel('人物', act.personId)
   const personColor = person?.color ?? 'var(--ink-faint)'
   const location = locations.find(l => l.id === act.locationId)
-  const locationName = location?.name ?? `#${act.locationId}`
+  const locationName = location?.name ?? missingEntityLabel('場所', act.locationId)
   // 保存済みの色を優先し、未設定（旧データ）は id から導いた色でフォールバックする。
   const locationColor = location?.color ?? pickLocationColor(act.locationId)
 

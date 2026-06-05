@@ -4,6 +4,7 @@ import './SimulationControls.css'
 interface SimulationControlsProps {
   isPlaying: boolean
   currentTime: number
+  minTime?: number
   maxTime: number
   speed: number
   onPlayPause: () => void
@@ -15,6 +16,7 @@ interface SimulationControlsProps {
 export const SimulationControls: React.FC<SimulationControlsProps> = ({
   isPlaying,
   currentTime,
+  minTime = 0,
   maxTime,
   speed,
   onPlayPause,
@@ -68,7 +70,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
             type="range"
             className="timeline"
             value={currentTime}
-            min="0"
+            min={minTime}
             max={maxTime}
             step="0.0167"
             onChange={e => onTimeChange(Number(e.target.value))}

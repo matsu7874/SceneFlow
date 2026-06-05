@@ -31,12 +31,23 @@ function act(p: Partial<Act> & { id: number }): Act {
 const cat = (r: ReturnType<typeof analyzeStory>, actId: number) =>
   (r.byActId.get(actId) ?? []).map(b => b.category).sort()
 
+const messages = (r: ReturnType<typeof analyzeStory>, actId: number) =>
+  (r.byActId.get(actId) ?? []).map(b => b.message)
+
 describe('analyzeStory: position', () => {
   it('移動なしで現在地と違う場所のActを破綻にする', () => {
     const r = analyzeStory(
       story({ acts: [act({ id: 1, personId: 1, locationId: 11, startTime: 10 })] }),
     )
     expect(cat(r, 1)).toContain('position')
+  })
+  it('存在しない場所idを参照する破綻メッセージは生の#idでなく人間可読なラベルを使う', () => {
+    const r = analyzeStory(
+      story({ acts: [act({ id: 1, personId: 1, locationId: 999, startTime: 10 })] }),
+    )
+    const msg = messages(r, 1).join('\n')
+    expect(msg).toContain('不明な場所（#999）')
+    expect(msg).not.toContain('#999にいないため')
   })
   it('MOVEを挟めば破綻しない', () => {
     const r = analyzeStory(
