@@ -171,4 +171,19 @@ describe('sortActs', () => {
     const sorted = sortActs([act({ id: 2, startTime: 0 }), act({ id: 1, startTime: 0 })])
     expect(sorted.map(a => a.id)).toEqual([1, 2])
   })
+  it('startTimeが未設定ならtime文字列を時刻として並べる', () => {
+    const sorted = sortActs([
+      act({ id: 1, startTime: undefined, time: '00:10' }),
+      act({ id: 2, startTime: undefined, time: '00:00' }),
+    ])
+    expect(sorted.map(a => a.id)).toEqual([2, 1])
+  })
+  it('startTime付きとtimeのみのActが混在しても時刻順に並べる', () => {
+    const sorted = sortActs([
+      act({ id: 1, startTime: undefined, time: '00:10' }),
+      act({ id: 2, startTime: 0, time: '00:00' }),
+      act({ id: 3, startTime: undefined, time: '00:05' }),
+    ])
+    expect(sorted.map(a => a.id)).toEqual([2, 3, 1])
+  })
 })

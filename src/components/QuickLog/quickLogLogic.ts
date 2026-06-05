@@ -166,6 +166,13 @@ export function removeAct(story: StoryData, id: number): StoryData {
   return { ...story, acts: story.acts.filter(act => act.id !== id) }
 }
 
+// 並び替え用の実効時刻（分）。startTime が無いレガシー／読込データでも、
+// time 文字列から時刻を復元して時系列順を保つ。どちらも無ければ 0 とみなす。
+function effectiveActMinutes(act: Act): number {
+  if (act.startTime !== undefined) return act.startTime
+  return timeStringToMinutes(act.time) ?? 0
+}
+
 export function sortActs(acts: Act[]): Act[] {
-  return [...acts].sort((a, b) => (a.startTime ?? 0) - (b.startTime ?? 0) || a.id - b.id)
+  return [...acts].sort((a, b) => effectiveActMinutes(a) - effectiveActMinutes(b) || a.id - b.id)
 }
