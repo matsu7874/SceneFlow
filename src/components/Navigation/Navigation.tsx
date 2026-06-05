@@ -43,6 +43,12 @@ export const Navigation: React.FC = () => {
           検証
         </NavLink>
         <NavLink
+          to="/opportunity"
+          className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
+        >
+          容疑者・機会
+        </NavLink>
+        <NavLink
           to="/simulation"
           className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
         >

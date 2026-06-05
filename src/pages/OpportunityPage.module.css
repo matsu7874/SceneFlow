@@ -1,0 +1,273 @@
+/* =========================================================================
+   OpportunityPage ― 容疑者・機会の逆引き。計器的ライト基調。
+   ========================================================================= */
+
+.pageRoot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+/* 見出し */
+.pageHeader {
+  margin: 0;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+.pageHeader::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 4.5rem;
+  height: 2px;
+  background: var(--accent);
+}
+.pageEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+.pageTitle {
+  margin: 0.3rem 0 0.35rem;
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+.pageHint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+/* タブ */
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--line);
+}
+.tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0.55rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.tab:hover {
+  color: var(--ink);
+  background: var(--color-surface-hover);
+}
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.tab:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* パネル */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* コントロール */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.fieldLabel {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.select {
+  appearance: none;
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 0.45rem 2rem 0.45rem 0.7rem;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--ink);
+  min-width: 12rem;
+}
+.select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.finalState {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  padding-bottom: 0.45rem;
+}
+
+/* 結果 */
+.resultGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--space-4);
+}
+.resultBlock {
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--color-background);
+  overflow: hidden;
+}
+.blockHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  background: var(--color-surface-dark);
+  border-bottom: 1px solid var(--line);
+}
+.blockTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.blockCount {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--r-pill);
+  padding: 0.05rem 0.55rem;
+}
+
+.personList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.personRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+.personRow:last-child {
+  border-bottom: none;
+}
+
+.personChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex: none;
+}
+.personName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.personId {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+.chipSuffix {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+
+.alibiLoc {
+  margin-left: auto;
+  font-size: 0.82rem;
+  color: var(--ink-2);
+}
+.firstTime {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  min-width: 3.5rem;
+}
+
+.statusBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  padding: 0.05rem 0.5rem;
+}
+.status_injured {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+.status_unconscious {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+.status_dead {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.noneHint {
+  margin: 0;
+  padding: 0.85rem;
+  font-size: 0.85rem;
+  color: var(--ink-3);
+}
+
+/* 空状態 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-lg);
+  text-align: center;
+}
+.emptyIcon {
+  font-size: 1.8rem;
+  color: var(--ink-3);
+}
+.emptyTitle {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink);
+}
+.emptyHint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
