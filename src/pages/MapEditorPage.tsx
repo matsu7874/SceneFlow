@@ -8,7 +8,9 @@ import './MapEditorPage.css'
 export const MapEditorPage: React.FC = () => {
   const { storyData, setStoryData } = useAppContext()
   const { showNotification } = useVisualFeedback()
-  const [showGuide, setShowGuide] = useState(true)
+  // 操作ガイドは既定で折りたたむ。展開状態だとキャンバス中央のノードを
+  // 覆ってしまうため、必要なときにヘッダーから開く運用にする。
+  const [showGuide, setShowGuide] = useState(false)
 
   const handleMapSave = (mapData: { locations: Location[]; connections: Connection[] }): void => {
     if (storyData) {
