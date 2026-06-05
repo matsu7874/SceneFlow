@@ -80,12 +80,7 @@ test.describe('Scene Flow 基本機能確認', () => {
     // キャンバスが表示されることを確認
     await expect(page.locator('canvas').first()).toBeVisible()
 
-    // 操作ガイドを閉じる
-    const guideHeader = page.locator('.guide-header')
-    if (await guideHeader.isVisible()) {
-      await guideHeader.click()
-      await page.waitForTimeout(300)
-    }
+    // 操作ガイドは既定で折りたたまれているため、閉じる操作は不要
 
     // ノード数の確認
     await expect(page.locator('text=ノード数: 2')).toBeVisible()

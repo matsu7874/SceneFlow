@@ -94,9 +94,7 @@ test.describe('Scene Flow コア機能テスト', () => {
     await page.getByRole('link', { name: 'マップエディタ' }).click()
     await expect(page).toHaveURL(/\/map-editor/)
 
-    // 操作ガイドを閉じる
-    await page.locator('.guide-header').click()
-    await page.waitForTimeout(300)
+    // 操作ガイドは既定で折りたたまれているため、閉じる操作は不要
 
     // 初期状態の確認
     await expect(page.locator('text=ノード数: 3')).toBeVisible()
@@ -281,12 +279,12 @@ test.describe('パフォーマンスとエラー処理', () => {
       persons: Array.from({ length: 50 }, (_, i) => ({
         id: i + 1,
         name: `キャラクター${i + 1}`,
-        color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+        color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
       })),
       locations: Array.from({ length: 20 }, (_, i) => ({
         id: i + 1,
         name: `場所${i + 1}`,
-        connections: [(i + 2) % 20 + 1],
+        connections: [((i + 2) % 20) + 1],
       })),
       props: [],
       informations: [],

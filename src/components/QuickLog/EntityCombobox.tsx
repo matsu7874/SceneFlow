@@ -42,11 +42,12 @@ export const EntityCombobox: React.FC<EntityComboboxProps> = ({
   const trimmedQuery = query.trim()
   const hasExactMatch = options.some(option => option.name === trimmedQuery)
 
+  // 選択・作成後は検索クエリを空に戻す。確定名の表示は focused/blur に委ねる
+  // （フォーカス中は空＝次の検索待ち、ブラー後に確定名を通常色で表示）。
   const choose = (id: number): void => {
     onSelect(id)
     setQuery('')
     setOpen(false)
-    setFocused(false)
   }
 
   const create = (): void => {
@@ -57,7 +58,6 @@ export const EntityCombobox: React.FC<EntityComboboxProps> = ({
     onSelect(id)
     setQuery('')
     setOpen(false)
-    setFocused(false)
   }
 
   // 編集中（フォーカス時）は入力中のクエリを、未編集時は確定済みの名前を表示する。
