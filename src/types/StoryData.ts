@@ -11,6 +11,8 @@ export interface Person {
     targetId: string
     type: string
   }>
+  // 名寄せで束ねた別名（Act 説明文から抽出した表層形など）。既存一致判定にも使う。
+  aliases?: string[]
 }
 
 export interface Location {
@@ -32,6 +34,8 @@ export interface Location {
   travelTime?: number
   x?: number
   y?: number
+  // 名寄せで束ねた別名（Act 説明文から抽出した表層形など）。既存一致判定にも使う。
+  aliases?: string[]
 }
 
 export interface Prop {
@@ -45,6 +49,8 @@ export interface Prop {
   combinesWith?: string[]
   currentLocation?: string
   owner?: string
+  // 名寄せで束ねた別名（Act 説明文から抽出した表層形など）。既存一致判定にも使う。
+  aliases?: string[]
 }
 
 export interface Information {
@@ -64,6 +70,8 @@ export interface Information {
   value?: string // その観点での値（例: "茶色"）
   truth?: boolean // この value が (subject, aspect) の真実か（slot ごとに最大1つ）
   misinfoType?: 'lie' | 'mistake' // 誤情報の発生原因（嘘 / 見間違い）
+  // 名寄せで束ねた別名（Act 説明文から抽出した表層形など）。既存一致判定にも使う。
+  aliases?: string[]
 }
 
 export interface InitialState {
