@@ -101,6 +101,21 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
     (adjacency.get(from)?.has(to) ?? false) ||
     (adjacency.get(to)?.has(from) ?? false)
 
+  const locById = new Map(story.locations.map(l => [l.id, l]))
+  // 場所へ移動するのにかかる分数。未設定は 0（所要時間チェックは発火しない）。
+  const travelTimeOf = (id: number): number => locById.get(id)?.travelTime ?? 0
+  // 施錠を解く鍵（prop id）。properties.requiredItem は文字列なので数値化する。
+  const requiredKeyOf = (id: number): number | null => {
+    const raw = locById.get(id)?.properties?.requiredItem
+    if (raw == null || raw === '') return null
+    const n = Number(raw)
+    return Number.isFinite(n) ? n : null
+  }
+  const isLockedLoc = (id: number): boolean =>
+    locById.get(id)?.properties?.isLocked === true || requiredKeyOf(id) != null
+  // 各人物が直前に行動した時刻（分）。移動の所要時間検証で「前の行動からの経過」を測る。
+  const lastActTime = new Map<number, number>()
+
   const sorted = sortForReplay(story.acts)
 
   const groups = new Map<string, Act[]>()
@@ -150,6 +165,44 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
             null,
             `${personName(act.personId)} は ${locName(cur.locationId)} から ${locName(act.locationId)} へ直接移動できません（隣接していません）`,
           )
+        } else if (cur.locationId !== act.locationId) {
+          // 所要時間（アリバイ）: 隣接していても、直前の行動からの経過が
+          // 移動先の travelTime に満たなければ「間に合わない移動」とみなす。
+          const need = travelTimeOf(act.locationId)
+          const prev = lastActTime.get(act.personId)
+          if (need > 0 && prev != null && actMinutes(act) - prev < need) {
+            brek(
+              'timing',
+              null,
+              `${personName(act.personId)} は ${locName(act.locationId)} への移動に${need}分かかりますが、直前の行動から${actMinutes(act) - prev}分しか経っておらず間に合いません`,
+            )
+          }
+        }
+      }
+      // 施錠・鍵: 移動先が施錠空間なら、解錠に必要な鍵を所持していなければ入れない。
+      if (cur && cur.locationId !== act.locationId && isLockedLoc(act.locationId)) {
+        const key = requiredKeyOf(act.locationId)
+        if (key == null) {
+          brek(
+            'access',
+            null,
+            `${locName(act.locationId)} は施錠されており ${personName(act.personId)} は入れません`,
+          )
+        } else {
+          const ownsKey = ws.ownerOf(key)
+          if (!ownsKey || ownsKey.ownerId !== act.personId) {
+            brek(
+              'access',
+              { kind: 'owns', personId: act.personId, propId: key },
+              `${locName(act.locationId)} は施錠されており ${personName(act.personId)} は ${propName(key)} を所持しないと入れません`,
+            )
+          } else {
+            edges.push({
+              from: ownsKey.producer,
+              to: act.id,
+              fact: { kind: 'owns', personId: act.personId, propId: key },
+            })
+          }
         }
       }
       ws.setPosition(act.personId, act.locationId, act.id)
@@ -196,20 +249,28 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
       const owner = ws.ownerOf(act.propId)
       const ploc = ws.propLocationOf(act.propId)
       if (kind === 'TAKE') {
-        if (!ploc || ploc.locationId !== act.locationId) {
+        // 可搬性: isPortable が明示的に false の道具（大道具・凶器等）は持ち運べない。
+        if (story.props.find(p => p.id === act.propId)?.isPortable === false) {
+          brek(
+            'item',
+            { kind: 'propAt', propId: act.propId, locationId: act.locationId },
+            `${propName(act.propId)} は持ち運べないため取得できません（その場から動かせません）`,
+          )
+        } else if (!ploc || ploc.locationId !== act.locationId) {
           brek(
             'item',
             { kind: 'propAt', propId: act.propId, locationId: act.locationId },
             `${propName(act.propId)} は ${locName(act.locationId)} に無いため取得できません`,
           )
+          ws.setOwner(act.propId, act.personId, act.id)
         } else {
           edges.push({
             from: ploc.producer,
             to: act.id,
             fact: { kind: 'propAt', propId: act.propId, locationId: act.locationId },
           })
+          ws.setOwner(act.propId, act.personId, act.id)
         }
-        ws.setOwner(act.propId, act.personId, act.id)
       } else if (kind === 'GIVE') {
         if (!owner || owner.ownerId !== act.personId) {
           brek(
@@ -284,6 +345,9 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
         }
       }
     }
+
+    // この人物の「直前の行動時刻」を更新（次の移動の所要時間検証に使う）。
+    lastActTime.set(act.personId, actMinutes(act))
   }
 
   const byActId = new Map<number, Breakage[]>()

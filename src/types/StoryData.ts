@@ -27,6 +27,9 @@ export interface Location {
     requiredItem?: string
     atmosphere?: string
   }
+  // この場所へ隣接地から移動するのにかかる分数（アリバイの時間検証用、任意）。
+  // 未設定なら 0 とみなし、所要時間チェックは発火しない（既存データは無影響）。
+  travelTime?: number
   x?: number
   y?: number
 }

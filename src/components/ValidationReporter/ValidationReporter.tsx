@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import type { StoryData } from '../../types/StoryData'
 import { analyzeStory } from '../../modules/consistency'
-import type { Breakage, DiagnosticCategory } from '../../modules/consistency'
+import type { Breakage, Contradiction, DiagnosticCategory } from '../../modules/consistency'
 import styles from './ValidationReporter.module.css'
 
 interface ValidationReporterProps {
@@ -14,17 +14,29 @@ const CATEGORY_LABEL: Record<DiagnosticCategory, string> = {
   colocation: '同時刻・共在',
   item: 'アイテム所持',
   info: '情報の知識',
+  access: '施錠・鍵',
+  timing: '移動時間・アリバイ',
+  testimony: '証言の矛盾',
 }
 
-const CATEGORY_ORDER: DiagnosticCategory[] = ['position', 'colocation', 'item', 'info']
+const CATEGORY_ORDER: DiagnosticCategory[] = [
+  'position',
+  'timing',
+  'access',
+  'colocation',
+  'item',
+  'info',
+  'testimony',
+]
 
 type SeverityFilter = 'all' | 'error' | 'warn' | 'info'
 type CategoryFilter = 'all' | DiagnosticCategory
 
 /** Breakage の category から表示用の重大度を導出する */
 function severityOf(b: Breakage): 'error' | 'warn' | 'info' {
-  if (b.category === 'position' || b.category === 'item') return 'error'
-  if (b.category === 'colocation') return 'warn'
+  if (b.category === 'position' || b.category === 'item' || b.category === 'access') return 'error'
+  if (b.category === 'colocation' || b.category === 'timing' || b.category === 'testimony')
+    return 'warn'
   return 'info'
 }
 
@@ -35,7 +47,38 @@ const SEVERITY_LABEL: Record<'error' | 'warn' | 'info', string> = {
 }
 
 export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyData, className }) => {
-  const breakages = useMemo(() => analyzeStory(storyData).breakages, [storyData])
+  const breakages = useMemo(() => {
+    const report = analyzeStory(storyData)
+
+    // (subject, aspect) の subject を人物・場所・小道具のいずれかの名前に解決する。
+    const subjectName = (id: number): string => {
+      const p = storyData.persons.find(x => x.id === id)
+      if (p) return p.name
+      const l = storyData.locations.find(x => x.id === id)
+      if (l) return l.name
+      const pr = storyData.props.find(x => x.id === id)
+      if (pr) return pr.name
+      return `#${id}`
+    }
+
+    // 証言矛盾（contradictions）を診断リスト用の Breakage 形に変換する。
+    // これまで因果ビューでしか見られなかった「食い違う情報の同時保有」を検証ページに出す。
+    const contradictionToBreakage = (c: Contradiction): Breakage => {
+      const who = storyData.persons.find(p => p.id === c.personId)?.name ?? `#${c.personId}`
+      const tail =
+        c.kind === 'truth-conflict'
+          ? '一方は真実と食い違っています'
+          : '証言どうしが食い違っています'
+      return {
+        actId: c.actId,
+        category: 'testimony',
+        fact: null,
+        message: `${who} は ${subjectName(c.subject)} の「${c.aspect}」について矛盾する情報を保持しています：「${c.existing.value}」と「${c.incoming.value}」。${tail}`,
+      }
+    }
+
+    return [...report.breakages, ...report.contradictions.map(contradictionToBreakage)]
+  }, [storyData])
 
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')

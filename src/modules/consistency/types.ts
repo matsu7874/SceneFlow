@@ -1,4 +1,11 @@
-export type DiagnosticCategory = 'position' | 'colocation' | 'item' | 'info'
+export type DiagnosticCategory =
+  | 'position' // 動線（隣接していない移動）
+  | 'colocation' // 同時刻・共在（分身・不在の相手）
+  | 'item' // アイテム所持・可搬性
+  | 'info' // 情報の知識
+  | 'access' // 施錠・鍵（必要なアイテムを持たずに施錠空間へ入る）
+  | 'timing' // 移動所要時間（アリバイ：前の行動から間に合わない移動）
+  | 'testimony' // 証言矛盾（同一論点で食い違う情報の同時保有）
 
 // グラフのノード ID: Act の id（number）または初期シードの文字列キー
 export type NodeId = number | string
