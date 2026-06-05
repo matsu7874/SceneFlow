@@ -1,6 +1,7 @@
 import type { StoryData, Act } from '../../types/StoryData'
-import { getActKind } from './actKinds'
+import { getActKind, STATE_CHANGE_KINDS } from './actKinds'
 import { initWorldState } from './worldState'
+import type { PersonStatus } from './worldState'
 import { timeToMinutes } from '../utils/timeUtils'
 
 // startTime（分）を解決する。未設定なら time 文字列（"HH:MM" / "HH:MM:SS"）から導出する。
@@ -34,6 +35,8 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
     const i = story.informations.find(x => x.id === id)
     return i?.name ?? i?.content ?? `#${id}`
   }
+  const statusLabel = (s: PersonStatus): string =>
+    s === 'dead' ? '死亡' : s === 'unconscious' ? '昏倒' : s === 'injured' ? '負傷' : '健常'
 
   const nodes: GraphNode[] = []
   const edges: DependencyEdge[] = []
@@ -147,6 +150,25 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
 
     if (colocated.has(act.id)) {
       brek('colocation', null, `${personName(act.personId)} が同時刻に複数の場所に存在しています`)
+    }
+
+    // 生死・意識: 死亡・昏倒した人物は行動できない。状態を変える対象になる
+    // （WAKE で起こされる等）のは別途扱うので、ここでは「行為者」のみ検査する。
+    const actorStatus = ws.statusOf(act.personId)
+    if (actorStatus === 'dead' || actorStatus === 'unconscious') {
+      const producer = ws.statusProducer(act.personId)
+      if (producer != null) {
+        edges.push({
+          from: producer,
+          to: act.id,
+          fact: { kind: 'status', personId: act.personId, status: actorStatus },
+        })
+      }
+      brek(
+        'state',
+        null,
+        `${personName(act.personId)} は${statusLabel(actorStatus)}のため「${act.description}」を行えません`,
+      )
     }
 
     const cur = ws.positionOf(act.personId)
@@ -340,9 +362,51 @@ export function analyzeStory(story: StoryData): ConsistencyReport {
           })
         }
         if (act.interactedPersonId != null) {
-          ws.setKnows(act.interactedPersonId, act.informationId, act.id)
-          acquireClaim(act.interactedPersonId, act.informationId, act.id, act.id, time)
+          // 死亡・昏倒した相手は話を聞けない（屍や昏倒者に情報は伝わらない）。
+          const ls = ws.statusOf(act.interactedPersonId)
+          if (ls === 'dead' || ls === 'unconscious') {
+            brek(
+              'state',
+              { kind: 'status', personId: act.interactedPersonId, status: ls },
+              `${personName(act.interactedPersonId)} は${statusLabel(ls)}しているため「${infoName(act.informationId)}」を聞けません`,
+            )
+          } else {
+            ws.setKnows(act.interactedPersonId, act.informationId, act.id)
+            acquireClaim(act.interactedPersonId, act.informationId, act.id, act.id, time)
+          }
         }
+      }
+    }
+
+    // 生死・意識の状態変化（攻撃・昏倒・殺害・蘇生）。対象は interactedPersonId。
+    if (STATE_CHANGE_KINDS.has(kind) && act.interactedPersonId != null) {
+      const victim = act.interactedPersonId
+      const prev = ws.statusOf(victim)
+      const alreadyDead = (verb: string): void =>
+        brek(
+          'state',
+          { kind: 'status', personId: victim, status: 'dead' },
+          `${personName(victim)} は既に死亡しているため${verb}`,
+        )
+      if (kind === 'KILL') {
+        if (prev === 'dead') alreadyDead('再び殺害できません')
+        ws.setStatus(victim, 'dead', act.id)
+      } else if (kind === 'INCAPACITATE') {
+        if (prev === 'dead') alreadyDead('昏倒させられません')
+        else ws.setStatus(victim, 'unconscious', act.id)
+      } else if (kind === 'ATTACK') {
+        if (prev === 'dead') alreadyDead('攻撃しても変化しません')
+        else if (prev === 'normal' || prev === 'injured') ws.setStatus(victim, 'injured', act.id)
+        // 昏倒中の相手への攻撃は、より重い昏倒状態を維持する（負傷へ戻さない）。
+      } else if (kind === 'WAKE') {
+        if (prev === 'dead')
+          brek(
+            'state',
+            { kind: 'status', personId: victim, status: 'dead' },
+            `死亡した ${personName(victim)} は意識を取り戻せません`,
+          )
+        else if (prev === 'unconscious' || prev === 'injured')
+          ws.setStatus(victim, 'normal', act.id)
       }
     }
 

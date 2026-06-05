@@ -14,12 +14,22 @@ interface PropLocationEntry {
   producer: NodeId
 }
 
+// 人物の生体状態。normal=健常 / injured=負傷（行動は可能）/
+// unconscious=昏倒（行動不可・可逆）/ dead=死亡（行動不可・不可逆）。
+export type PersonStatus = 'normal' | 'injured' | 'unconscious' | 'dead'
+
+interface StatusEntry {
+  status: PersonStatus
+  producer: NodeId
+}
+
 export class WorldState {
   private positions = new Map<number, PositionEntry>()
   private propOwners = new Map<number, OwnerEntry>()
   private propLocations = new Map<number, PropLocationEntry>()
   private knowledge = new Map<number, Map<number, NodeId>>()
   private consumed = new Set<number>()
+  private statuses = new Map<number, StatusEntry>()
 
   positionOf(personId: number): PositionEntry | undefined {
     return this.positions.get(personId)
@@ -64,6 +74,18 @@ export class WorldState {
       this.knowledge.set(personId, m)
     }
     if (!m.has(informationId)) m.set(informationId, producer)
+  }
+
+  statusOf(personId: number): PersonStatus {
+    return this.statuses.get(personId)?.status ?? 'normal'
+  }
+
+  statusProducer(personId: number): NodeId | undefined {
+    return this.statuses.get(personId)?.producer
+  }
+
+  setStatus(personId: number, status: PersonStatus, producer: NodeId): void {
+    this.statuses.set(personId, { status, producer })
   }
 }
 

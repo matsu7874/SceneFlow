@@ -43,6 +43,7 @@ export const ActTimelineRow: React.FC<ActTimelineRowProps> = ({
     access: '🔒',
     timing: '⏱️',
     testimony: '⚖️',
+    state: '💀',
   }
   const categories = Array.from(new Set(breakages.map(b => b.category)))
   const tooltip = breakages.map(b => b.message).join('\n')
