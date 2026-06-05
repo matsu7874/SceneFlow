@@ -3,7 +3,11 @@ import type { StoryData } from '../../types/StoryData'
 import { analyzeStory } from '../../modules/consistency'
 import { useMapBackground } from '../../contexts/MapBackgroundContext'
 import { computeFitTransform, imageScreenRect } from '../MapBackground/geometry'
-import { breakageLocationIds, buildMovementPolylines } from '../MapBackground/spatial'
+import {
+  breakageLocationIds,
+  buildMovementPolylines,
+  resolveLocationPositions,
+} from '../MapBackground/spatial'
 import styles from './SpatialView.module.css'
 
 interface SpatialViewProps {
@@ -18,26 +22,21 @@ export const SpatialView: React.FC<SpatialViewProps> = ({ storyData }) => {
   const background = useMapBackground()
   const report = useMemo(() => analyzeStory(storyData), [storyData])
 
-  const placed = useMemo(
-    () => storyData.locations.filter(l => l.x !== undefined && l.y !== undefined),
+  // 座標未設定の場所は接続から自動レイアウトで補完する（空表示を防ぐ）。
+  const positions = useMemo(
+    () => resolveLocationPositions(storyData.locations),
     [storyData.locations],
   )
   const toScreen = useMemo(
-    () =>
-      computeFitTransform(
-        placed.map(l => ({ x: l.x as number, y: l.y as number })),
-        WIDTH,
-        HEIGHT,
-        PADDING,
-      ),
-    [placed],
+    () => computeFitTransform([...positions.values()], WIDTH, HEIGHT, PADDING),
+    [positions],
   )
 
   const locById = useMemo(() => {
     const m = new Map<number, { x: number; y: number }>()
-    for (const l of placed) m.set(l.id, toScreen(l.x as number, l.y as number))
+    for (const [id, p] of positions) m.set(id, toScreen(p.x, p.y))
     return m
-  }, [placed, toScreen])
+  }, [positions, toScreen])
 
   const breakLocs = useMemo(
     () => breakageLocationIds(report.breakages, storyData.acts),
@@ -150,7 +149,7 @@ export const SpatialView: React.FC<SpatialViewProps> = ({ storyData }) => {
             }
             return null
           })}
-          {placed.map(l => {
+          {storyData.locations.map(l => {
             const p = locById.get(l.id)
             if (!p) return null
             const isBreak = breakLocs.has(l.id)
@@ -179,15 +178,15 @@ export const SpatialView: React.FC<SpatialViewProps> = ({ storyData }) => {
         </svg>
       </div>
 
-      {/* 配置済み場所がない場合の空状態 */}
-      {placed.length === 0 && (
+      {/* 場所が1つも無い場合の空状態 */}
+      {storyData.locations.length === 0 && (
         <div className={styles.empty} role="status">
           <span className={styles.emptyMark} aria-hidden="true">
             🗺️
           </span>
-          <p className={styles.emptyTitle}>場所が配置されていません</p>
+          <p className={styles.emptyTitle}>場所がまだありません</p>
           <p className={styles.emptyHint}>
-            マップエディタで場所に座標を設定すると、ここに動線が表示されます。
+            イベント入力やマップエディタで場所を追加すると、ここに動線が表示されます。
           </p>
         </div>
       )}
