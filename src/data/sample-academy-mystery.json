@@ -5,35 +5,50 @@
       "name": "レオ",
       "color": "#6366f1",
       "occupation": "生徒会長",
-      "description": "完璧主義の生徒会長。ある秘密を抱える"
+      "description": "完璧主義の生徒会長。ある秘密を抱える",
+      "relationships": [
+        { "targetId": "5", "type": "脅迫される" },
+        { "targetId": "4", "type": "共犯" }
+      ]
     },
     {
       "id": 2,
       "name": "ユーリ",
       "color": "#22c55e",
       "occupation": "転入生",
-      "description": "学院の過去を探る転入生"
+      "description": "学院の過去を探る転入生",
+      "relationships": [{ "targetId": "1", "type": "調査対象" }]
     },
     {
       "id": 3,
       "name": "クラウス",
       "color": "#a855f7",
       "occupation": "寮監",
-      "description": "生徒を見守る寮監の教師"
+      "description": "生徒を見守る寮監の教師",
+      "relationships": [
+        { "targetId": "1", "type": "監督" },
+        { "targetId": "4", "type": "監督" },
+        { "targetId": "5", "type": "監督" }
+      ]
     },
     {
       "id": 4,
       "name": "ニコ",
       "color": "#f59e0b",
       "occupation": "図書委員",
-      "description": "物静かな図書委員"
+      "description": "物静かな図書委員",
+      "relationships": [
+        { "targetId": "1", "type": "協力" },
+        { "targetId": "5", "type": "目撃" }
+      ]
     },
     {
       "id": 5,
       "name": "アラン",
       "color": "#ef4444",
       "occupation": "生徒",
-      "description": "脅迫状を握る問題児（被害者）"
+      "description": "脅迫状を握る問題児（被害者）",
+      "relationships": [{ "targetId": "1", "type": "敵対" }]
     }
   ],
   "locations": [
