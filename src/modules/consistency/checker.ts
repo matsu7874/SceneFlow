@@ -2,6 +2,7 @@ import type { StoryData, Act } from '../../types/StoryData'
 import { getActKind } from './actKinds'
 import { initWorldState } from './worldState'
 import { timeToMinutes } from '../utils/timeUtils'
+import { missingEntityLabel } from '../../utils/entityLabels'
 
 // startTime（分）を解決する。未設定なら time 文字列（"HH:MM" / "HH:MM:SS"）から導出する。
 // 桃太郎サンプルやJSONインポートのActは time のみを持つため、startTime だけに依存すると
@@ -27,12 +28,15 @@ function sortForReplay(acts: Act[]): Act[] {
 
 export function analyzeStory(story: StoryData): ConsistencyReport {
   const ws = initWorldState(story)
-  const personName = (id: number): string => story.persons.find(p => p.id === id)?.name ?? `#${id}`
-  const locName = (id: number): string => story.locations.find(l => l.id === id)?.name ?? `#${id}`
-  const propName = (id: number): string => story.props.find(p => p.id === id)?.name ?? `#${id}`
+  const personName = (id: number): string =>
+    story.persons.find(p => p.id === id)?.name ?? missingEntityLabel('人物', id)
+  const locName = (id: number): string =>
+    story.locations.find(l => l.id === id)?.name ?? missingEntityLabel('場所', id)
+  const propName = (id: number): string =>
+    story.props.find(p => p.id === id)?.name ?? missingEntityLabel('小道具', id)
   const infoName = (id: number): string => {
     const i = story.informations.find(x => x.id === id)
-    return i?.name ?? i?.content ?? `#${id}`
+    return i?.name ?? i?.content ?? missingEntityLabel('情報', id)
   }
 
   const nodes: GraphNode[] = []
