@@ -7,7 +7,20 @@ describe('ACT_KINDS', () => {
   })
   it('主要な種類を持つ', () => {
     const values = ACT_KINDS.map(k => k.value)
-    expect(values).toEqual(['', 'MOVE', 'TAKE', 'GIVE', 'DROP', 'USE', 'LEARN', 'SPEAK'])
+    expect(values).toEqual([
+      '',
+      'MOVE',
+      'TAKE',
+      'GIVE',
+      'DROP',
+      'USE',
+      'LEARN',
+      'SPEAK',
+      'ATTACK',
+      'INCAPACITATE',
+      'KILL',
+      'WAKE',
+    ])
   })
 })
 

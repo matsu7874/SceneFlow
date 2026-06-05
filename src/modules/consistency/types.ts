@@ -6,6 +6,7 @@ export type DiagnosticCategory =
   | 'access' // 施錠・鍵（必要なアイテムを持たずに施錠空間へ入る）
   | 'timing' // 移動所要時間（アリバイ：前の行動から間に合わない移動）
   | 'testimony' // 証言矛盾（同一論点で食い違う情報の同時保有）
+  | 'state' // 生死・意識（死亡/昏倒した人物の行動、対象の状態不整合）
 
 // グラフのノード ID: Act の id（number）または初期シードの文字列キー
 export type NodeId = number | string
@@ -15,6 +16,7 @@ export type FactRef =
   | { kind: 'owns'; personId: number; propId: number }
   | { kind: 'propAt'; propId: number; locationId: number }
   | { kind: 'knows'; personId: number; informationId: number }
+  | { kind: 'status'; personId: number; status: 'normal' | 'injured' | 'unconscious' | 'dead' }
 
 export interface GraphNode {
   id: NodeId

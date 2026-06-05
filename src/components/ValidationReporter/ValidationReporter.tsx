@@ -17,9 +17,11 @@ const CATEGORY_LABEL: Record<DiagnosticCategory, string> = {
   access: '施錠・鍵',
   timing: '移動時間・アリバイ',
   testimony: '証言の矛盾',
+  state: '生死・意識',
 }
 
 const CATEGORY_ORDER: DiagnosticCategory[] = [
+  'state',
   'position',
   'timing',
   'access',
@@ -34,7 +36,13 @@ type CategoryFilter = 'all' | DiagnosticCategory
 
 /** Breakage の category から表示用の重大度を導出する */
 function severityOf(b: Breakage): 'error' | 'warn' | 'info' {
-  if (b.category === 'position' || b.category === 'item' || b.category === 'access') return 'error'
+  if (
+    b.category === 'position' ||
+    b.category === 'item' ||
+    b.category === 'access' ||
+    b.category === 'state'
+  )
+    return 'error'
   if (b.category === 'colocation' || b.category === 'timing' || b.category === 'testimony')
     return 'warn'
   return 'info'
@@ -121,6 +129,19 @@ export const ValidationReporter: React.FC<ValidationReporterProps> = ({ storyDat
         const info = storyData.informations.find(i => i.id === fact.informationId)
         const infoName = info?.name ?? info?.content ?? `#${fact.informationId}`
         return { kind: 'knows', label: `${person} ← ${infoName}` }
+      }
+      case 'status': {
+        const person =
+          storyData.persons.find(p => p.id === fact.personId)?.name ?? `#${fact.personId}`
+        const label =
+          fact.status === 'dead'
+            ? '死亡'
+            : fact.status === 'unconscious'
+              ? '昏倒'
+              : fact.status === 'injured'
+                ? '負傷'
+                : '健常'
+        return { kind: 'status', label: `${person}：${label}` }
       }
       default:
         return null
