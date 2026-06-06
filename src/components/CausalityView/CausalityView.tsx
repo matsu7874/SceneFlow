@@ -41,7 +41,9 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData, onStory
   const [hovered, setHovered] = useState<HoverState | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const updateHover = (e: React.MouseEvent, id: string): void => {
+  // ノードに入った時点で一度だけ位置を確定する。move ごとに setState すると
+  // 大きな SVG 全体が再描画され、getBoundingClientRect のレイアウト読みも毎回走るため避ける。
+  const showHover = (e: React.MouseEvent, id: string): void => {
     const rect = containerRef.current?.getBoundingClientRect()
     if (!rect) return
     setHovered({ id, x: e.clientX - rect.left, y: e.clientY - rect.top })
@@ -358,8 +360,7 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData, onStory
                   transform={`translate(${xOf(n)}, ${yOf(n)})`}
                   className={`${styles.node} ${isDimNode(id) ? styles.dim : ''}`}
                   onClick={() => setSelected(prev => (prev === id ? null : id))}
-                  onMouseEnter={e => updateHover(e, id)}
-                  onMouseMove={e => updateHover(e, id)}
+                  onMouseEnter={e => showHover(e, id)}
                   onMouseLeave={() => setHovered(null)}
                   tabIndex={0}
                   role="button"

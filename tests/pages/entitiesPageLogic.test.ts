@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { replaceEntityInList } from '../../src/pages/entitiesPageLogic'
+import { replaceEntityInList, pickEditedFields } from '../../src/pages/entitiesPageLogic'
 import type { ExtendedEntity, EntityType } from '../../src/types/extendedEntities'
 
 function ent(id: string, type: EntityType, name: string): ExtendedEntity {
@@ -36,5 +36,47 @@ describe('replaceEntityInList', () => {
 
     expect(result.find(e => e.id === '1')?.name).toBe('アリス')
     expect(result.find(e => e.id === '2')?.name).toBe('ボブ改')
+  })
+})
+
+describe('pickEditedFields', () => {
+  it('編集後のトップレベル値（名前以外のドメインフィールド）を採用する', () => {
+    const updated = {
+      ...ent('1', 'person', 'アリス'),
+      // フォームが書き戻すトップレベルの編集値
+      age: 42,
+      occupation: '探偵',
+    } as ExtendedEntity & Record<string, unknown>
+
+    const edited = pickEditedFields(updated, 'person')
+
+    expect(edited).toMatchObject({ age: 42, occupation: '探偵' })
+  })
+
+  it('false/0/空文字は採用し、未指定（undefined）のみ除外する', () => {
+    const updated = {
+      ...ent('1', 'prop', '鍵'),
+      isPortable: false,
+      description: '',
+      // category は未指定 → 除外される
+    } as ExtendedEntity & Record<string, unknown>
+
+    const edited = pickEditedFields(updated, 'prop')
+
+    expect(edited).toEqual({ isPortable: false, description: '' })
+    expect('category' in edited).toBe(false)
+  })
+
+  it('location の type は判別子と衝突するため対象外', () => {
+    const updated = {
+      ...ent('1', 'location', '図書室'),
+      capacity: 10,
+      type: 'location',
+    } as ExtendedEntity & Record<string, unknown>
+
+    const edited = pickEditedFields(updated, 'location')
+
+    expect(edited).toMatchObject({ capacity: 10 })
+    expect('type' in edited).toBe(false)
   })
 })
