@@ -123,6 +123,9 @@ export interface ExtendedEntity {
   content?: string
   connectedTo?: string[]
   connections?: number[]
+  // ドメインの type フィールドは判別子 type と衝突するため、別名で公開・編集する。
+  actType?: string
+  locationType?: string
 }
 
 /**

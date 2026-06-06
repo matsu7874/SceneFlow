@@ -5,7 +5,7 @@ import { ExtendedEntity, EntityType, entityTypeLabel } from '../types/extendedEn
 import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
 import { generateEventsFromActs } from '../utils/eventGeneration'
 import { replaceEntityInList, pickEditedFields } from './entitiesPageLogic'
-import { applyActUpdate, deleteAct } from '../components/CausalityView/actEditing'
+import { actToEntity, applyActUpdate, deleteAct } from '../components/CausalityView/actEditing'
 import { assignPersonColor, assignLocationColor } from '../components/QuickLog/quickLogLogic'
 import { ExtractionPanel } from '../components/EntityExtraction/ExtractionPanel'
 
@@ -47,6 +47,8 @@ export const EntitiesPage: React.FC = () => {
           attributes: location,
           relationships: [],
           color: location.color,
+          // 判別子 type と衝突しないよう、ドメインの type を locationType として公開する。
+          locationType: location.type,
           connectedTo: location.connections?.map(conn => conn.toString()) || [],
         })),
         ...storyData.props.map(prop => ({
@@ -72,17 +74,8 @@ export const EntitiesPage: React.FC = () => {
           attributes: info,
           relationships: [],
         })),
-        ...storyData.acts.map(act => ({
-          ...act,
-          id: act.id.toString(),
-          type: 'act' as EntityType,
-          name: act.description || `行動 ${act.id}`,
-          description: act.description || '',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          attributes: act,
-          relationships: [],
-        })),
+        // 変換は actEditing と共通化（actType の公開もここで一元化）。
+        ...storyData.acts.map(act => actToEntity(act)),
         // Events are generated from acts
         ...generateEventsFromActs(storyData.acts || []).map(event => ({
           ...event,
@@ -136,6 +129,8 @@ export const EntitiesPage: React.FC = () => {
                   id: numericId,
                   name: updatedEntity.name,
                   color: updatedEntity.color || l.color,
+                  // locationType は判別子と衝突しない別名。Location.type へ書き戻す。
+                  type: (updatedEntity.locationType as typeof l.type) ?? l.type,
                   connections: (updatedEntity.connectedTo || updatedEntity.connections || []).map(
                     (id: string | number) => (typeof id === 'string' ? parseInt(id) : id),
                   ),
