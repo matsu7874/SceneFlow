@@ -16,9 +16,9 @@ const toNum = (v: unknown): number | undefined => {
 
 /**
  * Act を ExtendedEntityEditor が扱う ExtendedEntity 形式へ変換する。
- * EntityEditor はトップレベルのフィールドを直接読むため、act の各属性を
- * 展開して載せる。type は ExtendedEntity 種別（'act'）に固定し、
- * 元の行動種別（TAKE/MOVE 等）は applyActUpdate 側で保持する。
+ * EntityEditor はトップレベルのフィールドを直接読むため、act の各属性を展開して載せる。
+ * type は ExtendedEntity 種別（'act'）に固定し、行動種別（TAKE/MOVE 等）は判別子と
+ * 衝突しない actType として公開する（編集結果は applyActUpdate で Act.type へ戻す）。
  */
 export const actToEntity = (act: Act): ExtendedEntity => {
   const now = new Date().toISOString()
@@ -26,6 +26,7 @@ export const actToEntity = (act: Act): ExtendedEntity => {
     ...act,
     id: act.id.toString(),
     type: 'act',
+    actType: act.type ?? '',
     name: act.description || `行動 ${act.id}`,
     description: act.description || '',
     created_at: now,
@@ -38,8 +39,8 @@ export const actToEntity = (act: Act): ExtendedEntity => {
 /**
  * 編集結果（ExtendedEntity）を storyData の acts に反映した新しい storyData を返す。
  * フォームのトップレベル値を数値へ正規化して patch を作り、applyActPatch に委譲する
- * （startTime 変更時の time 文字列同期も applyActPatch が行う）。行動種別（act.type）は
- * patch に含めないことで、フォームの汎用 type（'act'）に上書きされず元値を保つ。
+ * （startTime 変更時の time 文字列同期も applyActPatch が行う）。行動種別は判別子と
+ * 衝突しない actType フィールドから Act.type へ書き戻す。
  */
 export const applyActUpdate = (story: StoryData, entity: ExtendedEntity): StoryData => {
   const numericId = Number(entity.id)
@@ -47,6 +48,7 @@ export const applyActUpdate = (story: StoryData, entity: ExtendedEntity): StoryD
   if (!current) return story
   const e = entity as ExtendedEntity & Record<string, unknown>
   const patch: Partial<Act> = {
+    type: typeof e.actType === 'string' ? e.actType : current.type,
     personId: toNum(e.personId) ?? current.personId,
     locationId: toNum(e.locationId) ?? current.locationId,
     startTime: toNum(e.startTime),

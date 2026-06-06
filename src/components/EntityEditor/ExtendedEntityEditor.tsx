@@ -4,6 +4,7 @@ import { EntityEditor } from './EntityEditor'
 import { useVisualFeedback } from '../../contexts/VisualFeedbackContext'
 import { useAppContext } from '../../contexts/AppContext'
 import { generateEventsFromActs } from '../../utils/eventGeneration'
+import { ACT_KINDS } from '../../modules/consistency/actKinds'
 import styles from './EntityEditor.module.css'
 
 interface ExtendedEntityEditorProps {
@@ -51,7 +52,9 @@ const entitySchemas: Record<EntityType, any> = {
       name: { type: 'string', label: '名前', validation: { required: true, minLength: 1 } },
       color: { type: 'color', label: '色' },
       description: { type: 'string', label: '説明' },
-      type: {
+      // フィールド名は ExtendedEntity の判別子 type と衝突しないよう locationType とし、
+      // 保存時に Location.type へ書き戻す（EntitiesPage 側で対応）。
+      locationType: {
         type: 'select',
         label: 'タイプ',
         options: [
@@ -80,7 +83,7 @@ const entitySchemas: Record<EntityType, any> = {
       },
     },
     groups: {
-      基本情報: ['name', 'color', 'description', 'type', 'capacity'],
+      基本情報: ['name', 'color', 'description', 'locationType', 'capacity'],
       接続: ['connectedTo'],
       プロパティ: ['properties'],
     },
@@ -175,7 +178,9 @@ const entitySchemas: Record<EntityType, any> = {
   act: {
     fields: {
       id: { type: 'string', label: 'ID', validation: { required: true } },
-      type: { type: 'string', label: 'タイプ' },
+      // フィールド名は ExtendedEntity の判別子 type と衝突しないよう actType とし、
+      // 保存時に Act.type へ書き戻す（actEditing の actToEntity/applyActUpdate で対応）。
+      actType: { type: 'select', label: '行動種別', options: ACT_KINDS },
       personId: { type: 'reference', label: '人物', entityType: 'person' },
       locationId: { type: 'reference', label: '場所', entityType: 'location' },
       startTime: { type: 'number', label: '開始時間（分）' },
@@ -190,12 +195,12 @@ const entitySchemas: Record<EntityType, any> = {
       interactedPersonId: { type: 'reference', label: '相手の人物', entityType: 'person' },
     },
     groups: {
-      基本情報: ['id', 'type', 'description'],
+      基本情報: ['id', 'actType', 'description'],
       参照: ['personId', 'locationId'],
       タイミング: ['startTime', 'endTime'],
       関連: ['informationId', 'propId', 'interactedPersonId'],
     },
-    required: ['id', 'type'],
+    required: ['id'],
   },
 
   event: {
