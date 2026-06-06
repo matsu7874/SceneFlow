@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import type { StoryData } from '../../types/StoryData'
 import {
   analyzeStory,
@@ -7,10 +7,21 @@ import {
   duplicateTruthSlots,
 } from '../../modules/consistency'
 import type { GraphNode, NodeId, Contradiction } from '../../modules/consistency'
+import { ExtendedEntityEditor } from '../EntityEditor/ExtendedEntityEditor'
+import { actToEntity, applyActUpdate, createAct, deleteAct } from './actEditing'
+import type { ExtendedEntity } from '../../types/extendedEntities'
 import styles from './CausalityView.module.css'
 
 interface CausalityViewProps {
   storyData: StoryData
+  /** 編集（追加・修正・削除）を storyData に反映するためのコールバック。省略時は編集 UI を出さない。 */
+  onStoryDataChange?: (data: StoryData) => void
+}
+
+interface HoverState {
+  id: string
+  x: number
+  y: number
 }
 
 const GUTTER = 96
@@ -24,9 +35,17 @@ const NODE_H = 48
 const key = (id: NodeId): string => String(id)
 const isActKey = (k: string): boolean => /^\d+$/.test(k)
 
-export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
+export const CausalityView: React.FC<CausalityViewProps> = ({ storyData, onStoryDataChange }) => {
   const report = useMemo(() => analyzeStory(storyData), [storyData])
   const [selected, setSelected] = useState<string | null>(null)
+  const [hovered, setHovered] = useState<HoverState | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const updateHover = (e: React.MouseEvent, id: string): void => {
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (!rect) return
+    setHovered({ id, x: e.clientX - rect.left, y: e.clientY - rect.top })
+  }
 
   const personName = (id: number): string =>
     storyData.persons.find(p => p.id === id)?.name ?? `#${id}`
@@ -190,16 +209,54 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
     return '初期'
   }
 
+  const locationName = (id: number): string =>
+    storyData.locations.find(l => l.id === id)?.name ?? `#${id}`
+
+  // --- ビュー内編集 ---
+  const editingAct =
+    selectedActId != null ? (storyData.acts.find(a => a.id === selectedActId) ?? null) : null
+  // EntityEditor は entityData の参照が変わるたびフォームを初期化するため、
+  // ホバー等の無関係な再描画で入力が失われないよう editingAct 単位で identity を固定する。
+  const editingEntity = useMemo(() => (editingAct ? actToEntity(editingAct) : null), [editingAct])
+
+  const handleAddAct = (): void => {
+    if (!onStoryDataChange) return
+    const { story, newActId } = createAct(storyData)
+    onStoryDataChange(story)
+    setSelected(String(newActId))
+  }
+  const handleActUpdate = (entity: ExtendedEntity): void => {
+    if (!onStoryDataChange) return
+    onStoryDataChange(applyActUpdate(storyData, entity))
+  }
+  const handleActDelete = (): void => {
+    if (!onStoryDataChange || selectedActId == null) return
+    onStoryDataChange(deleteAct(storyData, selectedActId))
+    setSelected(null)
+  }
+
+  // --- ホバー時ツールチップの内容 ---
+  const hoveredNode = hovered ? (nodeById.get(hovered.id) ?? null) : null
+  const hoveredActId =
+    hovered && isActKey(hovered.id) && hoveredNode?.actId != null ? hoveredNode.actId : null
+  const hoveredAct = hoveredActId != null ? (actById.get(hoveredActId) ?? null) : null
+  const hoveredBreakMsgs =
+    hoveredActId != null ? (breakageActIds.get(hoveredActId) ?? []).map(b => b.message) : []
+  const hoveredContradictions =
+    hoveredActId != null ? (contradictionByActId.get(hoveredActId) ?? []) : []
+
   if (report.nodes.length === 0) {
     return <p className={styles.empty}>表示するイベントがありません。</p>
   }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} ref={containerRef}>
       <p className={styles.hint}>
-        ノードをクリックすると、その事実の上流（供給元）と下流（依存先）が強調されます。実線の赤いノードは破綻（前提が満たされていない箇所）、破線の枠は誤情報（❗=嘘
-        /
-        ❓=見間違い）、⚡は矛盾の発覚点です。矛盾ノードを選ぶと、食い違う2つの証言の流れが2色で表示されます。
+        このビューは <strong>破綻箇所</strong>（前提が満たされない＝赤いノード）と{' '}
+        <strong>矛盾の発覚点</strong>（真実と誤情報が食い違う＝
+        <span className={styles.hintContradiction}>⚡</span>
+        ）を見つけるためのものです。ノードをクリックすると上流（供給元）・下流（依存先）が強調され、矛盾ノードでは食い違う2つの証言の流れが2色で示されます。各情報の真贋（嘘
+        ❗ / 見間違い ❓）は補助情報として控えめに表示します。
       </p>
       {truthWarnings.length > 0 && (
         <div className={styles.truthWarning} data-testid="truth-warning">
@@ -211,125 +268,203 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData }) => {
       <div className={styles.legend} data-testid="causality-legend">
         <span className={styles.legendCaption}>凡例</span>
         <span className={styles.legendDivider} aria-hidden="true" />
+        {/* 主役: 破綻・矛盾 */}
         <span className={styles.legendItem}>
+          <span className={`${styles.swatch} ${styles.swatchBreak}`} />
+          破綻
+        </span>
+        <span className={styles.legendItem}>
+          <span className={`${styles.swatch} ${styles.swatchContradiction}`} />
+          <span className={`${styles.legendMark} ${styles.contradictionMark}`}>⚡</span>
+          矛盾発覚点
+        </span>
+        <span className={styles.legendDivider} aria-hidden="true" />
+        {/* 補助: 真贋 */}
+        <span className={`${styles.legendItem} ${styles.legendSecondary}`}>真贋</span>
+        <span className={`${styles.legendItem} ${styles.legendSecondary}`}>
           <span className={`${styles.swatch} ${styles.swatchTruth}`} />
           真実
         </span>
-        <span className={styles.legendItem}>
-          <span className={`${styles.swatch} ${styles.swatchLie}`} />
+        <span className={`${styles.legendItem} ${styles.legendSecondary}`}>
           <span className={`${styles.legendMark} ${styles.misinfoIconLie}`}>❗</span>
           誤情報(嘘)
         </span>
-        <span className={styles.legendItem}>
-          <span className={`${styles.swatch} ${styles.swatchMistake}`} />
+        <span className={`${styles.legendItem} ${styles.legendSecondary}`}>
           <span className={styles.legendMark}>❓</span>
           誤情報(見間違い)
         </span>
-        <span className={styles.legendItem}>
-          <span className={styles.legendMark}>⚡</span>
-          矛盾発覚点
-        </span>
       </div>
-      <div className={styles.scroll}>
-        <svg width={width} height={height} className={styles.svg}>
-          {personIds.map((pid, i) => (
-            <text
-              key={`row-${pid}`}
-              x={MARGIN_X}
-              y={MARGIN_Y + i * ROW_H + NODE_H / 2}
-              className={styles.rowLabel}
-            >
-              {personName(pid)}
-            </text>
-          ))}
-          {report.edges.map((e, i) => {
-            const from = nodeById.get(key(e.from))
-            const to = nodeById.get(key(e.to))
-            if (!from || !to) return null
-            return (
-              <line
-                key={`edge-${i}`}
-                x1={xOf(from) + NODE_W}
-                y1={yOf(from) + NODE_H / 2}
-                x2={xOf(to)}
-                y2={yOf(to) + NODE_H / 2}
-                className={`${styles.edge} ${edgeFlowClass(key(e.from), key(e.to))} ${isDimEdge(key(e.from), key(e.to)) ? styles.dim : ''}`}
-              />
-            )
-          })}
-          {report.nodes.map(n => {
-            const id = key(n.id)
-            const isSeed = n.actId === null
-            const hasBreak = n.actId !== null && breakageActIds.has(n.actId)
-            const hasContradiction = n.actId !== null && contradictionByActId.has(n.actId)
-            const misinfo = misinfoOfNode(n)
-            const selectedNow = selected === id
-            const breakMsgs =
-              n.actId !== null
-                ? (breakageActIds.get(n.actId) ?? []).map(b => b.message).join('\n')
-                : ''
-            const testid = isSeed ? `node-initial-${n.personId}` : `node-act-${n.actId}`
-            const misinfoClass =
-              misinfo === 'lie'
-                ? styles.misinfoLie
-                : misinfo === 'mistake' || misinfo === 'unknown'
-                  ? styles.misinfoMistake
-                  : ''
-            return (
-              <g
-                key={id}
-                data-testid={testid}
-                data-breakage={hasBreak ? 'true' : 'false'}
-                data-contradiction={hasContradiction ? 'true' : 'false'}
-                data-misinfo={misinfo}
-                data-flow={flowOf(id)}
-                data-selected={selectedNow ? 'true' : 'false'}
-                transform={`translate(${xOf(n)}, ${yOf(n)})`}
-                className={`${styles.node} ${isDimNode(id) ? styles.dim : ''}`}
-                onClick={() => setSelected(prev => (prev === id ? null : id))}
-                tabIndex={0}
-                role="button"
-                aria-pressed={selectedNow}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    setSelected(prev => (prev === id ? null : id))
-                  }
-                }}
+      {onStoryDataChange && (
+        <div className={styles.toolbar}>
+          <button type="button" className={styles.addButton} onClick={handleAddAct}>
+            ＋ 行動を追加
+          </button>
+          <span className={styles.toolbarHint}>
+            ノードを選ぶと右側で編集できます。破綻・矛盾箇所をその場で修正しましょう。
+          </span>
+        </div>
+      )}
+      <div className={styles.workspace}>
+        <div className={styles.scroll}>
+          <svg width={width} height={height} className={styles.svg}>
+            {personIds.map((pid, i) => (
+              <text
+                key={`row-${pid}`}
+                x={MARGIN_X}
+                y={MARGIN_Y + i * ROW_H + NODE_H / 2}
+                className={styles.rowLabel}
               >
-                <title>{hasBreak ? breakMsgs : n.label}</title>
-                <rect
-                  width={NODE_W}
-                  height={NODE_H}
-                  rx={6}
-                  className={`${isSeed ? styles.seedRect : hasBreak ? styles.breakRect : styles.actRect} ${misinfoClass} ${selectedNow ? styles.selectedRect : ''}`}
+                {personName(pid)}
+              </text>
+            ))}
+            {report.edges.map((e, i) => {
+              const from = nodeById.get(key(e.from))
+              const to = nodeById.get(key(e.to))
+              if (!from || !to) return null
+              return (
+                <line
+                  key={`edge-${i}`}
+                  x1={xOf(from) + NODE_W}
+                  y1={yOf(from) + NODE_H / 2}
+                  x2={xOf(to)}
+                  y2={yOf(to) + NODE_H / 2}
+                  className={`${styles.edge} ${edgeFlowClass(key(e.from), key(e.to))} ${isDimEdge(key(e.from), key(e.to)) ? styles.dim : ''}`}
                 />
-                {/* 等幅で時刻を右下に小さく表示 */}
-                <text x={8} y={NODE_H - 7} className={styles.nodeTime}>
-                  {`t=${n.startTime}`}
-                </text>
-                {misinfo !== 'none' && (
-                  <text
-                    x={NODE_W - 30}
-                    y={16}
-                    className={`${styles.misinfoIcon} ${misinfo === 'lie' ? styles.misinfoIconLie : ''}`}
-                  >
-                    {misinfo === 'lie' ? '❗' : '❓'}
+              )
+            })}
+            {report.nodes.map(n => {
+              const id = key(n.id)
+              const isSeed = n.actId === null
+              const hasBreak = n.actId !== null && breakageActIds.has(n.actId)
+              const hasContradiction = n.actId !== null && contradictionByActId.has(n.actId)
+              const misinfo = misinfoOfNode(n)
+              const selectedNow = selected === id
+              const testid = isSeed ? `node-initial-${n.personId}` : `node-act-${n.actId}`
+              const misinfoClass =
+                misinfo === 'lie'
+                  ? styles.misinfoLie
+                  : misinfo === 'mistake' || misinfo === 'unknown'
+                    ? styles.misinfoMistake
+                    : ''
+              return (
+                <g
+                  key={id}
+                  data-testid={testid}
+                  data-breakage={hasBreak ? 'true' : 'false'}
+                  data-contradiction={hasContradiction ? 'true' : 'false'}
+                  data-misinfo={misinfo}
+                  data-flow={flowOf(id)}
+                  data-selected={selectedNow ? 'true' : 'false'}
+                  transform={`translate(${xOf(n)}, ${yOf(n)})`}
+                  className={`${styles.node} ${isDimNode(id) ? styles.dim : ''}`}
+                  onClick={() => setSelected(prev => (prev === id ? null : id))}
+                  onMouseEnter={e => updateHover(e, id)}
+                  onMouseMove={e => updateHover(e, id)}
+                  onMouseLeave={() => setHovered(null)}
+                  tabIndex={0}
+                  role="button"
+                  aria-pressed={selectedNow}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setSelected(prev => (prev === id ? null : id))
+                    }
+                  }}
+                >
+                  <title>{n.label}</title>
+                  <rect
+                    width={NODE_W}
+                    height={NODE_H}
+                    rx={6}
+                    className={`${isSeed ? styles.seedRect : hasBreak ? styles.breakRect : styles.actRect} ${misinfoClass} ${hasContradiction ? styles.contradictionRect : ''} ${selectedNow ? styles.selectedRect : ''}`}
+                  />
+                  {/* 等幅で時刻を右下に小さく表示 */}
+                  <text x={8} y={NODE_H - 7} className={styles.nodeTime}>
+                    {`t=${n.startTime}`}
                   </text>
-                )}
-                {hasContradiction && (
-                  <text x={NODE_W - 16} y={16} className={styles.contradictionIcon}>
-                    ⚡
+                  {misinfo !== 'none' && (
+                    <text
+                      x={NODE_W - 30}
+                      y={16}
+                      className={`${styles.misinfoIcon} ${misinfo === 'lie' ? styles.misinfoIconLie : ''}`}
+                    >
+                      {misinfo === 'lie' ? '❗' : '❓'}
+                    </text>
+                  )}
+                  {hasContradiction && (
+                    <>
+                      <circle
+                        cx={NODE_W - 15}
+                        cy={15}
+                        r={11}
+                        className={styles.contradictionBadge}
+                      />
+                      <text x={NODE_W - 15} y={19} className={styles.contradictionIcon}>
+                        ⚡
+                      </text>
+                    </>
+                  )}
+                  <text x={8} y={NODE_H / 2 - 1} className={styles.nodeLabel}>
+                    {n.label.length > 16 ? `${n.label.slice(0, 15)}…` : n.label}
                   </text>
-                )}
-                <text x={8} y={NODE_H / 2 - 1} className={styles.nodeLabel}>
-                  {n.label.length > 16 ? `${n.label.slice(0, 15)}…` : n.label}
-                </text>
-              </g>
-            )
-          })}
-        </svg>
+                </g>
+              )
+            })}
+          </svg>
+        </div>
+        {onStoryDataChange && editingEntity && (
+          <aside className={styles.editPanel} data-testid="causality-edit-panel">
+            <div className={styles.editPanelHead}>
+              <span className={styles.panelEyebrow}>ノード編集</span>
+              <button
+                type="button"
+                className={styles.editClose}
+                onClick={() => setSelected(null)}
+                aria-label="編集を閉じる"
+              >
+                ✕
+              </button>
+            </div>
+            <ExtendedEntityEditor
+              entity={editingEntity}
+              onUpdate={handleActUpdate}
+              onDelete={handleActDelete}
+            />
+          </aside>
+        )}
       </div>
+      {hovered && hoveredNode && (
+        <div
+          className={styles.tooltip}
+          style={{ left: hovered.x + 14, top: hovered.y + 14 }}
+          role="tooltip"
+        >
+          <div className={styles.tooltipLabel}>{hoveredNode.label}</div>
+          <div className={styles.tooltipMeta}>
+            t={hoveredNode.startTime} ・ {personName(hoveredNode.personId)}
+            {hoveredAct?.locationId != null ? ` ・ ${locationName(hoveredAct.locationId)}` : ''}
+          </div>
+          {hoveredBreakMsgs.length > 0 && (
+            <div className={styles.tooltipBreak}>
+              <span className={styles.tooltipTag}>破綻</span>
+              {hoveredBreakMsgs.map((m, i) => (
+                <div key={i}>{m}</div>
+              ))}
+            </div>
+          )}
+          {hoveredContradictions.length > 0 && (
+            <div className={styles.tooltipContradiction}>
+              <span className={styles.tooltipTagContradiction}>矛盾発覚</span>
+              {hoveredContradictions.map(c => (
+                <div key={c.id}>
+                  {entityName(c.subject)}／{c.aspect}: 「{c.existing.value}」と「{c.incoming.value}
+                  」が食い違い
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       {selectedContradictions && selectedContradictions.length > 0 && (
         <div className={styles.panel} data-testid="contradiction-panel">
           <span className={styles.panelEyebrow}>矛盾レポート</span>

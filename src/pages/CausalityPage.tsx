@@ -59,7 +59,7 @@ const emptyStyle: React.CSSProperties = {
 }
 
 export const CausalityPage: React.FC = () => {
-  const { storyData } = useAppContext()
+  const { storyData, setStoryData } = useAppContext()
 
   if (!storyData) {
     return (
@@ -90,7 +90,7 @@ export const CausalityPage: React.FC = () => {
       </header>
       <div className="page-content">
         <ErrorBoundary>
-          <CausalityView storyData={storyData} />
+          <CausalityView storyData={storyData} onStoryDataChange={setStoryData} />
         </ErrorBoundary>
       </div>
     </div>
