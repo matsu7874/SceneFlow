@@ -26,6 +26,9 @@
   --warn-soft: #fef3c7;
   --danger: #dc2626;
   --danger-soft: #fee2e2;
+  /* 矛盾発覚点の専用色。破綻(赤)・誤情報(橙) と衝突しない violet 系。 */
+  --contradiction: #7c3aed;
+  --contradiction-soft: #ede9fe;
 
   /* 余白（8pxグリッド）・角丸 */
   --space-1: 4px;

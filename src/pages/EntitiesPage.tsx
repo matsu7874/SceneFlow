@@ -5,6 +5,7 @@ import { ExtendedEntity, EntityType, entityTypeLabel } from '../types/extendedEn
 import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
 import { generateEventsFromActs } from '../utils/eventGeneration'
 import { replaceEntityInList } from './entitiesPageLogic'
+import { applyActUpdate, deleteAct } from '../components/CausalityView/actEditing'
 import { assignPersonColor, assignLocationColor } from '../components/QuickLog/quickLogLogic'
 import { ExtractionPanel } from '../components/EntityExtraction/ExtractionPanel'
 
@@ -175,17 +176,8 @@ export const EntitiesPage: React.FC = () => {
         }
 
         case 'act': {
-          const updatedActs = storyData.acts.map(a =>
-            a.id === numericId
-              ? {
-                  ...a,
-                  ...updatedEntity.attributes,
-                  id: numericId,
-                  description: updatedEntity.description || updatedEntity.name,
-                }
-              : a,
-          )
-          setStoryData({ ...storyData, acts: updatedActs })
+          // 参照・時刻フィールドの編集も保存されるよう、トップレベル値を採用する共通ヘルパーで反映する。
+          setStoryData(applyActUpdate(storyData, updatedEntity))
           break
         }
 
@@ -363,10 +355,7 @@ export const EntitiesPage: React.FC = () => {
           })
           break
         case 'act':
-          setStoryData({
-            ...storyData,
-            acts: storyData.acts.filter(a => a.id !== numericId),
-          })
+          setStoryData(deleteAct(storyData, numericId))
           break
         case 'event':
           // Events are generated from acts, so we can't delete them directly

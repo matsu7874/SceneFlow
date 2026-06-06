@@ -5,11 +5,18 @@
 
 /* ---------- コンテナ ---------- */
 .container {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   font-family: var(--font-sans);
   color: var(--ink);
+}
+
+/* ヒント文中の矛盾シンボル強調 */
+.hintContradiction {
+  color: var(--contradiction);
+  font-weight: 700;
 }
 
 /* ---------- ヒント文 ---------- */
@@ -92,6 +99,14 @@
   background: var(--color-background);
   border-color: var(--line-strong);
 }
+.swatchBreak {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+.swatchContradiction {
+  background: var(--contradiction-soft);
+  border-color: var(--contradiction);
+}
 .swatchLie {
   background: var(--danger-soft);
   border-color: var(--danger);
@@ -104,15 +119,104 @@
   font-size: 0.85rem;
   line-height: 1;
 }
+.contradictionMark {
+  color: var(--contradiction);
+}
+
+/* 副次的な凡例（真贋）— 主役の破綻・矛盾より控えめに見せる */
+.legendSecondary {
+  font-size: 0.72rem;
+  color: var(--ink-3);
+}
+.legendSecondary .swatch {
+  width: 8px;
+  height: 8px;
+}
+
+/* ---------- ツールバー（編集操作） ---------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+}
+.addButton:hover {
+  background: var(--accent-strong);
+}
+.toolbarHint {
+  font-size: 0.76rem;
+  color: var(--ink-3);
+}
+
+/* ---------- グラフ + 編集パネルのレイアウト ---------- */
+.workspace {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
 
 /* ---------- グラフ スクロール領域 ---------- */
 .scroll {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   background: var(--color-surface);
   max-height: 70vh;
   box-shadow: var(--shadow-1);
+}
+
+/* ---------- ビュー内編集パネル ---------- */
+.editPanel {
+  flex: 0 0 340px;
+  max-width: 340px;
+  max-height: 70vh;
+  overflow: auto;
+  background: var(--color-background);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-2);
+}
+.editPanelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: var(--color-background);
+  z-index: 1;
+}
+.editClose {
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--r-sm);
+}
+.editClose:hover {
+  background: var(--color-surface-hover);
+  color: var(--ink);
 }
 
 .svg {
@@ -186,38 +290,55 @@
   stroke-width: 1.5;
 }
 
+/* 誤情報（真贋）は補助情報。塗りつぶしをやめ、細い破線枠のみで控えめに示す。
+   矛盾・選択より先に定義し、それらの枠が上書きで勝つようにする。 */
+.misinfoLie {
+  stroke: var(--danger);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.9;
+}
+.misinfoMistake {
+  stroke: var(--warn);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.9;
+}
+
+/* 矛盾発覚点（主役）— violet の太枠で強調。破綻(赤)・真贋より優先。 */
+.contradictionRect {
+  stroke: var(--contradiction);
+  stroke-width: 2.5;
+  stroke-dasharray: none;
+}
+
 /* 選択ノード（全種に上書き） */
 .selectedRect {
   stroke: var(--accent);
   stroke-width: 2.5;
   fill: var(--accent-soft);
+  stroke-dasharray: none;
 }
 
-/* 誤情報（嘘） */
-.misinfoLie {
-  fill: var(--danger-soft);
-  stroke: var(--danger);
-  stroke-width: 1.5;
-  stroke-dasharray: 5 3;
-}
-
-/* 誤情報（見間違い） */
-.misinfoMistake {
-  fill: var(--warn-soft);
-  stroke: var(--warn);
-  stroke-width: 1.5;
-  stroke-dasharray: 5 3;
-}
-
+/* 真贋アイコンは小さく淡く */
 .misinfoIcon {
-  font-size: 11px;
+  font-size: 9px;
+  opacity: 0.55;
   pointer-events: none;
 }
 .misinfoIconLie {
   fill: var(--danger);
 }
+
+/* 矛盾バッジ（主役）— violet の塗り丸 + ⚡ */
+.contradictionBadge {
+  fill: var(--contradiction);
+  pointer-events: none;
+}
 .contradictionIcon {
   font-size: 12px;
+  fill: #fff;
+  text-anchor: middle;
   pointer-events: none;
 }
 
@@ -243,6 +364,59 @@
 /* 非強調ノード・エッジの減光 */
 .dim {
   opacity: 0.18;
+}
+
+/* ---------- ホバー ツールチップ ---------- */
+.tooltip {
+  position: absolute;
+  z-index: 20;
+  max-width: 320px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-pop);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  pointer-events: none;
+  white-space: normal;
+  word-break: break-word;
+}
+.tooltipLabel {
+  font-weight: 600;
+  font-size: 0.84rem;
+  margin-bottom: 2px;
+}
+.tooltipMeta {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+.tooltipBreak,
+.tooltipContradiction {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.74rem;
+}
+.tooltipTag,
+.tooltipTagContradiction {
+  display: inline-block;
+  margin-bottom: 2px;
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.tooltipTag {
+  background: var(--danger);
+  color: #fff;
+}
+.tooltipTagContradiction {
+  background: var(--contradiction);
+  color: #fff;
 }
 
 /* ---------- 空状態 ---------- */
