@@ -4,7 +4,7 @@ import { useAppContext } from '../contexts/AppContext'
 import { ExtendedEntity, EntityType, entityTypeLabel } from '../types/extendedEntities'
 import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
 import { generateEventsFromActs } from '../utils/eventGeneration'
-import { replaceEntityInList } from './entitiesPageLogic'
+import { replaceEntityInList, pickEditedFields } from './entitiesPageLogic'
 import { applyActUpdate, deleteAct } from '../components/CausalityView/actEditing'
 import { assignPersonColor, assignLocationColor } from '../components/QuickLog/quickLogLogic'
 import { ExtractionPanel } from '../components/EntityExtraction/ExtractionPanel'
@@ -110,15 +110,15 @@ export const EntitiesPage: React.FC = () => {
 
       switch (updatedEntity.type) {
         case 'person': {
+          const edited = pickEditedFields(updatedEntity, 'person')
           const updatedPersons = storyData.persons.map(p =>
             p.id === numericId
               ? {
                   ...p,
-                  ...updatedEntity.attributes,
+                  ...edited,
                   id: numericId,
                   name: updatedEntity.name,
-                  color:
-                    updatedEntity.color || updatedEntity.attributes?.color || p.color || '#3B82F6',
+                  color: updatedEntity.color || p.color || '#3B82F6',
                 }
               : p,
           )
@@ -127,14 +127,15 @@ export const EntitiesPage: React.FC = () => {
         }
 
         case 'location': {
+          const edited = pickEditedFields(updatedEntity, 'location')
           const updatedLocations = storyData.locations.map(l =>
             l.id === numericId
               ? {
                   ...l,
-                  ...updatedEntity.attributes,
+                  ...edited,
                   id: numericId,
                   name: updatedEntity.name,
-                  color: updatedEntity.color || updatedEntity.attributes?.color || l.color,
+                  color: updatedEntity.color || l.color,
                   connections: (updatedEntity.connectedTo || updatedEntity.connections || []).map(
                     (id: string | number) => (typeof id === 'string' ? parseInt(id) : id),
                   ),
@@ -146,26 +147,21 @@ export const EntitiesPage: React.FC = () => {
         }
 
         case 'prop': {
+          const edited = pickEditedFields(updatedEntity, 'prop')
           const updatedProps = storyData.props.map(p =>
-            p.id === numericId
-              ? {
-                  ...p,
-                  ...updatedEntity.attributes,
-                  id: numericId,
-                  name: updatedEntity.name,
-                }
-              : p,
+            p.id === numericId ? { ...p, ...edited, id: numericId, name: updatedEntity.name } : p,
           )
           setStoryData({ ...storyData, props: updatedProps })
           break
         }
 
         case 'information': {
+          const edited = pickEditedFields(updatedEntity, 'information')
           const updatedInformations = storyData.informations.map(i =>
             i.id === numericId
               ? {
                   ...i,
-                  ...updatedEntity.attributes,
+                  ...edited,
                   id: numericId,
                   content: updatedEntity.content || updatedEntity.name,
                 }
