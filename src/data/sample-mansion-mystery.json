@@ -1,0 +1,1173 @@
+{
+  "persons": [
+    {
+      "id": 1,
+      "name": "城ヶ崎 厳三",
+      "color": "#6b7280",
+      "age": 68,
+      "occupation": "当主・資産家",
+      "personality": "尊大で猜疑心が強い",
+      "description": "鴉乃城の当主。先妻の息子を廃嫡しようとしている。事件の被害者",
+      "goals": ["遺言を書き換え相続を整理する", "鵜飼の不正を暴く"],
+      "relationships": [
+        { "targetId": "3", "type": "廃嫡しようとする" },
+        { "targetId": "4", "type": "不正を疑う" }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "城ヶ崎 怜子",
+      "color": "#ec4899",
+      "age": 34,
+      "occupation": "後妻",
+      "personality": "華やかだが孤独",
+      "description": "厳三の若い後妻。運転手の黒木と旧恋人で、駆け落ちを夢見る。事件当夜は施錠した主寝室にいた",
+      "goals": ["黒木と駆け落ちする"],
+      "relationships": [
+        { "targetId": "1", "type": "財産目当ての結婚" },
+        { "targetId": "7", "type": "旧恋人" }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "城ヶ崎 透",
+      "color": "#ef4444",
+      "age": 29,
+      "occupation": "先妻の息子",
+      "personality": "冷静沈着、執念深い",
+      "description": "厳三の先妻の息子。廃嫡を目前に父を手にかける真犯人",
+      "goals": ["廃嫡を阻止し相続権を守る"],
+      "relationships": [
+        { "targetId": "1", "type": "確執" },
+        { "targetId": "7", "type": "共犯" }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "鵜飼 修司",
+      "color": "#f59e0b",
+      "age": 51,
+      "occupation": "顧問弁護士",
+      "personality": "理知的だが脛に傷を持つ",
+      "description": "城ヶ崎家の顧問弁護士。横領が露見しかけ動揺するが、最後は隠し通路を見抜き真相に迫る",
+      "goals": ["横領の発覚を防ぐ", "事件の真相を突き止める"],
+      "relationships": [{ "targetId": "1", "type": "横領を隠す" }]
+    },
+    {
+      "id": 5,
+      "name": "朝倉 美晴",
+      "color": "#14b8a6",
+      "age": 58,
+      "occupation": "家政婦",
+      "personality": "忠実だが思い込みが強い",
+      "description": "長年仕える住み込みの家政婦。暗がりで人影を見間違える誤認証言者",
+      "relationships": [{ "targetId": "1", "type": "長年の忠誠" }]
+    },
+    {
+      "id": 6,
+      "name": "神門 一郎",
+      "color": "#3b82f6",
+      "age": 47,
+      "occupation": "主治医",
+      "personality": "几帳面だが思い込みに弱い",
+      "description": "厳三の主治医。止まった大時計を見落とし死亡時刻を誤って推定する",
+      "relationships": [{ "targetId": "1", "type": "主治医" }]
+    },
+    {
+      "id": 7,
+      "name": "黒木 蓮",
+      "color": "#8b5cf6",
+      "age": 33,
+      "occupation": "運転手",
+      "personality": "口が達者で打算的",
+      "description": "城ヶ崎家の運転手。怜子の旧恋人。透のために偽のアリバイを証言する",
+      "goals": ["怜子と駆け落ちする"],
+      "relationships": [
+        { "targetId": "2", "type": "旧恋人" },
+        { "targetId": "3", "type": "偽証" }
+      ]
+    }
+  ],
+  "locations": [
+    {
+      "id": 1,
+      "name": "玄関ホール",
+      "connections": [2, 8, 9],
+      "type": "indoor",
+      "description": "鴉乃城の表玄関。大時計が時を刻む",
+      "x": 300,
+      "y": 420
+    },
+    {
+      "id": 2,
+      "name": "大広間",
+      "connections": [1, 3, 4, 8],
+      "type": "indoor",
+      "description": "晩餐が催される広間。各室の起点",
+      "x": 520,
+      "y": 420
+    },
+    {
+      "id": 3,
+      "name": "厨房",
+      "connections": [2],
+      "type": "indoor",
+      "description": "家政婦が差配する厨房",
+      "x": 720,
+      "y": 420
+    },
+    {
+      "id": 4,
+      "name": "ビリヤード室",
+      "connections": [2, 5],
+      "type": "indoor",
+      "description": "紳士たちの遊技室。書斎へ通じる隠し通路がある",
+      "x": 520,
+      "y": 250
+    },
+    {
+      "id": 5,
+      "name": "書斎",
+      "connections": [4, 8],
+      "type": "indoor",
+      "description": "当主の書斎。事件現場。扉は内側から施錠されていた（密室）",
+      "x": 520,
+      "y": 90
+    },
+    {
+      "id": 6,
+      "name": "主寝室",
+      "connections": [8],
+      "type": "indoor",
+      "description": "夫妻の寝室。施錠されており鍵が要る",
+      "properties": { "isLocked": true, "requiredItem": "102" },
+      "x": 100,
+      "y": 90
+    },
+    {
+      "id": 7,
+      "name": "客室",
+      "connections": [8],
+      "type": "indoor",
+      "description": "招かれた客のための部屋",
+      "x": 300,
+      "y": 90
+    },
+    {
+      "id": 8,
+      "name": "大階段",
+      "connections": [1, 2, 5, 6, 7],
+      "type": "transit",
+      "description": "一階と二階をつなぐ大階段。上るのに時間がかかる",
+      "travelTime": 1,
+      "x": 300,
+      "y": 250
+    },
+    {
+      "id": 9,
+      "name": "温室",
+      "connections": [1],
+      "type": "outdoor",
+      "description": "玄関脇の温室。嵐の夜は人気がなく、密会や隠し事に使われる",
+      "travelTime": 2,
+      "x": 100,
+      "y": 420
+    }
+  ],
+  "props": [
+    {
+      "id": 101,
+      "name": "青銅の梟の文鎮",
+      "category": "SMALL_PROP",
+      "isPortable": true,
+      "currentLocation": "5",
+      "description": "書斎の机に置かれた重い文鎮。凶器となる"
+    },
+    {
+      "id": 102,
+      "name": "主寝室の鍵",
+      "category": "SMALL_PROP",
+      "isPortable": true,
+      "owner": "2",
+      "description": "怜子が持つ主寝室の鍵。彼女のアリバイを裏づける"
+    },
+    {
+      "id": 103,
+      "name": "鎮静剤の小瓶",
+      "category": "SMALL_PROP",
+      "isPortable": true,
+      "isConsumable": true,
+      "isCombineable": true,
+      "combinesWith": ["104"],
+      "owner": "6",
+      "description": "神門が持つ強い鎮静剤。ブランデーに混ぜられる"
+    },
+    {
+      "id": 104,
+      "name": "ブランデーのデキャンタ",
+      "category": "SMALL_PROP",
+      "isPortable": true,
+      "isCombineable": true,
+      "combinesWith": ["103"],
+      "owner": "5",
+      "description": "晩餐に供されたブランデー。鎮静剤と混ぜられる"
+    },
+    {
+      "id": 106,
+      "name": "遺言書草案",
+      "category": "SMALL_PROP",
+      "isPortable": true,
+      "currentLocation": "5",
+      "description": "透の廃嫡を記した遺言書の草案。動機の証拠",
+      "aliases": ["廃嫡の手紙"]
+    },
+    {
+      "id": 107,
+      "name": "古いランタン",
+      "category": "SMALL_PROP",
+      "isPortable": true,
+      "owner": "7",
+      "description": "停電に備えた携行ランタン。共犯の符牒として手渡される"
+    },
+    {
+      "id": 108,
+      "name": "玄関の大時計",
+      "category": "LARGE_PROP",
+      "isFixed": true,
+      "occupiesSpace": true,
+      "isPortable": false,
+      "currentLocation": "1",
+      "description": "玄関ホールの大時計。犯行時の衝撃で22:35に止まっていた"
+    },
+    {
+      "id": 109,
+      "name": "会計帳簿",
+      "category": "SMALL_PROP",
+      "isPortable": true,
+      "owner": "4",
+      "description": "鵜飼の横領を示す裏帳簿。温室に隠される動機の証拠"
+    }
+  ],
+  "informations": [
+    {
+      "id": 201,
+      "name": "透の居場所（真実）",
+      "content": "透は22:30に書斎にいた",
+      "category": "FACT",
+      "subject": 3,
+      "aspect": "22:30の居場所",
+      "value": "書斎",
+      "truth": true
+    },
+    {
+      "id": 205,
+      "name": "透の偽アリバイ",
+      "content": "透はずっとビリヤード室にいた",
+      "category": "RUMOR",
+      "subject": 3,
+      "aspect": "22:30の居場所",
+      "value": "ビリヤード室",
+      "truth": false,
+      "misinfoType": "lie"
+    },
+    {
+      "id": 206,
+      "name": "朝倉の誤認",
+      "content": "22:30頃、怜子を書斎前の廊下で見た",
+      "category": "RUMOR",
+      "subject": 2,
+      "aspect": "22:30の居場所",
+      "value": "書斎前の廊下",
+      "truth": false,
+      "misinfoType": "mistake"
+    },
+    {
+      "id": 207,
+      "name": "怜子の居場所（真実）",
+      "content": "怜子は22:30、主寝室にいた",
+      "category": "FACT",
+      "subject": 2,
+      "aspect": "22:30の居場所",
+      "value": "主寝室",
+      "truth": true
+    },
+    {
+      "id": 208,
+      "name": "凶器の所在（嘘）",
+      "content": "凶器は温室で見つかった",
+      "category": "RUMOR",
+      "subject": 101,
+      "aspect": "凶器の所在",
+      "value": "温室",
+      "truth": false,
+      "misinfoType": "lie"
+    },
+    {
+      "id": 209,
+      "name": "凶器の所在（真実）",
+      "content": "凶器の文鎮は書斎にあった",
+      "category": "FACT",
+      "subject": 101,
+      "aspect": "凶器の所在",
+      "value": "書斎",
+      "truth": true
+    },
+    {
+      "id": 202,
+      "name": "死亡時刻（真実）",
+      "content": "厳三の死亡時刻は22:35。止まった大時計が示している",
+      "category": "FACT",
+      "subject": 1,
+      "aspect": "死亡時刻",
+      "value": "22:35",
+      "truth": true
+    },
+    {
+      "id": 210,
+      "name": "死亡時刻（誤推定）",
+      "content": "厳三の死亡時刻は23:00頃",
+      "category": "RUMOR",
+      "subject": 1,
+      "aspect": "死亡時刻",
+      "value": "23:00",
+      "truth": false,
+      "misinfoType": "mistake"
+    },
+    {
+      "id": 204,
+      "name": "透の動機",
+      "content": "透は廃嫡を阻止するため父を殺した",
+      "category": "SECRET",
+      "isSecret": true,
+      "subject": 3,
+      "aspect": "動機",
+      "value": "廃嫡阻止",
+      "truth": true
+    },
+    {
+      "id": 212,
+      "name": "遺言の書き換え",
+      "content": "厳三は遺言を書き換えた",
+      "category": "RUMOR",
+      "subject": 1,
+      "aspect": "遺言",
+      "value": "書き換え済み",
+      "truth": true
+    },
+    {
+      "id": 213,
+      "name": "鵜飼の横領",
+      "content": "鵜飼は城ヶ崎家の資産を横領している",
+      "category": "SECRET",
+      "isSecret": true,
+      "subject": 4,
+      "aspect": "不正経理",
+      "value": "横領",
+      "truth": true
+    },
+    {
+      "id": 214,
+      "name": "怜子と黒木の密通",
+      "content": "怜子は運転手の黒木と密かに通じている",
+      "category": "SECRET",
+      "isSecret": true,
+      "subject": 2,
+      "aspect": "私的関係",
+      "value": "黒木と密通",
+      "truth": true
+    },
+    {
+      "id": 217,
+      "name": "駆け落ちの計画",
+      "content": "怜子と黒木は今夜駆け落ちを企てている",
+      "category": "SECRET",
+      "isSecret": true,
+      "subject": 2,
+      "aspect": "計画",
+      "value": "黒木と駆け落ち",
+      "truth": true
+    }
+  ],
+  "initialStates": [
+    { "personId": 1, "locationId": 2, "time": "21:00" },
+    { "personId": 2, "locationId": 2, "time": "21:00" },
+    { "personId": 3, "locationId": 2, "time": "21:00" },
+    { "personId": 4, "locationId": 2, "time": "21:00" },
+    { "personId": 5, "locationId": 3, "time": "21:00" },
+    { "personId": 6, "locationId": 2, "time": "21:00" },
+    { "personId": 7, "locationId": 1, "time": "21:00" }
+  ],
+  "acts": [
+    {
+      "id": 1,
+      "personId": 5,
+      "locationId": 2,
+      "startTime": 1262,
+      "time": "21:02",
+      "type": "MOVE",
+      "description": "朝倉が配膳のため厨房から大広間へ出る"
+    },
+    {
+      "id": 2,
+      "personId": 7,
+      "locationId": 2,
+      "startTime": 1264,
+      "time": "21:04",
+      "type": "MOVE",
+      "description": "黒木が給仕を手伝うため玄関から大広間へ入る"
+    },
+    {
+      "id": 3,
+      "personId": 5,
+      "locationId": 2,
+      "startTime": 1265,
+      "time": "21:05",
+      "type": "DROP",
+      "propId": 104,
+      "description": "朝倉がブランデーのデキャンタを卓に置く"
+    },
+    {
+      "id": 4,
+      "personId": 6,
+      "locationId": 2,
+      "startTime": 1266,
+      "time": "21:06",
+      "type": "DROP",
+      "propId": 103,
+      "description": "神門が往診鞄の鎮静剤を卓に置き忘れる"
+    },
+    {
+      "id": 5,
+      "personId": 1,
+      "locationId": 2,
+      "startTime": 1267,
+      "time": "21:07",
+      "type": "LEARN",
+      "informationId": 212,
+      "description": "厳三が遺言を書き換える決意を固める"
+    },
+    {
+      "id": 6,
+      "personId": 1,
+      "locationId": 2,
+      "startTime": 1269,
+      "time": "21:09",
+      "type": "SPEAK",
+      "informationId": 212,
+      "interactedPersonId": 3,
+      "description": "厳三が透に廃嫡（遺言書換え）を宣告する"
+    },
+    {
+      "id": 7,
+      "personId": 1,
+      "locationId": 2,
+      "startTime": 1271,
+      "time": "21:11",
+      "type": "SPEAK",
+      "informationId": 212,
+      "interactedPersonId": 4,
+      "description": "厳三が鵜飼に遺言の立会いを命じる"
+    },
+    {
+      "id": 8,
+      "personId": 2,
+      "locationId": 2,
+      "startTime": 1272,
+      "time": "21:12",
+      "type": "LEARN",
+      "informationId": 214,
+      "description": "怜子が黒木との関係をひそかに意識する"
+    },
+    {
+      "id": 9,
+      "personId": 4,
+      "locationId": 2,
+      "startTime": 1274,
+      "time": "21:14",
+      "type": "LEARN",
+      "informationId": 213,
+      "description": "鵜飼が自らの横領が露見しかねないと恐れる"
+    },
+    {
+      "id": 10,
+      "personId": 7,
+      "locationId": 2,
+      "startTime": 1276,
+      "time": "21:16",
+      "type": "LEARN",
+      "informationId": 214,
+      "description": "黒木が怜子との密会を心に決める"
+    },
+    {
+      "id": 11,
+      "personId": 3,
+      "locationId": 2,
+      "startTime": 1278,
+      "time": "21:18",
+      "type": "TAKE",
+      "propId": 103,
+      "description": "透が卓上の鎮静剤をそっとくすねる"
+    },
+    {
+      "id": 12,
+      "personId": 1,
+      "locationId": 2,
+      "startTime": 1280,
+      "time": "21:20",
+      "type": "LEARN",
+      "informationId": 213,
+      "description": "厳三が鵜飼の不正経理を見抜く"
+    },
+    {
+      "id": 13,
+      "personId": 3,
+      "locationId": 2,
+      "startTime": 1282,
+      "time": "21:22",
+      "type": "TAKE",
+      "propId": 104,
+      "description": "透がブランデーのデキャンタを取る"
+    },
+    {
+      "id": 14,
+      "personId": 1,
+      "locationId": 2,
+      "startTime": 1284,
+      "time": "21:24",
+      "type": "SPEAK",
+      "informationId": 213,
+      "interactedPersonId": 4,
+      "description": "厳三が鵜飼を横領の件で問い詰める"
+    },
+    {
+      "id": 15,
+      "personId": 3,
+      "locationId": 2,
+      "startTime": 1286,
+      "time": "21:26",
+      "type": "COMBINE",
+      "propId": 103,
+      "description": "透が鎮静剤をブランデーに混ぜ込む（睡眠薬入りの酒を用意）"
+    },
+    {
+      "id": 16,
+      "personId": 7,
+      "locationId": 2,
+      "startTime": 1288,
+      "time": "21:28",
+      "type": "GIVE",
+      "propId": 107,
+      "interactedPersonId": 3,
+      "description": "黒木が透にランタンを渡す（停電に備えと称した符牒）"
+    },
+    {
+      "id": 17,
+      "personId": 6,
+      "locationId": 1,
+      "startTime": 1290,
+      "time": "21:30",
+      "type": "MOVE",
+      "description": "神門が玄関ホールへ赴き大時計を確かめる"
+    },
+    {
+      "id": 18,
+      "personId": 2,
+      "locationId": 1,
+      "startTime": 1292,
+      "time": "21:32",
+      "type": "MOVE",
+      "description": "怜子が不快げに晩餐の席を立つ"
+    },
+    {
+      "id": 19,
+      "personId": 5,
+      "locationId": 3,
+      "startTime": 1293,
+      "time": "21:33",
+      "type": "MOVE",
+      "description": "朝倉が追加の料理を取りに厨房へ下がる"
+    },
+    {
+      "id": 20,
+      "personId": 7,
+      "locationId": 1,
+      "startTime": 1294,
+      "time": "21:34",
+      "type": "MOVE",
+      "description": "黒木が怜子を追って玄関へ向かう"
+    },
+    {
+      "id": 21,
+      "personId": 2,
+      "locationId": 9,
+      "startTime": 1296,
+      "time": "21:36",
+      "type": "MOVE",
+      "description": "怜子が人目を避けて温室へ入る"
+    },
+    {
+      "id": 22,
+      "personId": 4,
+      "locationId": 1,
+      "startTime": 1298,
+      "time": "21:38",
+      "type": "MOVE",
+      "description": "鵜飼が裏帳簿を隠そうと席を立ち玄関へ"
+    },
+    {
+      "id": 23,
+      "personId": 7,
+      "locationId": 9,
+      "startTime": 1298,
+      "time": "21:38",
+      "type": "MOVE",
+      "description": "黒木が温室で怜子と落ち合う"
+    },
+    {
+      "id": 24,
+      "personId": 2,
+      "locationId": 9,
+      "startTime": 1300,
+      "time": "21:40",
+      "type": "LEARN",
+      "informationId": 217,
+      "description": "怜子が黒木との駆け落ちを決意する"
+    },
+    {
+      "id": 25,
+      "personId": 6,
+      "locationId": 2,
+      "startTime": 1301,
+      "time": "21:41",
+      "type": "MOVE",
+      "description": "神門が大広間へ戻る"
+    },
+    {
+      "id": 26,
+      "personId": 2,
+      "locationId": 9,
+      "startTime": 1302,
+      "time": "21:42",
+      "type": "SPEAK",
+      "informationId": 217,
+      "interactedPersonId": 7,
+      "description": "怜子が黒木に駆け落ちの計画を打ち明ける"
+    },
+    {
+      "id": 27,
+      "personId": 5,
+      "locationId": 2,
+      "startTime": 1303,
+      "time": "21:43",
+      "type": "MOVE",
+      "description": "朝倉が後片付けに大広間へ戻る"
+    },
+    {
+      "id": 28,
+      "personId": 7,
+      "locationId": 1,
+      "startTime": 1304,
+      "time": "21:44",
+      "type": "MOVE",
+      "description": "黒木が温室を出る"
+    },
+    {
+      "id": 29,
+      "personId": 4,
+      "locationId": 9,
+      "startTime": 1305,
+      "time": "21:45",
+      "type": "MOVE",
+      "description": "鵜飼が温室へ入る"
+    },
+    {
+      "id": 30,
+      "personId": 2,
+      "locationId": 1,
+      "startTime": 1306,
+      "time": "21:46",
+      "type": "MOVE",
+      "description": "怜子が温室を出る"
+    },
+    {
+      "id": 31,
+      "personId": 4,
+      "locationId": 9,
+      "startTime": 1307,
+      "time": "21:47",
+      "type": "DROP",
+      "propId": 109,
+      "description": "鵜飼が会計帳簿を温室の鉢の陰に隠す"
+    },
+    {
+      "id": 32,
+      "personId": 7,
+      "locationId": 2,
+      "startTime": 1308,
+      "time": "21:48",
+      "type": "MOVE",
+      "description": "黒木が大広間へ戻る"
+    },
+    {
+      "id": 33,
+      "personId": 5,
+      "locationId": 8,
+      "startTime": 1309,
+      "time": "21:49",
+      "type": "MOVE",
+      "description": "朝倉が二階の支度に大階段を上る"
+    },
+    {
+      "id": 34,
+      "personId": 2,
+      "locationId": 8,
+      "startTime": 1310,
+      "time": "21:50",
+      "type": "MOVE",
+      "description": "怜子が大階段へ向かう"
+    },
+    {
+      "id": 35,
+      "personId": 4,
+      "locationId": 1,
+      "startTime": 1311,
+      "time": "21:51",
+      "type": "MOVE",
+      "description": "鵜飼が温室を出る"
+    },
+    {
+      "id": 36,
+      "personId": 5,
+      "locationId": 7,
+      "startTime": 1312,
+      "time": "21:52",
+      "type": "MOVE",
+      "description": "朝倉が客室のベッドを整える"
+    },
+    {
+      "id": 37,
+      "personId": 2,
+      "locationId": 6,
+      "startTime": 1313,
+      "time": "21:53",
+      "type": "MOVE",
+      "description": "怜子が鍵を使い主寝室に入る（施錠を解錠）"
+    },
+    {
+      "id": 38,
+      "personId": 4,
+      "locationId": 2,
+      "startTime": 1314,
+      "time": "21:54",
+      "type": "MOVE",
+      "description": "鵜飼が大広間へ戻る"
+    },
+    {
+      "id": 39,
+      "personId": 3,
+      "locationId": 4,
+      "startTime": 1315,
+      "time": "21:55",
+      "type": "MOVE",
+      "description": "透がビリヤード室へ移る"
+    },
+    {
+      "id": 40,
+      "personId": 7,
+      "locationId": 4,
+      "startTime": 1317,
+      "time": "21:57",
+      "type": "MOVE",
+      "description": "黒木がビリヤード室で透と同席する"
+    },
+    {
+      "id": 41,
+      "personId": 1,
+      "locationId": 8,
+      "startTime": 1320,
+      "time": "22:00",
+      "type": "MOVE",
+      "description": "厳三が席を立ち大階段へ向かう"
+    },
+    {
+      "id": 42,
+      "personId": 1,
+      "locationId": 5,
+      "startTime": 1323,
+      "time": "22:03",
+      "type": "MOVE",
+      "description": "厳三が書斎に入る"
+    },
+    {
+      "id": 43,
+      "personId": 4,
+      "locationId": 1,
+      "startTime": 1330,
+      "time": "22:10",
+      "type": "MOVE",
+      "description": "鵜飼が落ち着かず玄関で嵐の様子を窺う"
+    },
+    {
+      "id": 44,
+      "personId": 3,
+      "locationId": 5,
+      "startTime": 1335,
+      "time": "22:15",
+      "type": "MOVE",
+      "description": "透がビリヤード室の隠し通路を抜け書斎へ侵入する"
+    },
+    {
+      "id": 45,
+      "personId": 3,
+      "locationId": 5,
+      "startTime": 1338,
+      "time": "22:18",
+      "type": "LEARN",
+      "informationId": 204,
+      "description": "透が遺言書草案を読み、廃嫡を確信する"
+    },
+    {
+      "id": 46,
+      "personId": 3,
+      "locationId": 5,
+      "startTime": 1340,
+      "time": "22:20",
+      "type": "USE",
+      "propId": 103,
+      "interactedPersonId": 1,
+      "description": "透が鎮静剤入りの酒を厳三に飲ませる"
+    },
+    {
+      "id": 47,
+      "personId": 6,
+      "locationId": 1,
+      "startTime": 1345,
+      "time": "22:25",
+      "type": "MOVE",
+      "description": "神門が食後の一服に玄関へ出る"
+    },
+    {
+      "id": 48,
+      "personId": 3,
+      "locationId": 5,
+      "startTime": 1348,
+      "time": "22:28",
+      "type": "ATTACK",
+      "interactedPersonId": 1,
+      "description": "もみ合いとなり厳三が負傷する"
+    },
+    {
+      "id": 49,
+      "personId": 3,
+      "locationId": 5,
+      "startTime": 1351,
+      "time": "22:31",
+      "type": "INCAPACITATE",
+      "interactedPersonId": 1,
+      "description": "薬が効き厳三が昏倒する"
+    },
+    {
+      "id": 50,
+      "personId": 3,
+      "locationId": 5,
+      "startTime": 1355,
+      "time": "22:35",
+      "type": "KILL",
+      "propId": 101,
+      "interactedPersonId": 1,
+      "description": "透が青銅の文鎮で厳三を撲殺する"
+    },
+    {
+      "id": 51,
+      "personId": 5,
+      "locationId": 8,
+      "startTime": 1361,
+      "time": "22:41",
+      "type": "MOVE",
+      "description": "朝倉が物音に気づき大階段へ出る"
+    },
+    {
+      "id": 52,
+      "personId": 5,
+      "locationId": 8,
+      "startTime": 1362,
+      "time": "22:42",
+      "type": "LEARN",
+      "informationId": 206,
+      "description": "朝倉が暗がりの人影を怜子だと思い込む"
+    },
+    {
+      "id": 53,
+      "personId": 3,
+      "locationId": 8,
+      "startTime": 1364,
+      "time": "22:44",
+      "type": "MOVE",
+      "description": "透が書斎を出て大階段に現れる"
+    },
+    {
+      "id": 54,
+      "personId": 3,
+      "locationId": 8,
+      "startTime": 1365,
+      "time": "22:45",
+      "type": "INCAPACITATE",
+      "interactedPersonId": 5,
+      "description": "透が朝倉を当て身で昏倒させ口を封じる"
+    },
+    {
+      "id": 55,
+      "personId": 3,
+      "locationId": 5,
+      "startTime": 1367,
+      "time": "22:47",
+      "type": "MOVE",
+      "description": "透が書斎を経由して退避する"
+    },
+    {
+      "id": 56,
+      "personId": 3,
+      "locationId": 4,
+      "startTime": 1369,
+      "time": "22:49",
+      "type": "MOVE",
+      "description": "透が隠し通路でビリヤード室へ戻りアリバイを取り繕う"
+    },
+    {
+      "id": 57,
+      "personId": 2,
+      "locationId": 8,
+      "startTime": 1372,
+      "time": "22:52",
+      "type": "MOVE",
+      "description": "怜子が主寝室を出て倒れた朝倉を見つける"
+    },
+    {
+      "id": 58,
+      "personId": 6,
+      "locationId": 8,
+      "startTime": 1374,
+      "time": "22:54",
+      "type": "MOVE",
+      "description": "神門が二階の異変に気づき駆け上がる"
+    },
+    {
+      "id": 59,
+      "personId": 6,
+      "locationId": 8,
+      "startTime": 1376,
+      "time": "22:56",
+      "type": "WAKE",
+      "interactedPersonId": 5,
+      "description": "神門が朝倉を介抱し意識を取り戻させる"
+    },
+    {
+      "id": 60,
+      "personId": 2,
+      "locationId": 5,
+      "startTime": 1378,
+      "time": "22:58",
+      "type": "MOVE",
+      "description": "怜子が書斎へ入り厳三の遺体を発見する"
+    },
+    {
+      "id": 61,
+      "personId": 6,
+      "locationId": 5,
+      "startTime": 1380,
+      "time": "23:00",
+      "type": "MOVE",
+      "description": "神門が書斎に入り検死を始める"
+    },
+    {
+      "id": 62,
+      "personId": 6,
+      "locationId": 5,
+      "startTime": 1382,
+      "time": "23:02",
+      "type": "LEARN",
+      "informationId": 210,
+      "description": "神門が死亡時刻を23:00頃と誤って推定する"
+    },
+    {
+      "id": 63,
+      "personId": 6,
+      "locationId": 5,
+      "startTime": 1383,
+      "time": "23:03",
+      "type": "LEARN",
+      "informationId": 202,
+      "description": "神門が止まった大時計の22:35という真の死亡時刻を知る（自らの推定と矛盾）"
+    },
+    {
+      "id": 64,
+      "personId": 4,
+      "locationId": 2,
+      "startTime": 1385,
+      "time": "23:05",
+      "type": "MOVE",
+      "description": "鵜飼が騒ぎを聞きつけ大広間へ戻る"
+    },
+    {
+      "id": 65,
+      "personId": 5,
+      "locationId": 5,
+      "startTime": 1386,
+      "time": "23:06",
+      "type": "MOVE",
+      "description": "朝倉が書斎へ向かう"
+    },
+    {
+      "id": 66,
+      "personId": 4,
+      "locationId": 4,
+      "startTime": 1387,
+      "time": "23:07",
+      "type": "MOVE",
+      "description": "鵜飼がビリヤードの透と黒木に事情を聴きに行く"
+    },
+    {
+      "id": 67,
+      "personId": 2,
+      "locationId": 5,
+      "startTime": 1389,
+      "time": "23:09",
+      "type": "LEARN",
+      "informationId": 207,
+      "description": "怜子が『私は主寝室にいた、鍵が証拠』と訴える"
+    },
+    {
+      "id": 68,
+      "personId": 7,
+      "locationId": 4,
+      "startTime": 1390,
+      "time": "23:10",
+      "type": "LEARN",
+      "informationId": 205,
+      "description": "黒木が透のための偽アリバイを用意する"
+    },
+    {
+      "id": 69,
+      "personId": 5,
+      "locationId": 5,
+      "startTime": 1391,
+      "time": "23:11",
+      "type": "SPEAK",
+      "informationId": 206,
+      "interactedPersonId": 2,
+      "description": "朝倉が怜子に『廊下であなたを見た』と告げる（誤認が怜子の真実と衝突）"
+    },
+    {
+      "id": 70,
+      "personId": 7,
+      "locationId": 4,
+      "startTime": 1392,
+      "time": "23:12",
+      "type": "LEARN",
+      "informationId": 208,
+      "description": "黒木が『凶器は温室にあった』という嘘を用意する"
+    },
+    {
+      "id": 71,
+      "personId": 7,
+      "locationId": 4,
+      "startTime": 1394,
+      "time": "23:14",
+      "type": "SPEAK",
+      "informationId": 205,
+      "interactedPersonId": 4,
+      "description": "黒木が鵜飼に『透はずっとここにいた』と偽証する"
+    },
+    {
+      "id": 72,
+      "personId": 7,
+      "locationId": 4,
+      "startTime": 1396,
+      "time": "23:16",
+      "type": "SPEAK",
+      "informationId": 208,
+      "interactedPersonId": 4,
+      "description": "黒木が鵜飼に『凶器は温室で見た』と吹き込む"
+    },
+    {
+      "id": 73,
+      "personId": 4,
+      "locationId": 5,
+      "startTime": 1399,
+      "time": "23:19",
+      "type": "MOVE",
+      "description": "鵜飼が隠し通路に気づきビリヤード室から書斎へ抜ける"
+    },
+    {
+      "id": 74,
+      "personId": 4,
+      "locationId": 5,
+      "startTime": 1401,
+      "time": "23:21",
+      "type": "LEARN",
+      "informationId": 201,
+      "description": "鵜飼が『透は22:30に書斎にいた』と見抜く（黒木の偽証と衝突）"
+    },
+    {
+      "id": 75,
+      "personId": 4,
+      "locationId": 5,
+      "startTime": 1403,
+      "time": "23:23",
+      "type": "LEARN",
+      "informationId": 209,
+      "description": "鵜飼が凶器の文鎮を書斎で見つける（温室の嘘と衝突）"
+    },
+    {
+      "id": 76,
+      "personId": 4,
+      "locationId": 5,
+      "startTime": 1405,
+      "time": "23:25",
+      "type": "SPEAK",
+      "informationId": 201,
+      "interactedPersonId": 6,
+      "description": "鵜飼が神門に透の犯行を告げる"
+    },
+    {
+      "id": 77,
+      "personId": 3,
+      "locationId": 5,
+      "startTime": 1407,
+      "time": "23:27",
+      "type": "MOVE",
+      "description": "透が平静を装い書斎に現れる"
+    },
+    {
+      "id": 78,
+      "personId": 4,
+      "locationId": 5,
+      "startTime": 1409,
+      "time": "23:29",
+      "type": "SPEAK",
+      "informationId": 209,
+      "interactedPersonId": 3,
+      "description": "鵜飼が透に凶器の在処を突きつける"
+    },
+    {
+      "id": 79,
+      "personId": 2,
+      "locationId": 5,
+      "startTime": 1411,
+      "time": "23:31",
+      "type": "DROP",
+      "propId": 102,
+      "description": "怜子がアリバイの証拠として主寝室の鍵を置く"
+    },
+    {
+      "id": 80,
+      "personId": 6,
+      "locationId": 5,
+      "startTime": 1413,
+      "time": "23:33",
+      "type": "TAKE",
+      "propId": 102,
+      "description": "神門が証拠品として鍵を確保する"
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import { StoryData, createEmptyStoryData } from '../types/StoryData'
 import { validateStoryData } from '../utils/validation'
 import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
 import academyMystery from '../data/sample-academy-mystery.json'
+import mansionMystery from '../data/sample-mansion-mystery.json'
 import './JsonDataInput.css'
 
 interface JsonDataInputProps {
@@ -623,6 +624,13 @@ export const JsonDataInput: React.FC<JsonDataInputProps> = ({ onDataLoad, curren
               onClick={() => setJsonText(JSON.stringify(academyMystery, null, 2))}
             >
               学院ミステリのサンプルを入力
+            </button>
+            <button
+              type="button"
+              className="sample-button"
+              onClick={() => setJsonText(JSON.stringify(mansionMystery, null, 2))}
+            >
+              嵐の洋館ミステリのサンプルを入力
             </button>
           </div>
           {error && <div className="error-output">{error}</div>}
