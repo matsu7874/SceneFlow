@@ -48,17 +48,11 @@ test.describe('エンティティ編集の基本動作確認', () => {
     // データを入力
     await page.locator('textarea').fill(JSON.stringify(simpleTestData, null, 2))
 
-    // デバッグ用スクリーンショット
-    await page.screenshot({ path: 'debug-before-load.png' })
-
     // 読み込みボタンをクリック
     await page.getByRole('button', { name: '物語データをロード' }).click()
 
     // 少し待つ
     await page.waitForTimeout(500)
-
-    // デバッグ用スクリーンショット
-    await page.screenshot({ path: 'debug-after-load-click.png' })
 
     // エラーメッセージが表示されていないか確認
     const errorElement = page.locator('.error-output')
@@ -68,8 +62,10 @@ test.describe('エンティティ編集の基本動作確認', () => {
       console.error('バリデーションエラー:', errorText)
     }
 
-    // データが読み込まれたことを確認（シミュレーション制御が表示される）
-    await expect(page.locator('text=シミュレーション制御')).toBeVisible({ timeout: 10000 })
+    // データが読み込まれたことを確認（ロード成功通知）
+    await expect(page.locator('text=データが正常にロードされました')).toBeVisible({
+      timeout: 10000,
+    })
 
     // Step 2: エンティティページに移動
     await page.getByRole('link', { name: 'エンティティ編集' }).click()
