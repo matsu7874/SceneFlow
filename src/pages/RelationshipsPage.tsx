@@ -1,73 +1,70 @@
-import React, { useState } from 'react'
-import { RelationshipEditor } from '../components/RelationshipEditor'
+import React from 'react'
+import { Link } from 'react-router-dom'
 import { CharacterRelationshipDiagram } from '../components/CharacterRelationshipDiagram'
+import { PageHeader } from '../components/common/PageHeader'
+import { EmptyState } from '../components/common/EmptyState'
+import { NextSteps } from '../components/common/NextSteps'
 import { useAppContext } from '../contexts/AppContext'
+import { useLoadSample } from '../hooks/useLoadSample'
 import styles from './RelationshipsPage.module.css'
+
+const HINT =
+  '人物間の関係を俯瞰します（閲覧専用）。関係の追加・編集は『エンティティ編集』の各人物フォームで行います。'
 
 export const RelationshipsPage: React.FC = () => {
   const { storyData } = useAppContext()
-  const [viewMode, setViewMode] = useState<'diagram' | 'editor'>('diagram')
+  const loadSample = useLoadSample()
 
-  if (!storyData) {
+  if (!storyData || storyData.persons.length === 0) {
     return (
       <div className={`page relationships-page ${styles.pageRoot}`}>
-        <div className={styles.pageHeader}>
-          <span className={styles.pageEyebrow}>Relationships</span>
-          <h2 className={styles.pageTitle}>関係性</h2>
-        </div>
-        <div className={styles.emptyState}>
-          <span className={styles.emptyIcon} aria-hidden="true">
-            ◎
-          </span>
-          <p className={styles.emptyTitle}>データが読み込まれていません</p>
-          <p className={styles.emptyHint}>
-            シミュレーションページで物語データを読み込んでください。
-          </p>
-        </div>
+        <PageHeader eyebrow="Relationships" title="関係性" hint={HINT} />
+        <EmptyState
+          icon="◎"
+          title={storyData ? '人物がまだ登録されていません' : 'データが読み込まれていません'}
+          description="人物と関係を登録すると、ここに相関図が表示されます。"
+          actions={[
+            { label: 'エンティティ編集で人物を追加', to: '/entities' },
+            {
+              label: 'サンプルを読み込む',
+              onClick: () => loadSample('mansion'),
+              variant: 'secondary',
+            },
+          ]}
+        />
       </div>
     )
   }
 
   return (
     <div className={`page relationships-page ${styles.pageRoot}`}>
-      {/* ページ見出し */}
-      <div className={styles.pageHeader}>
-        <div className={styles.pageHeaderLeft}>
-          <span className={styles.pageEyebrow}>Relationships</span>
-          <h2 className={styles.pageTitle}>関係性</h2>
-        </div>
-
-        {/* ビュー切替タブ */}
-        <div className={styles.viewTabs} role="tablist" aria-label="表示切替">
-          <button
-            className={`${styles.viewTab} ${viewMode === 'diagram' ? styles.active : ''}`}
-            onClick={() => setViewMode('diagram')}
-            role="tab"
-            aria-selected={viewMode === 'diagram'}
-            aria-controls="relationships-panel"
-          >
-            相関図
-          </button>
-          <button
-            className={`${styles.viewTab} ${viewMode === 'editor' ? styles.active : ''}`}
-            onClick={() => setViewMode('editor')}
-            role="tab"
-            aria-selected={viewMode === 'editor'}
-            aria-controls="relationships-panel"
-          >
-            エディタ
-          </button>
-        </div>
+      <PageHeader
+        eyebrow="Relationships"
+        title="関係性"
+        hint={HINT}
+        actions={
+          <Link to="/entities" className={styles.editLink}>
+            関係を編集（エンティティ編集）→
+          </Link>
+        }
+      />
+      <div className={styles.pageContent}>
+        <CharacterRelationshipDiagram persons={storyData.persons} />
       </div>
-
-      {/* コンテンツパネル */}
-      <div id="relationships-panel" className={styles.pageContent} role="tabpanel">
-        {viewMode === 'diagram' ? (
-          <CharacterRelationshipDiagram persons={storyData.persons} />
-        ) : (
-          <RelationshipEditor initialMode="relationships" />
-        )}
-      </div>
+      <NextSteps
+        steps={[
+          {
+            label: '関係を追加・編集する',
+            description: '各人物フォームの「関係性」で設定します',
+            to: '/entities',
+          },
+          {
+            label: '出来事として物語に反映する',
+            description: 'イベント入力で行動を記録します',
+            to: '/log',
+          },
+        ]}
+      />
     </div>
   )
 }

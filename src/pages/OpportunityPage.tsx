@@ -10,6 +10,9 @@ import {
 import type { PersonStatus } from '../modules/consistency/worldState'
 import type { KnowledgeEntry } from '../modules/consistency'
 import { minutesToTime } from '../modules/utils/timeUtils'
+import { EmptyState } from '../components/common/EmptyState'
+import { NextSteps } from '../components/common/NextSteps'
+import { useLoadSample } from '../hooks/useLoadSample'
 import styles from './OpportunityPage.module.css'
 
 type Mode = 'place' | 'prop' | 'info'
@@ -28,6 +31,7 @@ export const OpportunityPage: React.FC = () => {
   const [time, setTime] = useState<number | null>(null)
   const [propId, setPropId] = useState<number | null>(null)
   const [infoId, setInfoId] = useState<number | null>(null)
+  const loadSample = useLoadSample()
 
   const times = useMemo(() => (storyData ? distinctActTimes(storyData) : []), [storyData])
 
@@ -133,6 +137,33 @@ export const OpportunityPage: React.FC = () => {
         {STATUS_LABEL[status]}
       </span>
     )
+
+  if (!storyData) {
+    return (
+      <div className={`page ${styles.pageRoot}`}>
+        <header className={styles.pageHeader}>
+          <span className={styles.pageEyebrow}>Opportunity</span>
+          <h2 className={styles.pageTitle}>容疑者・機会</h2>
+          <p className={styles.pageHint}>
+            「犯行時刻に現場に居られたのは誰か」「凶器に触れ得たのは誰か」「秘密を知り得たのは誰か」を逆引きします。
+          </p>
+        </header>
+        <EmptyState
+          icon="◎"
+          title="物語データが読み込まれていません"
+          description="人物・場所・行動を登録すると、時刻×場所や道具・情報から逆引きできます。"
+          actions={[
+            { label: 'イベント入力で書き始める', to: '/log' },
+            {
+              label: 'サンプルを読み込む',
+              onClick: () => loadSample('mansion'),
+              variant: 'secondary',
+            },
+          ]}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className={`page ${styles.pageRoot}`}>
@@ -353,6 +384,21 @@ export const OpportunityPage: React.FC = () => {
           )}
         </section>
       )}
+
+      <NextSteps
+        steps={[
+          {
+            label: '矛盾・破綻を検査する',
+            description: 'アリバイや動線の整合性は検証で',
+            to: '/validation',
+          },
+          {
+            label: '行動を追加・修正する',
+            description: 'イベント入力で記録',
+            to: '/log',
+          },
+        ]}
+      />
     </div>
   )
 }

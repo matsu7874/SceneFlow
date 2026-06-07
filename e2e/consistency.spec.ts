@@ -53,7 +53,7 @@ test.describe('整合性: 因果ビューと凍結', () => {
     await expect(page.getByTestId('node-act-1')).toHaveAttribute('data-selected', 'true')
   })
 
-  test('関係性リンクがナビから消えている', async ({ page }) => {
-    await expect(page.getByRole('link', { name: '関係性' })).toHaveCount(0)
+  test('関係性リンクがナビにある（閲覧専用の相関図）', async ({ page }) => {
+    await expect(page.getByRole('link', { name: '関係性' })).toHaveCount(1)
   })
 })

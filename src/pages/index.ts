@@ -1,7 +1,7 @@
 export { SimulationPage } from './SimulationPage'
 export { CausalityPage } from './CausalityPage'
 export { EntitiesPage } from './EntitiesPage'
-export { MapEditorPage } from './MapEditorPage'
+export { SpaceWorkspacePage } from './SpaceWorkspacePage'
 export { RelationshipsPage } from './RelationshipsPage'
 export { ValidationPage } from './ValidationPage'
 export { QuickLogPage } from './QuickLogPage'

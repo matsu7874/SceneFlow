@@ -27,21 +27,20 @@ test.describe('Scene Flow 基本機能確認', () => {
     // タイトルの確認
     await expect(page).toHaveTitle(/Scene-Flow/)
 
-    // メインヘッダーの確認
-    await expect(page.locator('.app-header h1').first()).toContainText('Scene-Flow')
+    // ナビゲーションリンクの確認（作業フロー順）。
+    // オンボーディング等にも同名リンクがあり得るため、ナビ要素内に限定する。
+    const nav = page.getByRole('navigation')
+    await expect(nav.getByRole('link', { name: 'エンティティ編集' })).toBeVisible()
+    await expect(nav.getByRole('link', { name: '空間', exact: true })).toBeVisible()
+    await expect(nav.getByRole('link', { name: 'イベント入力' })).toBeVisible()
+    await expect(nav.getByRole('link', { name: '因果関係ビュー' })).toBeVisible()
+    await expect(nav.getByRole('link', { name: '検証' })).toBeVisible()
+    await expect(nav.getByRole('link', { name: 'シミュレーション' })).toBeVisible()
+    await expect(nav.getByRole('link', { name: '関係性' })).toBeVisible()
 
-    // ナビゲーションリンクの確認（作業フロー順）
-    await expect(page.getByRole('link', { name: 'エンティティ編集' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'マップエディタ' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'イベント入力' })).toBeVisible()
-    await expect(page.getByRole('link', { name: '因果関係ビュー' })).toBeVisible()
-    await expect(page.getByRole('link', { name: '検証' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'シミュレーション' })).toBeVisible()
-    await expect(page.getByRole('link', { name: '空間ビュー' })).toBeVisible()
-
-    // デフォルトでエンティティ編集ページが表示されることを確認
-    await expect(page).toHaveURL(/\/entities/)
-    await expect(page.locator('h2:has-text("エンティティ管理")')).toBeVisible()
+    // デフォルトはイベント入力ページ（/ → /log にリダイレクト）
+    await expect(page).toHaveURL(/\/log/)
+    await expect(page.locator('h2:has-text("イベント入力")')).toBeVisible()
   })
 
   test('データのロードと通知が正しく動作する', async ({ page }) => {
@@ -65,22 +64,20 @@ test.describe('Scene Flow 基本機能確認', () => {
     await expect(page.locator('.person-tag').filter({ hasText: '花子' })).toBeVisible()
   })
 
-  test('マップエディタページへの遷移と基本表示', async ({ page }) => {
+  test('空間ワークスペースへの遷移と基本表示', async ({ page }) => {
     // データをロード
     await page.goto('http://localhost:3000/simulation')
     await page.locator('textarea').fill(JSON.stringify(simpleTestData, null, 2))
     await page.getByRole('button', { name: '物語データをロード' }).click()
     await page.waitForTimeout(500)
 
-    // マップエディタへ移動
-    await page.getByRole('link', { name: 'マップエディタ' }).click()
-    await expect(page).toHaveURL(/\/map-editor/)
-    await expect(page.locator('h2')).toContainText('マップエディタ')
+    // 空間ワークスペースへ移動
+    await page.getByRole('link', { name: '空間', exact: true }).click()
+    await expect(page).toHaveURL(/\/space/)
+    await expect(page.locator('h2')).toContainText('空間')
 
     // キャンバスが表示されることを確認
     await expect(page.locator('canvas').first()).toBeVisible()
-
-    // 操作ガイドは既定で折りたたまれているため、閉じる操作は不要
 
     // ノード数の確認
     await expect(page.locator('text=ノード数: 2')).toBeVisible()

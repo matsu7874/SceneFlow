@@ -1,11 +1,21 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import styles from './MapEditor.module.css'
 import { useMapEditor } from './useMapEditor'
 import { AStar } from './pathfinding'
 import { getCanvasCoords } from './coords'
-import { Location, Connection, Point } from './types'
+import { Location, Connection, Point, MapData } from './types'
 import { useMapBackground } from '../../contexts/MapBackgroundContext'
 import { drawMapBackground } from '../MapBackground/drawMapBackground'
+
+export interface MapOverlayInfo {
+  /** ワールド座標 → canvas 内部スクリーン座標（pan/zoom 適用済み）。 */
+  worldToScreen: (x: number, y: number) => Point
+  /** 現在のズーム倍率（半径などスクリーン量を world→screen に合わせるのに使う）。 */
+  zoom: number
+  mapData: MapData
+  width: number
+  height: number
+}
 
 interface MapEditorProps {
   initialData?: {
@@ -15,6 +25,17 @@ interface MapEditorProps {
   onSave?: (data: { locations: Location[]; connections: Connection[] }) => void
   width?: number
   height?: number
+  /**
+   * canvas の真上に重ねる SVG オーバーレイのレンダラ。
+   * editor の worldToScreen を渡すので、pan/zoom と完全に同期した位置に描ける。
+   * 動線・破綻ハイライトなどの「読み取り専用レイヤー」を /space で重ねるために使う。
+   */
+  renderOverlay?: (info: MapOverlayInfo) => React.ReactNode
+  /**
+   * ユーザー編集で mapData が変化したときに呼ばれる（自動保存用）。
+   * 初期データの取り込みでは発火しない。/space ではこれを使って storyData へ書き戻す。
+   */
+  onMapDataChange?: (mapData: MapData) => void
 }
 
 export const MapEditor: React.FC<MapEditorProps> = ({
@@ -22,6 +43,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
   onSave,
   width = 800,
   height = 600,
+  renderOverlay,
+  onMapDataChange,
 }) => {
   const editor = useMapEditor()
   const background = useMapBackground()
@@ -48,6 +71,27 @@ export const MapEditor: React.FC<MapEditorProps> = ({
       editor.importMapData(JSON.stringify(initialData))
     }
   }, [])
+
+  // ユーザー編集で mapData が変化したら onMapDataChange に通知する（自動保存用）。
+  // 初期データの取り込み（mount 時の import）は「ユーザー編集」ではないので一度だけ握りつぶす。
+  const prevMapDataRef = useRef<MapData | null>(null)
+  const initialImportSkippedRef = useRef(false)
+  useEffect(() => {
+    const cur = editor.state.mapData
+    if (prevMapDataRef.current === null) {
+      // mount 直後の初期状態。変化ではないので記録だけして無視。
+      prevMapDataRef.current = cur
+      return
+    }
+    if (prevMapDataRef.current === cur) return
+    prevMapDataRef.current = cur
+    if (initialData && !initialImportSkippedRef.current) {
+      // 初期 import による最初の変化は自動保存の対象にしない。
+      initialImportSkippedRef.current = true
+      return
+    }
+    onMapDataChange?.(cur)
+  }, [editor.state.mapData, initialData, onMapDataChange])
 
   // Canvas rendering
   useEffect(() => {
@@ -750,6 +794,19 @@ export const MapEditor: React.FC<MapEditorProps> = ({
         onDoubleClick={handleDoubleClick}
         onContextMenu={e => e.preventDefault()}
       />
+
+      {/* 読み取り専用オーバーレイ（動線・破綻など）。canvas と同一座標系で重ねる。 */}
+      {renderOverlay && (
+        <div className={styles.overlayLayer}>
+          {renderOverlay({
+            worldToScreen: editor.worldToScreen,
+            zoom: editor.state.viewState.zoom,
+            mapData: editor.state.mapData,
+            width,
+            height,
+          })}
+        </div>
+      )}
 
       {/* Controls */}
       <div className={styles.controls}>

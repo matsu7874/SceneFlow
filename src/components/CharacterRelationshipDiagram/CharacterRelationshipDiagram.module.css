@@ -118,6 +118,20 @@
   white-space: nowrap;
 }
 
+/* 編集導線（編集は /entities が正規ルート） */
+.editPersonLink {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+
+.editPersonLink:hover {
+  text-decoration: underline;
+}
+
 /* ---------- 空状態 ---------- */
 .emptyState {
   flex: 1;

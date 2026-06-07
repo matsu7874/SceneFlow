@@ -8,11 +8,10 @@ import { NotificationDisplay } from './components/NotificationDisplay'
 import { SimulationPage } from './pages/SimulationPage'
 import { CausalityPage } from './pages/CausalityPage'
 import { EntitiesPage } from './pages/EntitiesPage'
-import { MapEditorPage } from './pages/MapEditorPage'
 import { ValidationPage } from './pages/ValidationPage'
 import { QuickLogPage } from './pages/QuickLogPage'
 import { OpportunityPage } from './pages/OpportunityPage'
-import { SpatialPage } from './pages/SpatialPage'
+import { SpaceWorkspacePage } from './pages/SpaceWorkspacePage'
 import { RelationshipsPage } from './pages/RelationshipsPage'
 import './App.css'
 
@@ -37,11 +36,13 @@ function App(): React.ReactNode {
                   <Route path="/causality" element={<CausalityPage />} />
                   <Route path="/entities" element={<EntitiesPage />} />
                   <Route path="/relationships" element={<RelationshipsPage />} />
-                  <Route path="/map-editor" element={<MapEditorPage />} />
+                  <Route path="/space" element={<SpaceWorkspacePage />} />
+                  {/* 旧ルートは空間ワークスペースへ統合（後方互換のためリダイレクト） */}
+                  <Route path="/map-editor" element={<Navigate to="/space" replace />} />
+                  <Route path="/spatial" element={<Navigate to="/space" replace />} />
                   <Route path="/validation" element={<ValidationPage />} />
                   <Route path="/opportunity" element={<OpportunityPage />} />
                   <Route path="/log" element={<QuickLogPage />} />
-                  <Route path="/spatial" element={<SpatialPage />} />
                 </Routes>
               </main>
 
