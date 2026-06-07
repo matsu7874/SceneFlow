@@ -1,4 +1,5 @@
 import type { StoryData } from '../types/StoryData'
+import { normalizeStoryData } from '../utils/normalizeStoryData'
 
 /** localStorage 互換の最小インターフェース（テスト時に差し替え可能にする）。 */
 export interface StoryStorage {
@@ -16,7 +17,7 @@ export function loadStoredStory(storage: StoryStorage): StoryData | null {
   try {
     const raw = storage.getItem(STORY_STORAGE_KEY)
     if (raw == null) return null
-    return JSON.parse(raw) as StoryData
+    return normalizeStoryData(JSON.parse(raw) as StoryData)
   } catch {
     // 壊れたデータでアプリ起動を妨げない
     return null

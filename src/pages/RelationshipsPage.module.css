@@ -1,5 +1,5 @@
 /* =========================================================================
-   RelationshipsPage ― 関係性ページのレイアウト
+   RelationshipsPage ― 関係性ページ（閲覧専用の相関図）
    計器的ライト基調。デザイントークンのみ使用。
    ========================================================================= */
 
@@ -12,158 +12,37 @@
   min-height: 100%;
 }
 
-/* ---------- ページ見出し ---------- */
-.pageHeader {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-4);
-  margin: 0 0 var(--space-4);
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--line);
-  position: relative;
-}
-
-/* アクセント縦罫の代わりに下線アクセント */
-.pageHeader::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 4rem;
-  height: 2px;
-  background: var(--accent);
-}
-
-.pageHeaderLeft {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.pageEyebrow {
-  display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-
-.pageTitle {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--ink);
-  letter-spacing: 0.02em;
-}
-
-/* ---------- ビュー切替タブ ---------- */
-.viewTabs {
-  display: flex;
-  gap: 2px;
-  background: var(--color-surface);
+/* 見出し右の編集導線リンク */
+.editLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  padding: 2px;
-  align-self: flex-end;
-}
-
-.viewTab {
-  padding: 0.4rem 1rem;
-  border: none;
-  background: transparent;
-  color: var(--ink-2);
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: calc(var(--r-sm) - 2px);
+  background: var(--color-surface);
+  color: var(--accent-strong);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
   transition:
     background 0.12s,
-    color 0.12s;
-  white-space: nowrap;
+    border-color 0.12s;
 }
 
-.viewTab:hover {
-  background: var(--color-surface-hover);
-  color: var(--ink);
+.editLink:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
 }
 
-.viewTab.active {
-  background: var(--accent);
-  color: #fff;
-  font-weight: 600;
-}
-
-.viewTab:focus-visible {
-  outline: 3px solid var(--accent-soft);
-  outline-offset: 1px;
-}
-
-/* ---------- コンテンツパネル ---------- */
+/* コンテンツパネル（相関図 Canvas を内包） */
 .pageContent {
+  position: relative;
   flex: 1;
   background: var(--color-background);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-1);
   overflow: hidden;
-  /* 最低限の高さを確保してグラフが見えるようにする */
   min-height: 500px;
-}
-
-/* ---------- 空状態（データなし） ---------- */
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-6);
-  border: 1px dashed var(--line);
-  border-radius: var(--r-lg);
-  background: var(--color-background);
-  text-align: center;
-}
-
-.emptyIcon {
-  font-size: 2.5rem;
-  color: var(--ink-3);
-  line-height: 1;
-}
-
-.emptyTitle {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--ink-2);
-}
-
-.emptyHint {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--ink-3);
-  max-width: 28rem;
-  line-height: 1.6;
-}
-
-/* ---------- レスポンシブ ---------- */
-@media (max-width: 600px) {
-  .pageHeader {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .viewTabs {
-    align-self: stretch;
-    justify-content: stretch;
-  }
-
-  .viewTab {
-    flex: 1;
-    text-align: center;
-  }
 }

@@ -1,0 +1,74 @@
+/* =========================================================================
+   SpaceWorkspacePage ― 空間ワークスペース（マップ編集＋動線/破綻オーバーレイ）
+   ========================================================================= */
+
+.pageRoot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--app-bg);
+  font-family: var(--font-sans);
+  color: var(--ink);
+  min-height: 100%;
+}
+
+/* レイヤートグル（動線・破綻） */
+.layerToggles {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--color-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 2px;
+}
+
+.toggle {
+  padding: 0.35rem 0.9rem;
+  border: none;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: calc(var(--r-sm) - 2px);
+  transition:
+    background 0.12s,
+    color 0.12s;
+  white-space: nowrap;
+}
+
+.toggle:hover {
+  background: var(--color-surface-hover);
+  color: var(--ink);
+}
+
+.toggleOn {
+  background: var(--accent);
+  color: #fff;
+}
+
+.toggle:focus-visible {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 1px;
+}
+
+/* 操作ガイドの箇条書き */
+.guideList {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.guideList strong {
+  color: var(--ink);
+}
+
+/* 編集 canvas の領域。MapEditor の .container が height:100% を埋める。 */
+.canvasWrap {
+  position: relative;
+  width: 100%;
+  height: clamp(440px, 64vh, 720px);
+}

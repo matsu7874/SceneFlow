@@ -1,14 +1,27 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { OpportunityPage } from '../../src/pages/OpportunityPage'
 import type { StoryData } from '../../src/types/StoryData'
 
 // AppContext を差し替えてサンプル相当のデータを注入する。
 let mockStory: StoryData | null = null
 vi.mock('../../src/contexts/AppContext', () => ({
-  useAppContext: () => ({ storyData: mockStory }),
+  useAppContext: () => ({ storyData: mockStory, setStoryData: vi.fn() }),
 }))
+// 通知は本テストの対象外なのでモックする（EmptyState のサンプル読込導線が依存）。
+vi.mock('../../src/contexts/VisualFeedbackContext', () => ({
+  useVisualFeedback: () => ({ showNotification: vi.fn() }),
+}))
+
+// 空状態・NextSteps の <Link> が Router を必要とするためラップする。
+const renderPage = (): ReturnType<typeof render> =>
+  render(
+    <MemoryRouter>
+      <OpportunityPage />
+    </MemoryRouter>,
+  )
 
 const story: StoryData = {
   persons: [
@@ -44,13 +57,13 @@ const story: StoryData = {
 describe('OpportunityPage（容疑者・機会）', () => {
   it('データ未読み込みなら空状態を表示', () => {
     mockStory = null
-    render(<OpportunityPage />)
+    renderPage()
     expect(screen.getByText(/データが読み込まれていません/)).toBeInTheDocument()
   })
 
   it('場所×時刻で現場の在席者を表示する', () => {
     mockStory = story
-    render(<OpportunityPage />)
+    renderPage()
     // 既定で先頭の場所（広間）・最終時刻。広間には初期配置のレオとユーリが居る。
     expect(screen.getByText('容疑者・機会')).toBeInTheDocument()
     expect(screen.getByText('現場に居た（容疑者）')).toBeInTheDocument()
@@ -60,7 +73,7 @@ describe('OpportunityPage（容疑者・機会）', () => {
 
   it('情報タブで知り得た人物を表示する', () => {
     mockStory = story
-    render(<OpportunityPage />)
+    renderPage()
     fireEvent.click(screen.getByRole('tab', { name: '情報・秘密' }))
     expect(screen.getByText('知り得た人物（初出時刻順）')).toBeInTheDocument()
     // レオが LEARN しているので少なくとも本人は知り得た人物に出る
@@ -69,7 +82,7 @@ describe('OpportunityPage（容疑者・機会）', () => {
 
   it('道具タブで触れ得た人物を表示する', () => {
     mockStory = story
-    render(<OpportunityPage />)
+    renderPage()
     fireEvent.click(screen.getByRole('tab', { name: '凶器・道具' }))
     expect(screen.getByText('触れ得た人物（全期間）')).toBeInTheDocument()
   })

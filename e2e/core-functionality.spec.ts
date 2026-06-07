@@ -83,34 +83,24 @@ test.describe('Scene Flow コア機能テスト', () => {
     await expect(page.locator('text=次郎')).toBeVisible()
   })
 
-  test('2. マップエディタ機能のテスト', async ({ page }) => {
+  test('2. 空間ワークスペース機能のテスト', async ({ page }) => {
     // データを読み込む
     await page.goto('/simulation')
     await page.locator('textarea').fill(JSON.stringify(comprehensiveTestData, null, 2))
     await page.getByRole('button', { name: '物語データをロード' }).click()
     await page.waitForTimeout(500)
 
-    // マップエディタに移動
-    await page.getByRole('link', { name: 'マップエディタ' }).click()
-    await expect(page).toHaveURL(/\/map-editor/)
-
-    // 操作ガイドは既定で折りたたまれているため、閉じる操作は不要
+    // 空間ワークスペースに移動
+    await page.getByRole('link', { name: '空間', exact: true }).click()
+    await expect(page).toHaveURL(/\/space/)
 
     // 初期状態の確認
     await expect(page.locator('text=ノード数: 3')).toBeVisible()
     await expect(page.locator('text=接続数: 6')).toBeVisible()
 
-    // ノードを追加
+    // ノードを追加（自動保存される）
     await page.getByRole('button', { name: 'ノード追加' }).click()
     await expect(page.locator('text=ノード数: 4')).toBeVisible()
-
-    // 接続モードのテスト
-    await page.getByRole('button', { name: '接続モード' }).click()
-
-    // キャンバス上でノードをクリックして接続を作成
-    const canvas = page.locator('canvas').first()
-    await canvas.click({ position: { x: 100, y: 100 } })
-    await canvas.click({ position: { x: 200, y: 200 } })
 
     // 元に戻す
     await page.getByRole('button', { name: '元に戻す' }).click()
@@ -119,10 +109,6 @@ test.describe('Scene Flow コア機能テスト', () => {
     // やり直し
     await page.getByRole('button', { name: 'やり直し' }).click()
     await expect(page.locator('text=ノード数: 4')).toBeVisible()
-
-    // 保存
-    await page.getByRole('button', { name: '保存' }).click()
-    await expect(page.locator('text=マップデータを保存しました')).toBeVisible()
   })
 
   test('3. エンティティエディタ機能のテスト', async ({ page }) => {

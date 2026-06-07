@@ -1,12 +1,38 @@
-/* グローバルナビ。トークンは /DESIGN.md・src/index.css を参照。 */
+/* グローバルナビ。トークンは /DESIGN.md・src/index.css を参照。
+   作業フェーズ（書く→組む→検証・分析）でセクション分けして役割を示す。 */
 .nav {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
   padding: var(--space-2) var(--space-4);
   background: var(--ink);
   color: #fff;
   border-bottom: 1px solid #0f1620;
+}
+
+/* フェーズのまとまり。区切り罫で視覚的に分離する。 */
+.section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-right: var(--space-4);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.section:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.sectionLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7e8794;
+  white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .links {
@@ -23,6 +49,7 @@
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.01em;
+  white-space: nowrap;
   transition:
     background 0.15s,
     color 0.15s;
@@ -44,21 +71,14 @@
 }
 
 /* Responsive design */
-@media (max-width: 700px) {
-  .nav {
-    flex-direction: column;
-    gap: var(--space-3);
-    padding: var(--space-3);
+@media (max-width: 900px) {
+  .section {
+    border-right: none;
+    padding-right: 0;
+    flex-wrap: wrap;
   }
 
   .links {
-    width: 100%;
     flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .link {
-    font-size: 13px;
-    padding: 6px 12px;
   }
 }

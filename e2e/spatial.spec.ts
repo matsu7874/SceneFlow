@@ -25,7 +25,7 @@ const seed = {
   ],
 }
 
-test.describe('空間ビュー', () => {
+test.describe('空間ワークスペース', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:3000/simulation')
     await page.locator('textarea').fill(JSON.stringify(seed))
@@ -33,9 +33,9 @@ test.describe('空間ビュー', () => {
     await expect(page.locator('text=データが正常にロードされました')).toBeVisible()
   })
 
-  test('空間ビューに場所と動線が表示され、破綻場所が赤くなる', async ({ page }) => {
-    await page.getByRole('link', { name: '空間ビュー' }).click()
-    await expect(page).toHaveURL(/\/spatial/)
+  test('空間ワークスペースに場所と動線が重なり、破綻場所が示される', async ({ page }) => {
+    await page.getByRole('link', { name: '空間', exact: true }).click()
+    await expect(page).toHaveURL(/\/space/)
 
     // 場所ノードが存在する
     const loc1 = page.locator('[data-testid="spatial-loc-1"]')

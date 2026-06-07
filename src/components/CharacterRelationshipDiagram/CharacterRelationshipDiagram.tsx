@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { Person } from '../../types/StoryData'
 import { ColorPicker } from '../ColorPicker'
 import { useAppContext } from '../../contexts/AppContext'
@@ -347,6 +348,9 @@ export const CharacterRelationshipDiagram: React.FC<CharacterRelationshipDiagram
                 )
               })}
           </div>
+          <Link to="/entities" className={styles.editPersonLink}>
+            この人物の関係を編集 →
+          </Link>
         </div>
       )}
     </div>
