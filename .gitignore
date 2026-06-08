@@ -42,3 +42,7 @@ test-results/
 
 # TypeScript
 *.tsbuildinfo
+# e2e/手動デバッグで生成されるスクリーンショット成果物
+/screenshots/
+/debug-*.png
+/validation-*.png

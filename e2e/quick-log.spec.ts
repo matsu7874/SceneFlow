@@ -86,7 +86,8 @@ test.describe('イベント入力（Quick Log）', () => {
     await description.press('Enter')
     await expect(page.locator('[class*="what"]').filter({ hasText: '図書館にいる' })).toBeVisible()
 
-    // 動線バッジが表示されることを確認
-    await expect(page.getByText('⚠ 動線')).toBeVisible()
+    // 整合性の警告バッジ（動線=position など）がタイムライン行に表示されることを確認。
+    // 現行は「⚠ 動線」テキストではなくカテゴリ絵文字アイコン（role=img）で表示される。
+    await expect(page.getByRole('img', { name: /整合性の警告/ }).first()).toBeVisible()
   })
 })

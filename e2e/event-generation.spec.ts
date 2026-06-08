@@ -53,9 +53,7 @@ const testDataWithoutEvents = {
     { id: 201, name: '本', description: 'キャロルが読んでいる本' },
     { id: 202, name: 'コーヒー', description: 'ボブが注文したコーヒー' },
   ],
-  informations: [
-    { id: 301, content: '今日は晴れている', description: '天気情報' },
-  ],
+  informations: [{ id: 301, content: '今日は晴れている', description: '天気情報' }],
   initialStates: [
     { personId: 1, locationId: 101, time: '09:00:00' },
     { personId: 2, locationId: 102, time: '09:00:00' },
@@ -78,14 +76,18 @@ test.describe('Event自動生成機能', () => {
     // 成功通知を確認
     await expect(page.locator('text=データが正常にロードされました')).toBeVisible()
 
-    // 初期状態の確認
-    await expect(page.locator('text=アリス')).toBeVisible()
-    await expect(page.locator('text=ボブ')).toBeVisible()
-    await expect(page.locator('text=キャロル')).toBeVisible()
+    // 初期状態の確認（人物タグで確認。JSONテキストエリアと区別する）
+    await expect(page.locator('.person-tag').filter({ hasText: 'アリス' }).first()).toBeVisible()
+    await expect(page.locator('.person-tag').filter({ hasText: 'ボブ' }).first()).toBeVisible()
+    await expect(page.locator('.person-tag').filter({ hasText: 'キャロル' }).first()).toBeVisible()
 
-    // タイムラインスライダーが正しい時間範囲を持つことを確認
+    // タイムラインスライダーが存在することを確認（min/max はデータの時間範囲に依存）
     const timelineSlider = page.locator('input[type="range"]')
-    await expect(timelineSlider).toHaveAttribute('min', '0')
+    await expect(timelineSlider).toBeVisible()
+
+    // 再生前の時刻を控える
+    const timeDisplay = page.locator('.current-time-display')
+    const startTime = await timeDisplay.textContent()
 
     // 再生ボタンをクリック
     await page.getByRole('button', { name: /再生|Play/i }).click()
@@ -94,9 +96,8 @@ test.describe('Event自動生成機能', () => {
     await page.waitForTimeout(2000)
 
     // 時間表示が更新されていることを確認
-    const timeDisplay = page.locator('.current-time-display')
     const currentTime = await timeDisplay.textContent()
-    expect(currentTime).not.toBe('09:00:00')
+    expect(currentTime).not.toBe(startTime)
 
     // 一時停止
     await page.getByRole('button', { name: /一時停止|Pause/i }).click()
@@ -120,8 +121,8 @@ test.describe('Event自動生成機能', () => {
     await expect(page.locator('.current-time-display')).toContainText('09:30')
 
     // LocationDisplayでアリスがカフェにいることを確認
-    const cafeSection = page.locator('text=カフェ').locator('..')
-    await expect(cafeSection.locator('text=アリス')).toBeVisible()
+    const cafeSection = page.locator('.location-group').filter({ hasText: 'カフェ' })
+    await expect(cafeSection.locator('.person-tag').filter({ hasText: 'アリス' })).toBeVisible()
   })
 
   test('actsの時刻順にイベントが処理される', async ({ page }) => {
@@ -155,14 +156,9 @@ test.describe('Event自動生成機能', () => {
 
     await page.locator('textarea').fill(JSON.stringify(unorderedData, null, 2))
     await page.getByRole('button', { name: '物語データをロード' }).click()
+    await expect(page.locator('text=データが正常にロードされました')).toBeVisible()
 
-    // イベントログを開く
-    const eventLogSection = page.locator('details').filter({ hasText: 'イベントログ' })
-    if (!(await eventLogSection.getAttribute('open'))) {
-      await eventLogSection.locator('summary').click()
-    }
-
-    // タイムラインを最後まで進める
+    // タイムラインを最後まで進める（実行ログは常時表示される）
     const timelineSlider = page.locator('input[type="range"]')
     const maxValue = await timelineSlider.getAttribute('max')
     await timelineSlider.evaluate((slider: HTMLInputElement, max) => {
@@ -170,13 +166,13 @@ test.describe('Event自動生成機能', () => {
       slider.dispatchEvent(new Event('change', { bubbles: true }))
     }, maxValue)
 
-    // イベントログが時刻順に表示されることを確認
-    const logEntries = page.locator('.log-entry')
-    const firstEntry = await logEntries.first().textContent()
-    const lastEntry = await logEntries.last().textContent()
-
-    expect(firstEntry).toContain('08:00')
-    expect(lastEntry).toContain('10:00')
+    // 実行ログで acts が時刻順に処理されることを確認（初期状態エントリが先頭に入るため、
+    // 行の絶対位置ではなく「早いイベント」が「遅いイベント」より前に来ることで検証する）
+    const texts = await page.locator('.log-entry').allTextContents()
+    const earlyIdx = texts.findIndex(t => t.includes('早いイベント'))
+    const lateIdx = texts.findIndex(t => t.includes('遅いイベント'))
+    expect(earlyIdx).toBeGreaterThanOrEqual(0)
+    expect(lateIdx).toBeGreaterThan(earlyIdx)
   })
 
   test('空のactsでもエラーにならない', async ({ page }) => {
@@ -196,8 +192,8 @@ test.describe('Event自動生成機能', () => {
     await expect(page.locator('text=データが正常にロードされました')).toBeVisible()
     await expect(page.locator('.error-output')).not.toBeVisible()
 
-    // 基本的な表示が正常であることを確認
-    await expect(page.locator('text=テスト')).toBeVisible()
+    // 基本的な表示が正常であることを確認（人物タグで確認）
+    await expect(page.locator('.person-tag').filter({ hasText: 'テスト' }).first()).toBeVisible()
   })
 
   test('場所のレイアウト表示でキャラクターの移動が反映される', async ({ page }) => {
@@ -223,7 +219,7 @@ test.describe('Event自動生成機能', () => {
 
     // LocationDisplayでアリスがカフェにいることを確認
     const locationDisplay = page.locator('.location-display')
-    const cafeSection = locationDisplay.locator('.location-box').filter({ hasText: 'カフェ' })
+    const cafeSection = locationDisplay.locator('.location-group').filter({ hasText: 'カフェ' })
     await expect(cafeSection.locator('.person-tag').filter({ hasText: 'アリス' })).toBeVisible()
   })
 })

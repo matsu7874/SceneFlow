@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 test.describe('因果関係ビュー', () => {
   test.beforeEach(async ({ page }) => {
     // シミュレーションページに移動
-    await page.goto('http://localhost:3000/simulation')
+    await page.goto('/simulation')
     await page.waitForLoadState('networkidle')
 
     // テストデータを作成
@@ -46,124 +46,43 @@ test.describe('因果関係ビュー', () => {
   })
 
   test('因果関係ビューが表示される', async ({ page }) => {
-    // 因果関係ビューに移動
     await page.getByRole('link', { name: '因果関係ビュー' }).click()
+    await expect(page).toHaveURL(/\/causality/)
 
-    // ページタイトルが表示されることを確認
-    await expect(page.locator('h2')).toContainText('Causality Analysis')
+    // ページタイトル
+    await expect(page.locator('h2')).toContainText('因果関係ビュー')
 
-    // エラーメッセージが表示されていないことを確認
-    const errorElement = page.locator('text=Error in Causality View')
-    await expect(errorElement).not.toBeVisible()
+    // SVG の依存グラフが表示される
+    await expect(page.locator('svg').first()).toBeVisible()
 
-    // Canvas要素が存在することを確認
-    const canvas = page.locator('canvas')
-    await expect(canvas).toBeVisible()
-
-    // SVG要素が存在することを確認
-    const svg = page.locator('svg')
-    await expect(svg).toBeVisible()
-
-    // コントロールが表示されることを確認
-    const resetButton = page.getByRole('button', { name: 'Reset View' })
-    await expect(resetButton).toBeVisible()
-
-    // スケール表示があることを確認
-    await expect(page.locator('text=Scale:')).toBeVisible()
+    // 凡例が表示される
+    await expect(page.getByTestId('causality-legend')).toBeVisible()
   })
 
-  test('ノードが表示される', async ({ page }) => {
-    // 因果関係ビューに移動
+  test('行動ノードが表示される', async ({ page }) => {
     await page.getByRole('link', { name: '因果関係ビュー' }).click()
 
-    // SVG内のノード（円）が表示されることを確認
-    const nodes = page.locator('svg circle')
-    await expect(nodes).toHaveCount(10) // 5 acts + 5 events
-
-    // ノードのテキストが表示されることを確認
-    const nodeTexts = page.locator('svg text')
-    await expect(nodeTexts.first()).toBeVisible()
+    // 行動（act）ノードは acts の数だけ描画される（data-testid="node-act-<id>"）
+    await expect(page.locator('[data-testid^="node-act-"]')).toHaveCount(5)
+    await expect(page.getByTestId('node-act-1')).toBeVisible()
   })
 
-  test('ズーム機能が動作する', async ({ page }) => {
-    // 因果関係ビューに移動
+  test('ノードをクリックすると選択状態になる', async ({ page }) => {
     await page.getByRole('link', { name: '因果関係ビュー' }).click()
 
-    // 初期スケールを確認
-    const scaleText = page.locator('text=Scale:')
-    await expect(scaleText).toContainText('1.00')
-
-    // Canvas上でマウスホイールを使ってズームイン
-    const canvas = page.locator('canvas')
-    await canvas.hover()
-    await page.mouse.wheel(0, -100) // ズームイン
-
-    // スケールが変更されたことを確認
-    await expect(scaleText).not.toContainText('1.00')
+    const node = page.getByTestId('node-act-1')
+    await node.click()
+    await expect(node).toHaveAttribute('data-selected', 'true')
   })
 
-  test('パン機能が動作する', async ({ page }) => {
-    // 因果関係ビューに移動
-    await page.getByRole('link', { name: '因果関係ビュー' }).click()
+  test('データがない場合はメッセージが表示される', async ({ browser }) => {
+    // localStorage を共有しない新しいコンテキストで開く（データ未ロード状態）
+    const ctx = await browser.newContext()
+    const newPage = await ctx.newPage()
+    await newPage.goto('/causality')
 
-    // Canvas上でドラッグしてパン
-    const canvas = page.locator('canvas')
-    const box = await canvas.boundingBox()
-    if (!box) throw new Error('Canvas not found')
+    await expect(newPage.getByText('物語データが読み込まれていません')).toBeVisible()
 
-    // ドラッグ操作
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-    await page.mouse.down()
-    await page.mouse.move(box.x + box.width / 2 + 100, box.y + box.height / 2 + 100)
-    await page.mouse.up()
-
-    // ビューがパンされたことを視覚的に確認するのは難しいので、
-    // エラーが発生しないことを確認
-    await expect(page.locator('text=Error in Causality View')).not.toBeVisible()
-  })
-
-  test('リセットボタンが動作する', async ({ page }) => {
-    // 因果関係ビューに移動
-    await page.getByRole('link', { name: '因果関係ビュー' }).click()
-
-    // ズームを変更
-    const canvas = page.locator('canvas')
-    await canvas.hover()
-    await page.mouse.wheel(0, -100)
-
-    // スケールが1.00でないことを確認
-    const scaleText = page.locator('text=Scale:')
-    await expect(scaleText).not.toContainText('1.00')
-
-    // リセットボタンをクリック
-    await page.getByRole('button', { name: 'Reset View' }).click()
-
-    // スケールが1.00に戻ることを確認
-    await expect(scaleText).toContainText('1.00')
-  })
-
-  test('ノードをクリックすると選択される', async ({ page }) => {
-    // 因果関係ビューに移動
-    await page.getByRole('link', { name: '因果関係ビュー' }).click()
-
-    // 最初のノードをクリック
-    const firstNode = page.locator('svg circle').first()
-    await firstNode.click()
-
-    // 通知が表示されることを確認（選択されたことを示す）
-    // 実際の通知メッセージは実装により異なる可能性があるため、
-    // エラーが発生しないことを確認
-    await expect(page.locator('text=Error in Causality View')).not.toBeVisible()
-  })
-
-  test('データがない場合はメッセージが表示される', async ({ page }) => {
-    // 新しいタブでページを開く（データをロードせずに）
-    const newPage = await page.context().newPage()
-    await newPage.goto('http://localhost:3000/causality')
-
-    // データなしのメッセージが表示されることを確認
-    await expect(newPage.locator('text=No story data loaded')).toBeVisible()
-
-    await newPage.close()
+    await ctx.close()
   })
 })
