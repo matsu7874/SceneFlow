@@ -13,3 +13,9 @@
   stroke: var(--danger);
   stroke-width: 2;
 }
+
+/* 詳細パネルで選択中の破綻地点。塗り・線を強めて注意を引く。 */
+.breakRingActive {
+  fill: rgba(220, 38, 38, 0.22);
+  stroke-width: 4;
+}

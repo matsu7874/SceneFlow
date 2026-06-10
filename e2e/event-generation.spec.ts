@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { loadStoryData, navTo } from './helpers'
 
 const testDataWithoutEvents = {
   persons: [
@@ -62,19 +63,10 @@ const testDataWithoutEvents = {
 }
 
 test.describe('Event自動生成機能', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/simulation')
-  })
-
   test('eventsフィールドなしでJSONをロードし、シミュレーションが動作する', async ({ page }) => {
-    // JSONデータを入力
-    await page.locator('textarea').fill(JSON.stringify(testDataWithoutEvents, null, 2))
-
-    // データをロード
-    await page.getByRole('button', { name: '物語データをロード' }).click()
-
-    // 成功通知を確認
-    await expect(page.locator('text=データが正常にロードされました')).toBeVisible()
+    // データ入出力でロードしてシミュレーションへ
+    await loadStoryData(page, testDataWithoutEvents)
+    await navTo(page, 'シミュレーション')
 
     // 初期状態の確認（人物タグで確認。JSONテキストエリアと区別する）
     await expect(page.locator('.person-tag').filter({ hasText: 'アリス' }).first()).toBeVisible()
@@ -104,9 +96,9 @@ test.describe('Event自動生成機能', () => {
   })
 
   test('タイムラインをドラッグして特定の時刻にジャンプできる', async ({ page }) => {
-    // JSONデータをロード
-    await page.locator('textarea').fill(JSON.stringify(testDataWithoutEvents, null, 2))
-    await page.getByRole('button', { name: '物語データをロード' }).click()
+    // JSONデータをロードしてシミュレーションへ
+    await loadStoryData(page, testDataWithoutEvents)
+    await navTo(page, 'シミュレーション')
 
     // タイムラインスライダーを操作
     const timelineSlider = page.locator('input[type="range"]')
@@ -154,9 +146,8 @@ test.describe('Event自動生成機能', () => {
       ],
     }
 
-    await page.locator('textarea').fill(JSON.stringify(unorderedData, null, 2))
-    await page.getByRole('button', { name: '物語データをロード' }).click()
-    await expect(page.locator('text=データが正常にロードされました')).toBeVisible()
+    await loadStoryData(page, unorderedData)
+    await navTo(page, 'シミュレーション')
 
     // タイムラインを最後まで進める（実行ログは常時表示される）
     const timelineSlider = page.locator('input[type="range"]')
@@ -185,20 +176,20 @@ test.describe('Event自動生成機能', () => {
       initialStates: [{ personId: 1, locationId: 1, time: '09:00:00' }],
     }
 
-    await page.locator('textarea').fill(JSON.stringify(emptyActsData, null, 2))
-    await page.getByRole('button', { name: '物語データをロード' }).click()
+    await loadStoryData(page, emptyActsData)
 
     // エラーが表示されないことを確認
-    await expect(page.locator('text=データが正常にロードされました')).toBeVisible()
     await expect(page.locator('.error-output')).not.toBeVisible()
+
+    await navTo(page, 'シミュレーション')
 
     // 基本的な表示が正常であることを確認（人物タグで確認）
     await expect(page.locator('.person-tag').filter({ hasText: 'テスト' }).first()).toBeVisible()
   })
 
   test('場所のレイアウト表示でキャラクターの移動が反映される', async ({ page }) => {
-    await page.locator('textarea').fill(JSON.stringify(testDataWithoutEvents, null, 2))
-    await page.getByRole('button', { name: '物語データをロード' }).click()
+    await loadStoryData(page, testDataWithoutEvents)
+    await navTo(page, 'シミュレーション')
 
     // 場所のレイアウト表示セクションを確認
     const layoutSection = page.locator('.location-layout')

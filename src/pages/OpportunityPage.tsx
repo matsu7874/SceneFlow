@@ -105,7 +105,7 @@ export const OpportunityPage: React.FC = () => {
           </span>
           <p className={styles.emptyTitle}>データが読み込まれていません</p>
           <p className={styles.emptyHint}>
-            先にシミュレーションページで物語データを読み込んでください。
+            先にデータ入出力ページで物語データを読み込んでください。
           </p>
         </div>
       </div>

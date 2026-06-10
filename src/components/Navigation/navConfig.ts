@@ -24,9 +24,9 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { to: '/log', label: 'イベント入力', hint: '誰が・どこで・何をしたかを書いて物語を作る' },
       {
-        to: '/simulation',
-        label: 'シミュレーション',
-        hint: 'JSONの読込・サンプル投入と再生で確認',
+        to: '/data',
+        label: 'データ入出力',
+        hint: '物語データ（JSON）の読込・書き出しとサンプル投入',
       },
     ],
   },
@@ -48,6 +48,11 @@ export const NAV_SECTIONS: NavSection[] = [
     label: '③ 検証・分析',
     items: [
       { to: '/validation', label: '検証', hint: '矛盾・破綻をリアルタイムに検査' },
+      {
+        to: '/simulation',
+        label: 'シミュレーション',
+        hint: '物語を時間軸で再生し、各時刻の居場所と出来事を確認',
+      },
       { to: '/opportunity', label: '容疑者・機会', hint: '時刻×場所・道具・情報で逆引き' },
       { to: '/causality', label: '因果関係ビュー', hint: '事実・証言の依存と矛盾を読む' },
     ],

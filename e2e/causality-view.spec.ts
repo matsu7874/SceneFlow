@@ -1,11 +1,8 @@
 import { test, expect } from '@playwright/test'
+import { loadStoryData, navTo } from './helpers'
 
 test.describe('因果関係ビュー', () => {
   test.beforeEach(async ({ page }) => {
-    // シミュレーションページに移動
-    await page.goto('/simulation')
-    await page.waitForLoadState('networkidle')
-
     // テストデータを作成
     const testData = {
       persons: [
@@ -34,19 +31,12 @@ test.describe('因果関係ビュー', () => {
       ],
     }
 
-    // データをロード
-    const textarea = page.locator('textarea').first()
-    await textarea.fill(JSON.stringify(testData, null, 2))
-
-    const loadButton = page.getByRole('button', { name: '物語データをロード' })
-    await loadButton.click()
-
-    // ロード成功の通知を待つ
-    await page.locator('text=データが正常にロードされました').waitFor({ timeout: 5000 })
+    // データ入出力ページからロード
+    await loadStoryData(page, testData)
   })
 
   test('因果関係ビューが表示される', async ({ page }) => {
-    await page.getByRole('link', { name: '因果関係ビュー' }).click()
+    await navTo(page, '因果関係ビュー')
     await expect(page).toHaveURL(/\/causality/)
 
     // ページタイトル
@@ -60,7 +50,7 @@ test.describe('因果関係ビュー', () => {
   })
 
   test('行動ノードが表示される', async ({ page }) => {
-    await page.getByRole('link', { name: '因果関係ビュー' }).click()
+    await navTo(page, '因果関係ビュー')
 
     // 行動（act）ノードは acts の数だけ描画される（data-testid="node-act-<id>"）
     await expect(page.locator('[data-testid^="node-act-"]')).toHaveCount(5)
@@ -68,7 +58,7 @@ test.describe('因果関係ビュー', () => {
   })
 
   test('ノードをクリックすると選択状態になる', async ({ page }) => {
-    await page.getByRole('link', { name: '因果関係ビュー' }).click()
+    await navTo(page, '因果関係ビュー')
 
     const node = page.getByTestId('node-act-1')
     await node.click()

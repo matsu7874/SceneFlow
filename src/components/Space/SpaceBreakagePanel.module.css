@@ -1,0 +1,170 @@
+.panel {
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 10px);
+  padding: var(--space-3);
+  max-height: clamp(240px, 40vh, 480px);
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.total {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.clearBtn {
+  margin-left: auto;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+
+.clearBtn:hover {
+  background: var(--color-surface-hover, rgba(15, 22, 32, 0.06));
+  color: var(--ink);
+}
+
+.cleanState {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+
+.cleanIcon {
+  color: var(--success, #16a34a);
+  font-weight: 700;
+}
+
+.groupList,
+.issues {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.group {
+  margin-bottom: var(--space-2);
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  text-align: left;
+}
+
+.groupHeader:hover {
+  background: var(--color-surface-hover, rgba(15, 22, 32, 0.06));
+}
+
+.groupHeaderActive {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: var(--danger);
+}
+
+.locName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.locCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--danger);
+  border-radius: 999px;
+}
+
+.issues {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  padding-left: var(--space-2);
+}
+
+.issue {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding: var(--space-1) 0;
+}
+
+.badge {
+  flex-shrink: 0;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+}
+
+.badgeError {
+  color: var(--danger);
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.badgeWarn {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.badgeInfo {
+  color: var(--ink-2);
+  background: rgba(15, 22, 32, 0.06);
+}
+
+.issueBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.message {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.actRef {
+  font-size: 0.75rem;
+  color: var(--ink-3, #7e8794);
+}
