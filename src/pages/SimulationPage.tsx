@@ -34,7 +34,7 @@ export const SimulationPage: React.FC = () => {
   return (
     <div className="page simulation-page">
       <header className="simulation-page-header">
-        <span className="simulation-page-eyebrow">Simulation</span>
+        <span className="simulation-page-eyebrow">書く</span>
         <h2 className="simulation-page-title">シミュレーション</h2>
       </header>
 

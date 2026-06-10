@@ -165,7 +165,19 @@ export const ExtractionPanel: React.FC<ExtractionPanelProps> = ({
             {candidates && <span className={styles.count}>{candidates.length} 件の候補</span>}
           </div>
 
-          {error && <div className={styles.error}>{error}</div>}
+          {error && (
+            <div className={styles.error} role="alert">
+              {error}
+              <button
+                type="button"
+                className={styles.retryButton}
+                onClick={() => void runExtraction()}
+                disabled={loading}
+              >
+                再試行
+              </button>
+            </div>
+          )}
 
           {candidates && candidates.length === 0 && !error && (
             <div className={styles.empty}>

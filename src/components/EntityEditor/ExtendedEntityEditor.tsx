@@ -331,9 +331,12 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
         <button
           className={styles.deleteButton}
           onClick={() => {
-            if (confirm(`この${entityTypeLabel(entity.type)}を削除してもよろしいですか？`)) {
+            if (confirm(`「${entity.name}」を削除してもよろしいですか？`)) {
               onDelete()
-              showNotification(`${entityTypeLabel(entity.type)}を削除しました`, { type: 'info' })
+              showNotification(
+                `${entityTypeLabel(entity.type)}を削除しました（Ctrl+Z か右上の「元に戻す」で復元できます）`,
+                { type: 'info', duration: 5000 },
+              )
             }
           }}
         >

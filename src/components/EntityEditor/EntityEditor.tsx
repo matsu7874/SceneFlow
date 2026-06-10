@@ -89,7 +89,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
     (name: string, value: any, fieldSchema: FieldSchema): string | null => {
       // Required field validation
       if (schema.required?.includes(name) && !value) {
-        return `${fieldSchema.label || name} is required`
+        return `${fieldSchema.label || name}は必須です`
       }
 
       // Type-specific validation
@@ -98,22 +98,22 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
 
         if (fieldSchema.type === 'string' && value) {
           if (minLength && value.length < minLength) {
-            return `Minimum length is ${minLength}`
+            return `${minLength}文字以上で入力してください`
           }
           if (maxLength && value.length > maxLength) {
-            return `Maximum length is ${maxLength}`
+            return `${maxLength}文字以内で入力してください`
           }
           if (pattern && !new RegExp(pattern).test(value)) {
-            return 'Invalid format'
+            return '形式が正しくありません'
           }
         }
 
         if (fieldSchema.type === 'number' && value !== null && value !== undefined) {
           if (min !== undefined && value < min) {
-            return `Minimum value is ${min}`
+            return `${min}以上の値を入力してください`
           }
           if (max !== undefined && value > max) {
-            return `Maximum value is ${max}`
+            return `${max}以下の値を入力してください`
           }
         }
 
@@ -224,7 +224,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
         )
 
       case 'boolean':
-        return <BooleanField {...commonProps} />
+        return <BooleanField {...commonProps} label={fieldSchema.label || fieldName} />
 
       case 'select':
         return <SelectField {...commonProps} options={fieldSchema.options || []} />
@@ -379,10 +379,13 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
   ): React.ReactNode => {
     return Object.entries(fieldsSchema.fields).map(([fieldName, fieldSchema]) => (
       <div key={fieldName} className={styles.fieldRow}>
-        <label className={styles.fieldLabel}>
-          {fieldSchema.label || fieldName}
-          {schema.required?.includes(fieldName) && <span className={styles.required}>*</span>}
-        </label>
+        {/* boolean はチェックボックス自身がクリック可能なラベルを持つため、外側ラベルを重複表示しない */}
+        {fieldSchema.type !== 'boolean' && (
+          <label className={styles.fieldLabel}>
+            {fieldSchema.label || fieldName}
+            {schema.required?.includes(fieldName) && <span className={styles.required}>*</span>}
+          </label>
+        )}
         {renderField(fieldName, fieldSchema, fieldsData[fieldName], pathPrefix)}
       </div>
     ))
@@ -399,12 +402,14 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
 
             return (
               <div key={fieldName} className={styles.fieldRow}>
-                <label className={styles.fieldLabel}>
-                  {fieldSchema.label || fieldName}
-                  {schema.required?.includes(fieldName) && (
-                    <span className={styles.required}>*</span>
-                  )}
-                </label>
+                {fieldSchema.type !== 'boolean' && (
+                  <label className={styles.fieldLabel}>
+                    {fieldSchema.label || fieldName}
+                    {schema.required?.includes(fieldName) && (
+                      <span className={styles.required}>*</span>
+                    )}
+                  </label>
+                )}
                 {renderField(fieldName, fieldSchema, data[fieldName])}
               </div>
             )

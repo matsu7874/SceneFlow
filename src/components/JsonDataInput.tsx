@@ -24,7 +24,7 @@ export const JsonDataInput: React.FC<JsonDataInputProps> = ({ onDataLoad, curren
   // 各ページでの編集（イベント入力・エンティティ編集など）に追従してJSON表示を更新する
   React.useEffect(() => {
     setJsonText(JSON.stringify(currentData ?? createEmptyStoryData(), null, 2))
-  }, [currentData, JSON.stringify(currentData)])
+  }, [currentData])
 
   const handleLoadData = (): void => {
     try {
@@ -40,7 +40,15 @@ export const JsonDataInput: React.FC<JsonDataInputProps> = ({ onDataLoad, curren
         showNotification('データの検証に失敗しました', { type: 'error' })
       }
     } catch (e) {
-      setError(`JSONの解析に失敗しました: ${e instanceof Error ? e.message : 'Unknown error'}`)
+      // 生のパーサ例外（英語・文字位置）のままでは原因を探しにくいので、行番号に変換して示す
+      let detail = e instanceof Error ? e.message : ''
+      const position = /position (\d+)/.exec(detail)
+      if (position) {
+        const offset = Number(position[1])
+        const line = jsonText.slice(0, offset).split('\n').length
+        detail = `${line}行目あたりに文法の誤りがあります（${detail}）`
+      }
+      setError(`JSONの解析に失敗しました: ${detail}`)
       showNotification('JSONの解析に失敗しました', { type: 'error' })
     }
   }
@@ -52,13 +60,24 @@ export const JsonDataInput: React.FC<JsonDataInputProps> = ({ onDataLoad, curren
           <h2>物語データ (JSON)</h2>
         </summary>
         <div className="input-content">
+          <p className="json-data-input-hint">
+            各ページでの編集が自動でこのJSONに反映されます。直接編集して「物語データをロード」（Ctrl+Enter）で取り込むこともできます。
+          </p>
           <textarea
             value={jsonText}
             onChange={e => setJsonText(e.target.value)}
+            onKeyDown={e => {
+              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault()
+                handleLoadData()
+              }
+            }}
             placeholder="ここにJSON形式の物語データを入力してください..."
           />
           <div className="json-data-input-actions">
-            <button onClick={handleLoadData}>物語データをロード</button>
+            <button onClick={handleLoadData} title="Ctrl+Enter でも読み込めます">
+              物語データをロード
+            </button>
             {SAMPLES.map(sample => (
               <button
                 key={sample.id}

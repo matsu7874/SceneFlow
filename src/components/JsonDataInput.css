@@ -72,6 +72,13 @@
   padding: var(--space-4);
 }
 
+.json-data-input .json-data-input-hint {
+  margin: 0 0 var(--space-3) 0;
+  font-size: 0.78rem;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
 /* モノスペース JSON textarea */
 .json-data-input textarea {
   display: block;

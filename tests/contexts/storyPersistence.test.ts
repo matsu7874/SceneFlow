@@ -53,7 +53,11 @@ describe('saveStoredStory', () => {
     expect(storage._store.has('sceneflow.storyData')).toBe(false)
   })
 
-  it('書き込み失敗（容量超過など）でも例外を投げない', () => {
+  it('書き込み成功で true を返す', () => {
+    expect(saveStoredStory(makeStorage(), sample)).toBe(true)
+  })
+
+  it('書き込み失敗（容量超過など）でも例外を投げず false を返す', () => {
     const storage = {
       getItem: () => null,
       setItem: vi.fn(() => {
@@ -62,5 +66,6 @@ describe('saveStoredStory', () => {
       removeItem: () => undefined,
     }
     expect(() => saveStoredStory(storage, sample)).not.toThrow()
+    expect(saveStoredStory(storage, sample)).toBe(false)
   })
 })

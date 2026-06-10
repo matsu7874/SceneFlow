@@ -109,16 +109,27 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
       <div className={styles.paletteSection}>
         <h4>プリセットカラー</h4>
         <div className={styles.colorGrid}>
-          {colorPalette.map(color => (
-            <button
-              key={color}
-              type="button"
-              className={styles.paletteColor}
-              style={{ backgroundColor: color }}
-              onClick={() => handleColorChange(color)}
-              title={color}
-            />
-          ))}
+          {colorPalette.map(color => {
+            const isSelected = color.toLowerCase() === value.toLowerCase()
+            return (
+              <button
+                key={color}
+                type="button"
+                className={`${styles.paletteColor} ${isSelected ? styles.paletteColorSelected : ''}`}
+                style={{ backgroundColor: color }}
+                onClick={() => handleColorChange(color)}
+                title={color}
+                aria-label={`色 ${color}${isSelected ? '（選択中）' : ''}`}
+                aria-pressed={isSelected}
+              >
+                {isSelected && (
+                  <span className={styles.selectedMark} aria-hidden="true">
+                    ✓
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 

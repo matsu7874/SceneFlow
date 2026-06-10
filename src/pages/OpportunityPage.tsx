@@ -96,18 +96,25 @@ export const OpportunityPage: React.FC = () => {
     return (
       <div className={`page ${styles.pageRoot}`}>
         <header className={styles.pageHeader}>
-          <span className={styles.pageEyebrow}>Opportunity</span>
+          <span className={styles.pageEyebrow}>検証・分析</span>
           <h2 className={styles.pageTitle}>容疑者・機会</h2>
-        </header>
-        <div className={styles.emptyState}>
-          <span className={styles.emptyIcon} aria-hidden="true">
-            ◍
-          </span>
-          <p className={styles.emptyTitle}>データが読み込まれていません</p>
-          <p className={styles.emptyHint}>
-            先にシミュレーションページで物語データを読み込んでください。
+          <p className={styles.pageHint}>
+            「犯行時刻に現場に居られたのは誰か」「凶器に触れ得たのは誰か」「秘密を知り得たのは誰か」を逆引きします。
           </p>
-        </div>
+        </header>
+        <EmptyState
+          icon="◎"
+          title="物語データが読み込まれていません"
+          description="人物・場所・行動を登録すると、時刻×場所や道具・情報から逆引きできます。"
+          actions={[
+            { label: 'イベント入力で書き始める', to: '/log' },
+            {
+              label: 'サンプルを読み込む',
+              onClick: () => loadSample('mansion'),
+              variant: 'secondary',
+            },
+          ]}
+        />
       </div>
     )
   }
@@ -138,37 +145,10 @@ export const OpportunityPage: React.FC = () => {
       </span>
     )
 
-  if (!storyData) {
-    return (
-      <div className={`page ${styles.pageRoot}`}>
-        <header className={styles.pageHeader}>
-          <span className={styles.pageEyebrow}>Opportunity</span>
-          <h2 className={styles.pageTitle}>容疑者・機会</h2>
-          <p className={styles.pageHint}>
-            「犯行時刻に現場に居られたのは誰か」「凶器に触れ得たのは誰か」「秘密を知り得たのは誰か」を逆引きします。
-          </p>
-        </header>
-        <EmptyState
-          icon="◎"
-          title="物語データが読み込まれていません"
-          description="人物・場所・行動を登録すると、時刻×場所や道具・情報から逆引きできます。"
-          actions={[
-            { label: 'イベント入力で書き始める', to: '/log' },
-            {
-              label: 'サンプルを読み込む',
-              onClick: () => loadSample('mansion'),
-              variant: 'secondary',
-            },
-          ]}
-        />
-      </div>
-    )
-  }
-
   return (
     <div className={`page ${styles.pageRoot}`}>
       <header className={styles.pageHeader}>
-        <span className={styles.pageEyebrow}>Opportunity</span>
+        <span className={styles.pageEyebrow}>検証・分析</span>
         <h2 className={styles.pageTitle}>容疑者・機会</h2>
         <p className={styles.pageHint}>
           「犯行時刻に現場に居られたのは誰か」「凶器に触れ得たのは誰か」「秘密を知り得たのは誰か」を逆引きします。

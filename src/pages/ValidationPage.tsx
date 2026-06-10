@@ -15,7 +15,7 @@ export const ValidationPage: React.FC = () => {
   return (
     <div className="page validation-page">
       <div className="page-content">
-        <PageHeader eyebrow="Diagnostics" title="検証" hint={HINT} />
+        <PageHeader eyebrow="検証・分析" title="検証" hint={HINT} />
 
         {storyData ? (
           <>

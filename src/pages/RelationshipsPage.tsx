@@ -18,7 +18,7 @@ export const RelationshipsPage: React.FC = () => {
   if (!storyData || storyData.persons.length === 0) {
     return (
       <div className={`page relationships-page ${styles.pageRoot}`}>
-        <PageHeader eyebrow="Relationships" title="関係性" hint={HINT} />
+        <PageHeader eyebrow="組む" title="関係性" hint={HINT} />
         <EmptyState
           icon="◎"
           title={storyData ? '人物がまだ登録されていません' : 'データが読み込まれていません'}
@@ -39,7 +39,7 @@ export const RelationshipsPage: React.FC = () => {
   return (
     <div className={`page relationships-page ${styles.pageRoot}`}>
       <PageHeader
-        eyebrow="Relationships"
+        eyebrow="組む"
         title="関係性"
         hint={HINT}
         actions={

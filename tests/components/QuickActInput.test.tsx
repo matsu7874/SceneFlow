@@ -96,6 +96,43 @@ describe('QuickActInput', () => {
     expect(alert.textContent).toContain('何をした')
   })
 
+  it('時刻が不正な形式なら追加せずHH:MM形式を促す', async () => {
+    const onAdd = vi.fn()
+    render(
+      <QuickActInput
+        persons={persons}
+        locations={locations}
+        onAdd={onAdd}
+        onCreatePerson={() => 99}
+        onCreateLocation={() => 88}
+      />,
+    )
+    await user.click(screen.getByLabelText('誰が'))
+    await user.keyboard('太郎{Enter}')
+    await user.click(screen.getByLabelText('どこで'))
+    await user.keyboard('広場{Enter}')
+
+    const time = screen.getByLabelText('時刻')
+    await user.clear(time)
+    await user.type(time, '99:99')
+    await user.type(screen.getByLabelText('何をした'), '到着した{Enter}')
+
+    expect(onAdd).not.toHaveBeenCalled()
+    expect(screen.getByRole('alert').textContent).toContain('HH:MM')
+
+    // 時刻を直すとエラーが消えて追加できる
+    await user.clear(time)
+    await user.type(time, '09:30')
+    expect(screen.queryByRole('alert')).toBeNull()
+    await user.type(screen.getByLabelText('何をした'), '{Enter}')
+    expect(onAdd).toHaveBeenCalledWith({
+      personId: 1,
+      locationId: 10,
+      description: '到着した',
+      startTime: 9 * 60 + 30,
+    })
+  })
+
   it('項目を確定するとエラー表示が消える', async () => {
     const onAdd = vi.fn()
     render(
