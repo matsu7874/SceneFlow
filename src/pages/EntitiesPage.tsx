@@ -384,9 +384,7 @@ export const EntitiesPage: React.FC = () => {
       <div className="page entities-page">
         <h2>エンティティ管理</h2>
         <div className="no-data-message">
-          <p>
-            データが読み込まれていません。シミュレーションページで物語データを読み込んでください。
-          </p>
+          <p>データが読み込まれていません。データ入出力ページで物語データを読み込んでください。</p>
         </div>
       </div>
     )

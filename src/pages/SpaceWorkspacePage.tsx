@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react'
 import { MapEditor } from '../components/MapEditor'
 import { SpaceOverlay } from '../components/Space/SpaceOverlay'
+import { SpaceBreakagePanel } from '../components/Space/SpaceBreakagePanel'
 import {
   storyDataToMapEditor,
   mapEditorToStoryData,
@@ -23,6 +24,8 @@ export const SpaceWorkspacePage: React.FC = () => {
   const loadSample = useLoadSample()
   const [showMovement, setShowMovement] = useState(true)
   const [showBreakage, setShowBreakage] = useState(true)
+  // 詳細パネルで選択中の破綻地点。地図のリングと相互にハイライトする。
+  const [highlightLocId, setHighlightLocId] = useState<number | null>(null)
 
   // 自動保存: 編集（ドラッグ/追加/接続/削除/undo）で mapData が変わるたびに
   // debounce して storyData へ非破壊マージで書き戻す。保存ボタンは無し。
@@ -162,10 +165,20 @@ export const SpaceWorkspacePage: React.FC = () => {
               breakLocs={breakLocs}
               showMovement={showMovement}
               showBreakage={showBreakage}
+              highlightLocId={highlightLocId}
             />
           )}
         />
       </div>
+
+      {showBreakage && report && (
+        <SpaceBreakagePanel
+          storyData={storyData}
+          breakages={report.breakages}
+          highlightLocId={highlightLocId}
+          onSelectLocation={setHighlightLocId}
+        />
+      )}
     </div>
   )
 }

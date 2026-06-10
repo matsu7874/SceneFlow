@@ -66,9 +66,12 @@
   color: var(--ink);
 }
 
-/* 編集 canvas の領域。MapEditor の .container が height:100% を埋める。 */
+/* 編集 canvas の領域。MapEditor の .container が height:100% を埋める。
+   破綻詳細パネルを下に並べても縦方向に潰れない（潰れるとツールバーにミニマップが
+   重なる）よう flex-shrink を無効化し、地図は常に clamp の高さを保つ。 */
 .canvasWrap {
   position: relative;
   width: 100%;
   height: clamp(440px, 64vh, 720px);
+  flex-shrink: 0;
 }

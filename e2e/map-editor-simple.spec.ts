@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { loadStoryData, navTo } from './helpers'
 
 // テストデータ
 const testMapData = {
@@ -21,14 +22,11 @@ const testMapData = {
 
 test.describe('空間ワークスペース基本機能', () => {
   test.beforeEach(async ({ page }) => {
-    // シミュレーションページでデータを読み込む
-    await page.goto('/simulation')
-    await page.locator('textarea').fill(JSON.stringify(testMapData, null, 2))
-    await page.getByRole('button', { name: '物語データをロード' }).click()
-    await page.waitForTimeout(500)
+    // データ入出力ページでデータを読み込む
+    await loadStoryData(page, testMapData)
 
     // 空間ワークスペースへ移動
-    await page.getByRole('link', { name: '空間', exact: true }).click()
+    await navTo(page, '空間', { exact: true })
     await expect(page).toHaveURL(/\/space/)
   })
 

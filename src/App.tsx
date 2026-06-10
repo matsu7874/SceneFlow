@@ -6,6 +6,7 @@ import { MapBackgroundProvider } from './contexts/MapBackgroundContext'
 import { Navigation } from './components/Navigation'
 import { NotificationDisplay } from './components/NotificationDisplay'
 import { SimulationPage } from './pages/SimulationPage'
+import { DataPage } from './pages/DataPage'
 import { CausalityPage } from './pages/CausalityPage'
 import { EntitiesPage } from './pages/EntitiesPage'
 import { ValidationPage } from './pages/ValidationPage'
@@ -33,6 +34,7 @@ function App(): React.ReactNode {
                 <Routes>
                   <Route path="/" element={<Navigate to="/log" replace />} />
                   <Route path="/simulation" element={<SimulationPage />} />
+                  <Route path="/data" element={<DataPage />} />
                   <Route path="/causality" element={<CausalityPage />} />
                   <Route path="/entities" element={<EntitiesPage />} />
                   <Route path="/relationships" element={<RelationshipsPage />} />
