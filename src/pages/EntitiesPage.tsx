@@ -424,6 +424,7 @@ export const EntitiesPage: React.FC = () => {
           description="人物・場所・道具・情報を編集するには、まず物語データが必要です。"
           actions={[
             { label: 'イベント入力で書き始める', to: '/log' },
+            { label: 'データ入出力で読み込む', to: '/data', variant: 'secondary' },
             {
               label: 'サンプルを読み込む',
               onClick: () => loadSample('mansion'),

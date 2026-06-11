@@ -13,6 +13,8 @@ interface SpaceOverlayProps {
   breakLocs: Set<number>
   showMovement: boolean
   showBreakage: boolean
+  /** 詳細パネルで選択中の場所id。リングを強調表示する。 */
+  highlightLocId?: number | null
 }
 
 // canvas のノード半径（drawNode の radius=22 と一致させる）。world 単位。
@@ -30,6 +32,7 @@ export const SpaceOverlay: React.FC<SpaceOverlayProps> = ({
   breakLocs,
   showMovement,
   showBreakage,
+  highlightLocId = null,
 }) => {
   const { worldToScreen, zoom, mapData, width, height } = info
 
@@ -90,6 +93,7 @@ export const SpaceOverlay: React.FC<SpaceOverlayProps> = ({
         const p = posByLocId.get(id)
         if (!p) return null
         const isBreak = breakLocs.has(id)
+        const isHighlight = highlightLocId === id
         return (
           <g
             key={node.id}
@@ -97,7 +101,12 @@ export const SpaceOverlay: React.FC<SpaceOverlayProps> = ({
             data-breakage={isBreak ? 'true' : 'false'}
           >
             {showBreakage && isBreak && (
-              <circle cx={p.x} cy={p.y} r={ringRadius} className={styles.breakRing} />
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={ringRadius}
+                className={`${styles.breakRing} ${isHighlight ? styles.breakRingActive : ''}`}
+              />
             )}
           </g>
         )

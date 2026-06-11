@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { loadStoryData, navTo } from './helpers'
 
 const seed = {
   persons: [
@@ -32,15 +33,11 @@ const seed = {
 
 test.describe('整合性: 因果ビューと凍結', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/simulation')
-    await page.locator('textarea').fill(JSON.stringify(seed))
-    await page.getByRole('button', { name: '物語データをロード' }).click()
-    // データロード成功通知を待つ
-    await expect(page.locator('text=データが正常にロードされました')).toBeVisible()
+    await loadStoryData(page, seed)
   })
 
   test('因果ビューで破綻ノードが表示される', async ({ page }) => {
-    await page.getByRole('link', { name: '因果関係ビュー' }).click()
+    await navTo(page, '因果関係ビュー')
     await expect(page).toHaveURL(/\/causality/)
     const node = page.getByTestId('node-act-1')
     await expect(node).toBeVisible()
@@ -48,12 +45,15 @@ test.describe('整合性: 因果ビューと凍結', () => {
   })
 
   test('ノードクリックで選択状態になる', async ({ page }) => {
-    await page.getByRole('link', { name: '因果関係ビュー' }).click()
+    await navTo(page, '因果関係ビュー')
     await page.getByTestId('node-act-1').click()
     await expect(page.getByTestId('node-act-1')).toHaveAttribute('data-selected', 'true')
   })
 
   test('関係性リンクがナビにある（閲覧専用の相関図）', async ({ page }) => {
-    await expect(page.getByRole('link', { name: '関係性' })).toHaveCount(1)
+    // 「② 組む」プルダウンを開くと関係性リンクが現れる
+    const nav = page.getByRole('navigation')
+    await nav.getByRole('button', { name: /組む/ }).click()
+    await expect(nav.getByRole('link', { name: '関係性' })).toHaveCount(1)
   })
 })

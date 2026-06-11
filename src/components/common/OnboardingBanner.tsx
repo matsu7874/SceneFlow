@@ -57,8 +57,8 @@ export const OnboardingBanner: React.FC = () => {
             <p className={styles.stepTitle}>JSONを貼り付ける</p>
             <p className={styles.stepDesc}>
               既存データは{' '}
-              <Link to="/simulation" className={styles.inlineLink}>
-                シミュレーション
+              <Link to="/data" className={styles.inlineLink}>
+                データ入出力
               </Link>{' '}
               ページで読み込めます。
             </p>

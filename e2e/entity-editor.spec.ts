@@ -1,4 +1,5 @@
 import { test, expect, type Page, type Locator } from '@playwright/test'
+import { loadStoryData, navTo } from './helpers'
 
 // テストデータ（人物2・場所2・小道具1・情報1 = エンティティ6件）
 const testStoryData = {
@@ -32,20 +33,11 @@ function field(page: Page, label: string): Locator {
 
 test.describe('エンティティ編集機能', () => {
   test.beforeEach(async ({ page }) => {
-    // データ読み込みのためシミュレーションページを開く
-    await page.goto('/simulation')
-    await expect(page).toHaveURL(/\/simulation/)
-
-    // テストデータを読み込む
-    await page
-      .locator('textarea')
-      .first()
-      .fill(JSON.stringify(testStoryData, null, 2))
-    await page.getByRole('button', { name: '物語データをロード' }).click()
-    await expect(page.locator('text=データが正常にロードされました')).toBeVisible()
+    // データ入出力ページでテストデータを読み込む
+    await loadStoryData(page, testStoryData)
 
     // エンティティ編集ページに移動
-    await page.getByRole('link', { name: 'エンティティ編集' }).click()
+    await navTo(page, 'エンティティ編集')
     await expect(page).toHaveURL(/\/entities/)
     await expect(page.locator('h2:has-text("エンティティ管理")')).toBeVisible()
   })

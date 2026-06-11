@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { loadStoryData, navTo } from './helpers'
 
 // シンプルなテストデータ
 const simpleTestData = {
@@ -27,7 +28,7 @@ test.describe('エンティティ編集の基本動作確認', () => {
     // データなしメッセージを確認
     await expect(page.locator('text=データが読み込まれていません')).toBeVisible()
     await expect(
-      page.locator('text=シミュレーションページで物語データを読み込んでください'),
+      page.locator('text=データ入出力ページで物語データを読み込んでください'),
     ).toBeVisible()
   })
 
@@ -39,36 +40,11 @@ test.describe('エンティティ編集の基本動作確認', () => {
       }
     })
 
-    // Step 1: シミュレーションページでデータを読み込む
-    await page.goto('/simulation')
-
-    // データ入力欄を待つ
-    await page.waitForSelector('textarea', { timeout: 5000 })
-
-    // データを入力
-    await page.locator('textarea').fill(JSON.stringify(simpleTestData, null, 2))
-
-    // 読み込みボタンをクリック
-    await page.getByRole('button', { name: '物語データをロード' }).click()
-
-    // 少し待つ
-    await page.waitForTimeout(500)
-
-    // エラーメッセージが表示されていないか確認
-    const errorElement = page.locator('.error-output')
-    const hasError = await errorElement.isVisible()
-    if (hasError) {
-      const errorText = await errorElement.textContent()
-      console.error('バリデーションエラー:', errorText)
-    }
-
-    // データが読み込まれたことを確認（ロード成功通知）
-    await expect(page.locator('text=データが正常にロードされました')).toBeVisible({
-      timeout: 10000,
-    })
+    // Step 1: データ入出力ページでデータを読み込む
+    await loadStoryData(page, simpleTestData)
 
     // Step 2: エンティティページに移動
-    await page.getByRole('link', { name: 'エンティティ編集' }).click()
+    await navTo(page, 'エンティティ編集')
 
     // ページが読み込まれるのを待つ
     await expect(page).toHaveURL(/\/entities/)
@@ -85,11 +61,8 @@ test.describe('エンティティ編集の基本動作確認', () => {
 
   test('エンティティをクリックして編集画面を表示', async ({ page }) => {
     // データを読み込んだ状態でエンティティページへ
-    await page.goto('/simulation')
-    await page.locator('textarea').fill(JSON.stringify(simpleTestData, null, 2))
-    await page.getByRole('button', { name: '物語データをロード' }).click()
-    await page.waitForTimeout(1000)
-    await page.getByRole('link', { name: 'エンティティ編集' }).click()
+    await loadStoryData(page, simpleTestData)
+    await navTo(page, 'エンティティ編集')
 
     // エンティティをクリック
     await page.locator('.entity-item:has-text("テスト太郎")').click()
@@ -113,11 +86,8 @@ test.describe('エンティティ編集の基本動作確認', () => {
 
   test('新規作成モーダルを開いて閉じる', async ({ page }) => {
     // データを読み込んだ状態でエンティティページへ
-    await page.goto('/simulation')
-    await page.locator('textarea').fill(JSON.stringify(simpleTestData, null, 2))
-    await page.getByRole('button', { name: '物語データをロード' }).click()
-    await page.waitForTimeout(1000)
-    await page.getByRole('link', { name: 'エンティティ編集' }).click()
+    await loadStoryData(page, simpleTestData)
+    await navTo(page, 'エンティティ編集')
 
     // 新規作成ボタンをクリック
     await page.getByRole('button', { name: '+ 新規作成' }).click()

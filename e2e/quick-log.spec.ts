@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { loadStoryData, navTo } from './helpers'
 
 const seed = {
   persons: [
@@ -35,12 +36,8 @@ async function selectCombobox(
 
 test.describe('イベント入力（Quick Log）', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/simulation')
-    await page.locator('textarea').fill(JSON.stringify(seed))
-    await page.getByRole('button', { name: '物語データをロード' }).click()
-    // データロード成功通知を待つ
-    await expect(page.locator('text=データが正常にロードされました')).toBeVisible()
-    await page.getByRole('link', { name: 'イベント入力' }).click()
+    await loadStoryData(page, seed)
+    await navTo(page, 'イベント入力')
     await expect(page).toHaveURL(/\/log/)
   })
 

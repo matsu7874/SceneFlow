@@ -1,4 +1,5 @@
 export { SimulationPage } from './SimulationPage'
+export { DataPage } from './DataPage'
 export { CausalityPage } from './CausalityPage'
 export { EntitiesPage } from './EntitiesPage'
 export { SpaceWorkspacePage } from './SpaceWorkspacePage'

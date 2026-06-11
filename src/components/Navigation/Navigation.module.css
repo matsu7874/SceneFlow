@@ -1,71 +1,52 @@
 /* グローバルナビ。トークンは /DESIGN.md・src/index.css を参照。
-   作業フェーズ（書く→組む→検証・分析）でセクション分けして役割を示す。 */
+   作業フェーズ（書く→組む→検証・分析）ごとにプルダウンへ折りたたむ。 */
 .nav {
   display: flex;
   align-items: stretch;
   justify-content: flex-start;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
+  gap: var(--space-2) var(--space-3);
   padding: var(--space-2) var(--space-4);
   background: var(--ink);
   color: #fff;
   border-bottom: 1px solid #0f1620;
 }
 
-/* フェーズのまとまり。区切り罫で視覚的に分離する。 */
+/* フェーズのまとまり。メニューを絶対配置する基準にする。 */
 .section {
+  position: relative;
   display: flex;
+  align-items: center;
+}
+
+/* プルダウンを開くトリガー。フェーズ名＋現在地＋キャレット。 */
+.trigger {
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding-right: var(--space-4);
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.section:last-child {
-  border-right: none;
-  padding-right: 0;
-}
-
-.sectionLabel {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #7e8794;
-  white-space: nowrap;
-  text-transform: uppercase;
-}
-
-.links {
-  display: flex;
-  gap: var(--space-1);
-  align-items: center;
-}
-
-.link {
   padding: var(--space-2) var(--space-3);
-  color: #aeb6c2;
-  text-decoration: none;
+  border: 1px solid transparent;
   border-radius: var(--r-sm);
+  background: transparent;
+  color: #aeb6c2;
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.01em;
   white-space: nowrap;
+  cursor: pointer;
   transition:
     background 0.15s,
-    color 0.15s;
+    color 0.15s,
+    border-color 0.15s;
 }
 
-.link:hover {
+.trigger:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
 
-.link.active {
-  background: var(--accent);
-  color: #fff;
-}
-
-.link:focus-visible {
+.trigger:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -123,15 +104,117 @@
   min-width: 0;
 }
 
+/* 現在地がこのフェーズ配下にあるとき、トリガーを強調する。 */
+.triggerActive {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.triggerOpen {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.triggerLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7e8794;
+  text-transform: uppercase;
+}
+
+.triggerActive .triggerLabel,
+.triggerOpen .triggerLabel {
+  color: #aeb6c2;
+}
+
+/* トリガーに出す現在地のページ名。 */
+.triggerCurrent {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.caret {
+  font-size: 10px;
+  color: #7e8794;
+  transition: transform 0.15s;
+}
+
+.triggerOpen .caret {
+  transform: rotate(180deg);
+}
+
+/* ドロップダウン本体。明るいサーフェスに項目＋一言ヒントを縦並び。 */
+.menu {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  z-index: 50;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1);
+  background: var(--color-surface, #fff);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 10px);
+  box-shadow: 0 12px 32px rgba(15, 22, 32, 0.24);
+}
+
+.menuItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 0.12s;
+}
+
+.menuItem:hover {
+  background: var(--color-surface-hover, rgba(15, 22, 32, 0.06));
+}
+
+.menuItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.menuItemActive {
+  background: var(--accent);
+  color: #fff;
+}
+
+.menuItemActive:hover {
+  background: var(--accent);
+}
+
+.menuItemLabel {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.menuItemHint {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-3, #7e8794);
+}
+
+.menuItemActive .menuItemHint {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 /* Responsive design */
 @media (max-width: 900px) {
-  .section {
-    border-right: none;
-    padding-right: 0;
-    flex-wrap: wrap;
+  .nav {
+    gap: var(--space-1) var(--space-2);
   }
 
-  .links {
-    flex-wrap: wrap;
+  .menu {
+    min-width: 200px;
   }
 }

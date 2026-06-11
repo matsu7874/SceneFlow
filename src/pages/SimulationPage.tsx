@@ -3,13 +3,18 @@ import { SimulationControls } from '../components/SimulationControls'
 import { LocationDisplay } from '../components/LocationDisplay'
 import { EventLog } from '../components/EventLog'
 import { LocationLayout } from '../components/LocationLayout'
-import { JsonDataInput } from '../components/JsonDataInput'
 import { useSimulation } from '../hooks/useSimulation'
 import { useAppContext } from '../contexts/AppContext'
+import { PageHeader } from '../components/common/PageHeader'
+import { EmptyState } from '../components/common/EmptyState'
+import { useLoadSample } from '../hooks/useLoadSample'
 import './SimulationPage.css'
 
+const HINT = '入力済みの物語を時間軸に沿って再生し、各時刻の人物の居場所と出来事を確認します。'
+
 export const SimulationPage: React.FC = () => {
-  const { storyData, setStoryData } = useAppContext()
+  const { storyData } = useAppContext()
+  const loadSample = useLoadSample()
 
   const {
     isPlaying,
@@ -25,24 +30,32 @@ export const SimulationPage: React.FC = () => {
     changeSpeed,
   } = useSimulation(storyData)
 
-  const handleDataLoad = (data: typeof storyData): void => {
-    if (data) {
-      setStoryData(data)
-    }
+  if (!storyData) {
+    return (
+      <div className="page simulation-page">
+        <PageHeader eyebrow="検証・分析" title="シミュレーション" hint={HINT} />
+        <EmptyState
+          icon="▶"
+          title="物語データが読み込まれていません"
+          description="再生するには物語データが必要です。データ入出力で読み込むか、サンプルを投入してください。"
+          actions={[
+            { label: 'データ入出力で読み込む', to: '/data' },
+            {
+              label: 'サンプルを読み込む',
+              onClick: () => loadSample('mansion'),
+              variant: 'secondary',
+            },
+          ]}
+        />
+      </div>
+    )
   }
 
   return (
     <div className="page simulation-page">
-      <header className="simulation-page-header">
-        <span className="simulation-page-eyebrow">書く</span>
-        <h2 className="simulation-page-title">シミュレーション</h2>
-      </header>
+      <PageHeader eyebrow="検証・分析" title="シミュレーション" hint={HINT} />
 
       <div className="container">
-        <div className="input-area">
-          <JsonDataInput onDataLoad={handleDataLoad} currentData={storyData} />
-        </div>
-
         <div className="output-area">
           <SimulationControls
             isPlaying={isPlaying}
