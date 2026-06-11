@@ -147,7 +147,7 @@ describe('EntityEditor', () => {
     await user.tab()
 
     await waitFor(() => {
-      expect(screen.getByText(/Maximum value is 150/)).toBeInTheDocument()
+      expect(screen.getByText(/150以下の値を入力してください/)).toBeInTheDocument()
     })
   })
 

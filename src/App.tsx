@@ -21,7 +21,8 @@ import './App.css'
  */
 function App(): React.ReactNode {
   return (
-    <BrowserRouter>
+    // GitHub Pages のサブパス配信（base: /scene-flow/）でもルーティングが機能するようにする
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <AppProvider>
         <VisualFeedbackProvider>
           <MapBackgroundProvider>

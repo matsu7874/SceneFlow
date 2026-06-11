@@ -39,6 +39,12 @@ function kuromojiDict(): Plugin {
         mkdirSync(out, { recursive: true })
         cpSync(dictDir, out, { recursive: true })
       }
+      // GitHub Pages で /scene-flow/space などの深いURLを直接開いても
+      // アプリが起動するよう、index.html を 404.html として複製する（SPAフォールバック）。
+      const indexHtml = resolve(projectRoot, 'dist/index.html')
+      if (existsSync(indexHtml)) {
+        cpSync(indexHtml, resolve(projectRoot, 'dist/404.html'))
+      }
     },
   }
 }

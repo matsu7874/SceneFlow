@@ -76,7 +76,7 @@ export const SpaceWorkspacePage: React.FC = () => {
   if (!storyData) {
     return (
       <div className={`page ${styles.pageRoot}`}>
-        <PageHeader eyebrow="Workspace" title="空間" hint={HINT} />
+        <PageHeader eyebrow="組む" title="空間" hint={HINT} />
         <EmptyState
           icon="🗺️"
           title="物語データが読み込まれていません"
@@ -97,7 +97,7 @@ export const SpaceWorkspacePage: React.FC = () => {
   return (
     <div className={`page ${styles.pageRoot}`}>
       <PageHeader
-        eyebrow="Workspace"
+        eyebrow="組む"
         title="空間"
         hint={HINT}
         actions={

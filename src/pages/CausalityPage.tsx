@@ -16,7 +16,7 @@ export const CausalityPage: React.FC = () => {
   if (!storyData) {
     return (
       <div className="page causality-page">
-        <PageHeader eyebrow="分析" title="因果関係ビュー" hint={HINT} />
+        <PageHeader eyebrow="検証・分析" title="因果関係ビュー" hint={HINT} />
         <EmptyState
           icon="◎"
           title="物語データが読み込まれていません"
@@ -36,7 +36,7 @@ export const CausalityPage: React.FC = () => {
 
   return (
     <div className="page causality-page">
-      <PageHeader eyebrow="分析" title="因果関係ビュー" hint={HINT} />
+      <PageHeader eyebrow="検証・分析" title="因果関係ビュー" hint={HINT} />
       <div className="page-content">
         <ErrorBoundary>
           <CausalityView storyData={storyData} onStoryDataChange={setStoryData} />

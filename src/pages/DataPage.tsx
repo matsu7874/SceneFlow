@@ -21,7 +21,7 @@ export const DataPage: React.FC = () => {
 
   return (
     <div className="page">
-      <PageHeader eyebrow="Data" title="データ入出力" hint={HINT} />
+      <PageHeader eyebrow="書く" title="データ入出力" hint={HINT} />
       <JsonDataInput onDataLoad={handleDataLoad} currentData={storyData} />
     </div>
   )

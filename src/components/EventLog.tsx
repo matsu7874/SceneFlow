@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { Person } from '../types/StoryData'
+import { missingEntityLabel } from '../utils/entityLabels'
 import './EventLog.css'
 
 interface LogEntry {
@@ -30,7 +31,7 @@ export const EventLog: React.FC<EventLogProps> = ({ logEntries, persons, current
 
   const getPersonName = (personId: number): string => {
     const person = persons.find(p => p.id === personId)
-    return person?.name || `不明な人物 (${personId})`
+    return person?.name || missingEntityLabel('人物', personId)
   }
 
   return (

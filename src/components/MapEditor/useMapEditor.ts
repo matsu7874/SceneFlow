@@ -510,6 +510,11 @@ export function useMapEditor() {
     (jsonString: string) => {
       try {
         const data = JSON.parse(jsonString) as MapData
+        // 形だけ JSON で中身が別物（locations/connections が無い）のデータを
+        // 黙って取り込むとマップが空になるため、最低限の構造を確認する。
+        if (!Array.isArray(data?.locations) || !Array.isArray(data?.connections)) {
+          return false
+        }
         updateMapData(data)
         return true
       } catch (error) {

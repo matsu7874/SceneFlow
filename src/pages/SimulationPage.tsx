@@ -33,7 +33,7 @@ export const SimulationPage: React.FC = () => {
   if (!storyData) {
     return (
       <div className="page simulation-page">
-        <PageHeader eyebrow="Simulation" title="シミュレーション" hint={HINT} />
+        <PageHeader eyebrow="検証・分析" title="シミュレーション" hint={HINT} />
         <EmptyState
           icon="▶"
           title="物語データが読み込まれていません"
@@ -53,7 +53,7 @@ export const SimulationPage: React.FC = () => {
 
   return (
     <div className="page simulation-page">
-      <PageHeader eyebrow="Simulation" title="シミュレーション" hint={HINT} />
+      <PageHeader eyebrow="検証・分析" title="シミュレーション" hint={HINT} />
 
       <div className="container">
         <div className="output-area">

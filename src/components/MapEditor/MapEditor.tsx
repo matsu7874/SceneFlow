@@ -56,6 +56,24 @@ export const MapEditor: React.FC<MapEditorProps> = ({
   const [showNodeEditor, setShowNodeEditor] = useState<Location | null>(null)
   const [showConnectionEditor, setShowConnectionEditor] = useState<Connection | null>(null)
   const [showLayoutMenu, setShowLayoutMenu] = useState(false)
+  // インポートはブラウザの prompt() ではなくアプリ内ダイアログで行う
+  // （貼り付け失敗時に理由を表示でき、長いJSONも編集できる）。
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importText, setImportText] = useState('')
+  const [importError, setImportError] = useState<string | null>(null)
+  // エクスポート（クリップボードコピー）の結果をツールバー上で短く知らせる。
+  const [toolbarMessage, setToolbarMessage] = useState<string | null>(null)
+  const toolbarMessageTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const flashToolbarMessage = useCallback((message: string) => {
+    setToolbarMessage(message)
+    if (toolbarMessageTimer.current) clearTimeout(toolbarMessageTimer.current)
+    toolbarMessageTimer.current = setTimeout(() => setToolbarMessage(null), 2500)
+  }, [])
+  useEffect(() => {
+    return () => {
+      if (toolbarMessageTimer.current) clearTimeout(toolbarMessageTimer.current)
+    }
+  }, [])
   const [contextMenu, setContextMenu] = useState<{
     x: number
     y: number
@@ -467,6 +485,25 @@ export const MapEditor: React.FC<MapEditorProps> = ({
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
+      // 入力欄でのタイピング（モーダル内の名前編集など）をショートカットとして
+      // 解釈しない。Backspace で文字を消したらノードが消える事故を防ぐ。
+      const target = e.target as HTMLElement | null
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        // Escape だけは入力中でもモーダルを閉じられるようにする
+        if (e.key === 'Escape') {
+          setShowNodeEditor(null)
+          setShowConnectionEditor(null)
+          setShowImportDialog(false)
+        }
+        return
+      }
+
       // Delete selected nodes
       if (e.key === 'Delete' || e.key === 'Backspace') {
         editor.state.selection.selectedNodes.forEach(nodeId => {
@@ -499,6 +536,9 @@ export const MapEditor: React.FC<MapEditorProps> = ({
         setConnectingFrom(null)
         editor.deselectAll()
         setContextMenu(null)
+        setShowNodeEditor(null)
+        setShowConnectionEditor(null)
+        setShowImportDialog(false)
       }
     }
 
@@ -893,24 +933,33 @@ export const MapEditor: React.FC<MapEditorProps> = ({
           <div className={styles.separator} />
           <button
             className={styles.button}
+            title="マップデータ(JSON)をクリップボードにコピーする"
             onClick={() => {
               const data = editor.exportMapData()
-              void navigator.clipboard.writeText(data)
+              navigator.clipboard
+                .writeText(data)
+                .then(() => flashToolbarMessage('クリップボードにコピーしました'))
+                .catch(() => flashToolbarMessage('コピーに失敗しました'))
             }}
           >
             エクスポート
           </button>
           <button
             className={styles.button}
+            title="エクスポートしたマップデータ(JSON)を貼り付けて取り込む"
             onClick={() => {
-              const data = prompt('マップデータを貼り付けてください:')
-              if (data) {
-                editor.importMapData(data)
-              }
+              setImportText('')
+              setImportError(null)
+              setShowImportDialog(true)
             }}
           >
             インポート
           </button>
+          {toolbarMessage && (
+            <span className={styles.toolbarMessage} role="status">
+              {toolbarMessage}
+            </span>
+          )}
           {onSave && (
             <>
               <div className={styles.separator} />
@@ -966,6 +1015,8 @@ export const MapEditor: React.FC<MapEditorProps> = ({
       <div className={styles.zoomControls}>
         <button
           className={`${styles.button} ${styles.iconButton}`}
+          title="ズームイン"
+          aria-label="ズームイン"
           onClick={() => editor.setZoom(editor.state.viewState.zoom * 1.2)}
         >
           +
@@ -973,11 +1024,18 @@ export const MapEditor: React.FC<MapEditorProps> = ({
         <div className={styles.zoomLevel}>{Math.round(editor.state.viewState.zoom * 100)}%</div>
         <button
           className={`${styles.button} ${styles.iconButton}`}
+          title="ズームアウト"
+          aria-label="ズームアウト"
           onClick={() => editor.setZoom(editor.state.viewState.zoom * 0.8)}
         >
           -
         </button>
-        <button className={`${styles.button} ${styles.iconButton}`} onClick={editor.resetView}>
+        <button
+          className={`${styles.button} ${styles.iconButton}`}
+          title="表示を初期位置に戻す"
+          aria-label="表示を初期位置に戻す"
+          onClick={editor.resetView}
+        >
           ⟲
         </button>
       </div>
@@ -1029,8 +1087,16 @@ export const MapEditor: React.FC<MapEditorProps> = ({
             <label>名前</label>
             <input
               type="text"
+              autoFocus
               value={showNodeEditor.name}
               onChange={e => setShowNodeEditor({ ...showNodeEditor, name: e.target.value })}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  editor.updateNode(showNodeEditor.id, showNodeEditor)
+                  setShowNodeEditor(null)
+                }
+              }}
             />
           </div>
           <div className={styles.formGroup}>
@@ -1136,6 +1202,62 @@ export const MapEditor: React.FC<MapEditorProps> = ({
         </div>
       )}
 
+      {/* Import dialog */}
+      {showImportDialog && (
+        <div
+          className={styles.nodeEditor}
+          role="dialog"
+          aria-modal="true"
+          aria-label="マップデータのインポート"
+          style={{
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <h3>マップデータのインポート</h3>
+          <div className={styles.formGroup}>
+            <label>エクスポートしたマップデータ(JSON)を貼り付けてください</label>
+            <textarea
+              autoFocus
+              rows={8}
+              value={importText}
+              onChange={e => {
+                setImportText(e.target.value)
+                if (importError) setImportError(null)
+              }}
+              placeholder='{"locations": [...], "connections": [...]}'
+            />
+          </div>
+          {importError && (
+            <p className={styles.formError} role="alert">
+              {importError}
+            </p>
+          )}
+          <div className={styles.formActions}>
+            <button className={styles.button} onClick={() => setShowImportDialog(false)}>
+              キャンセル
+            </button>
+            <button
+              className={`${styles.button} ${styles.active}`}
+              disabled={!importText.trim()}
+              onClick={() => {
+                if (editor.importMapData(importText)) {
+                  setShowImportDialog(false)
+                  flashToolbarMessage('マップデータを取り込みました')
+                } else {
+                  setImportError(
+                    'JSONとして読み取れませんでした。エクスポートで出力した内容を貼り付けてください。',
+                  )
+                }
+              }}
+            >
+              取り込む
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Context menu */}
       {contextMenu && (
         <div
@@ -1161,7 +1283,10 @@ export const MapEditor: React.FC<MapEditorProps> = ({
                 className={styles.contextMenuItem}
                 onClick={() => {
                   const data = editor.exportMapData()
-                  void navigator.clipboard.writeText(data)
+                  navigator.clipboard
+                    .writeText(data)
+                    .then(() => flashToolbarMessage('クリップボードにコピーしました'))
+                    .catch(() => flashToolbarMessage('コピーに失敗しました'))
                   setContextMenu(null)
                 }}
               >

@@ -51,6 +51,59 @@
   outline-offset: 2px;
 }
 
+/* 右端のデータ操作（undo/redo・書き出し/読み込み・保存状態） */
+.globalActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.actionButton {
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  color: #aeb6c2;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.actionButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.fileInput {
+  display: none;
+}
+
+.saveStatus {
+  font-size: 11px;
+  color: #7e8794;
+  white-space: nowrap;
+  min-width: 4.5em;
+}
+
+.saveError {
+  color: #fca5a5;
+  min-width: 0;
+}
+
 /* 現在地がこのフェーズ配下にあるとき、トリガーを強調する。 */
 .triggerActive {
   color: #fff;

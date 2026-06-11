@@ -256,6 +256,27 @@
   margin-bottom: var(--space-3);
 }
 
+/* インポート失敗などのフォーム内エラー表示 */
+.formError {
+  margin: 0 0 var(--space-3) 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-left: 3px solid var(--danger);
+  border-radius: var(--r-sm);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+/* ツールバー右側の操作フィードバック（コピー完了など） */
+.toolbarMessage {
+  align-self: center;
+  font-size: 0.75rem;
+  color: var(--accent);
+  white-space: nowrap;
+  padding: 0 var(--space-2);
+}
+
 .formGroup label {
   display: block;
   margin-bottom: var(--space-1);

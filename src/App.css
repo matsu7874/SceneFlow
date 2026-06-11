@@ -220,15 +220,42 @@
   margin-bottom: var(--space-4);
 }
 
+.search-input-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+
 .search-input {
   flex: 1;
   padding: var(--space-2) var(--space-3);
+  padding-right: calc(var(--space-3) + 1.5em);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
   font-size: 14px;
   font-family: var(--font-sans);
   background: var(--color-background);
   color: var(--ink);
+}
+
+.search-clear-button {
+  position: absolute;
+  right: var(--space-1);
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 13px;
+  line-height: 1;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+
+.search-clear-button:hover {
+  color: var(--ink);
+  background: var(--accent-soft);
 }
 
 .search-input:focus,
@@ -303,6 +330,22 @@
   color: var(--ink-2);
   padding: var(--space-6) var(--space-5);
   font-size: 14px;
+}
+
+.clear-filters-button {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--color-background);
+  color: var(--ink);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.clear-filters-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* モーダル */

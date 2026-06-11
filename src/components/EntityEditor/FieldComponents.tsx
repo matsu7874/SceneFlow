@@ -68,7 +68,14 @@ export const NumberField: React.FC<FieldProps & { min?: number; max?: number; st
 }
 
 // Boolean Field Component
-export const BooleanField: React.FC<FieldProps> = ({ name, value, onChange, error, disabled }) => {
+export const BooleanField: React.FC<FieldProps & { label?: string }> = ({
+  name,
+  value,
+  onChange,
+  error,
+  disabled,
+  label,
+}) => {
   return (
     <div className={styles.field}>
       <label className={styles.checkboxLabel}>
@@ -78,7 +85,7 @@ export const BooleanField: React.FC<FieldProps> = ({ name, value, onChange, erro
           onChange={e => onChange(name, e.target.checked)}
           disabled={disabled}
         />
-        <span>{name}</span>
+        <span>{label || name}</span>
       </label>
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>

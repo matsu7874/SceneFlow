@@ -6,14 +6,21 @@ import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
 import { generateEventsFromActs } from '../utils/eventGeneration'
 import { replaceEntityInList, pickEditedFields } from './entitiesPageLogic'
 import { actToEntity, applyActUpdate, deleteAct } from '../components/CausalityView/actEditing'
-import { assignPersonColor, assignLocationColor } from '../components/QuickLog/quickLogLogic'
+import {
+  assignPersonColor,
+  assignLocationColor,
+  nextId,
+} from '../components/QuickLog/quickLogLogic'
 import { ExtractionPanel } from '../components/EntityExtraction/ExtractionPanel'
+import { EmptyState } from '../components/common/EmptyState'
+import { useLoadSample } from '../hooks/useLoadSample'
 
 const getEntityTypeLabel = (type: EntityType): string => entityTypeLabel(type)
 
 export const EntitiesPage: React.FC = () => {
   const { storyData, setStoryData } = useAppContext()
   const { showNotification } = useVisualFeedback()
+  const loadSample = useLoadSample()
   const [entities, setEntities] = useState<ExtendedEntity[]>([])
   const [selectedEntity, setSelectedEntity] = useState<ExtendedEntity | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -90,6 +97,13 @@ export const EntitiesPage: React.FC = () => {
         })),
       ]
       setEntities(convertedEntities)
+      // 選択中のエンティティは最新の内容に差し替え、消えていたら選択を解除する。
+      // （他ページでの編集や読み込みで古い内容を編集し続けるのを防ぐ）
+      setSelectedEntity(prev =>
+        prev
+          ? (convertedEntities.find(e => e.id === prev.id && e.type === prev.type) ?? null)
+          : prev,
+      )
     }
   }, [storyData])
 
@@ -183,7 +197,18 @@ export const EntitiesPage: React.FC = () => {
   }
 
   const handleEntityCreate = (type: EntityType): void => {
-    const newId = Date.now()
+    // ID はタイムスタンプではなく既存IDの連番にする（イベント入力など他機能の採番と一致させ、
+    // JSONを直接読む利用者にも追いやすくする）。
+    const collectionByType: Record<string, Array<{ id: number }>> = storyData
+      ? {
+          person: storyData.persons,
+          location: storyData.locations,
+          prop: storyData.props,
+          information: storyData.informations,
+          act: storyData.acts,
+        }
+      : {}
+    const newId = nextId(collectionByType[type] ?? [])
     const newEntity: ExtendedEntity = {
       id: newId.toString(),
       type,
@@ -282,7 +307,16 @@ export const EntitiesPage: React.FC = () => {
             ],
           })
           break
-        case 'act':
+        case 'act': {
+          // 存在しない人物/場所を参照する行動を作らない（検証で即破綻と表示されるのを防ぐ）。
+          const firstPerson = storyData.persons[0]
+          const firstLocation = storyData.locations[0]
+          if (!firstPerson || !firstLocation) {
+            showNotification('行動を作るには、先に人物と場所を1つ以上作成してください', {
+              type: 'warning',
+            })
+            break
+          }
           setStoryData({
             ...storyData,
             acts: [
@@ -290,8 +324,8 @@ export const EntitiesPage: React.FC = () => {
               {
                 id: newId,
                 type: 'move',
-                personId: 1,
-                locationId: 1,
+                personId: firstPerson.id,
+                locationId: firstLocation.id,
                 startTime: 0,
                 endTime: 5,
                 time: '00:00',
@@ -300,6 +334,7 @@ export const EntitiesPage: React.FC = () => {
             ],
           })
           break
+        }
         case 'event':
           // Events are generated from acts, so we can't create them directly
           showNotification('イベントは行動から自動生成されます', { type: 'info' })
@@ -383,9 +418,20 @@ export const EntitiesPage: React.FC = () => {
     return (
       <div className="page entities-page">
         <h2>エンティティ管理</h2>
-        <div className="no-data-message">
-          <p>データが読み込まれていません。データ入出力ページで物語データを読み込んでください。</p>
-        </div>
+        <EmptyState
+          icon="👤"
+          title="物語データが読み込まれていません"
+          description="人物・場所・道具・情報を編集するには、まず物語データが必要です。"
+          actions={[
+            { label: 'イベント入力で書き始める', to: '/log' },
+            { label: 'データ入出力で読み込む', to: '/data', variant: 'secondary' },
+            {
+              label: 'サンプルを読み込む',
+              onClick: () => loadSample('mansion'),
+              variant: 'secondary',
+            },
+          ]}
+        />
       </div>
     )
   }
@@ -408,13 +454,29 @@ export const EntitiesPage: React.FC = () => {
           </div>
 
           <div className="entities-controls">
-            <input
-              type="text"
-              placeholder="エンティティを検索..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
+            <div className="search-input-wrap">
+              <input
+                type="text"
+                placeholder="エンティティを検索..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Escape') setSearchQuery('')
+                }}
+                className="search-input"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="search-clear-button"
+                  aria-label="検索をクリア"
+                  title="検索をクリア (Esc)"
+                  onClick={() => setSearchQuery('')}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
             <select
               value={selectedType}
               onChange={e => setSelectedType(e.target.value as EntityType | 'all')}
@@ -456,7 +518,21 @@ export const EntitiesPage: React.FC = () => {
               </div>
             ))}
             {filteredEntities.length === 0 && (
-              <div className="no-results">条件に一致するエンティティが見つかりません。</div>
+              <div className="no-results">
+                <p>条件に一致するエンティティが見つかりません。</p>
+                {(searchQuery || selectedType !== 'all') && (
+                  <button
+                    type="button"
+                    className="clear-filters-button"
+                    onClick={() => {
+                      setSearchQuery('')
+                      setSelectedType('all')
+                    }}
+                  >
+                    検索条件をクリア
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -477,37 +553,75 @@ export const EntitiesPage: React.FC = () => {
       </div>
 
       {showCreateModal && (
-        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+        <div
+          className="modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="新規エンティティ作成"
+          onClick={() => setShowCreateModal(false)}
+          onKeyDown={e => {
+            if (e.key === 'Escape') setShowCreateModal(false)
+          }}
+        >
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <h3>新規エンティティ作成</h3>
             <p>作成するエンティティのタイプを選択してください：</p>
             <div className="entity-type-buttons">
-              <button onClick={() => handleEntityCreate('person')} className="type-button">
+              <button
+                type="button"
+                autoFocus
+                onClick={() => handleEntityCreate('person')}
+                className="type-button"
+              >
                 <span className="type-icon">👤</span>
                 <span>人物</span>
               </button>
-              <button onClick={() => handleEntityCreate('location')} className="type-button">
+              <button
+                type="button"
+                onClick={() => handleEntityCreate('location')}
+                className="type-button"
+              >
                 <span className="type-icon">📍</span>
                 <span>場所</span>
               </button>
-              <button onClick={() => handleEntityCreate('prop')} className="type-button">
+              <button
+                type="button"
+                onClick={() => handleEntityCreate('prop')}
+                className="type-button"
+              >
                 <span className="type-icon">📦</span>
                 <span>小道具</span>
               </button>
-              <button onClick={() => handleEntityCreate('information')} className="type-button">
+              <button
+                type="button"
+                onClick={() => handleEntityCreate('information')}
+                className="type-button"
+              >
                 <span className="type-icon">💭</span>
                 <span>情報</span>
               </button>
-              <button onClick={() => handleEntityCreate('act')} className="type-button">
+              <button
+                type="button"
+                onClick={() => handleEntityCreate('act')}
+                className="type-button"
+              >
                 <span className="type-icon">🎬</span>
                 <span>行動</span>
               </button>
-              <button onClick={() => handleEntityCreate('event')} className="type-button">
+              <button
+                type="button"
+                onClick={() => handleEntityCreate('event')}
+                className="type-button"
+              >
                 <span className="type-icon">⚡</span>
                 <span>イベント</span>
               </button>
             </div>
-            <button onClick={() => setShowCreateModal(false)} className="cancel-button">
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(false)}
+              className="cancel-button"
+            >
               キャンセル
             </button>
           </div>

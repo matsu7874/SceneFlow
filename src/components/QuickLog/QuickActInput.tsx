@@ -44,8 +44,13 @@ export const QuickActInput: React.FC<QuickActInputProps> = ({
       setError(`${missing.join('・')}を入力してください（候補を選ぶかEnterで確定）`)
       return
     }
+    // 不正な時刻が黙って 00:00 扱いになると時系列が狂うため、形式エラーを明示する。
+    const minutes = timeStringToMinutes(timeText)
+    if (minutes === null) {
+      setError('「いつ」は HH:MM 形式で入力してください（例: 19:30）')
+      return
+    }
     setError('')
-    const minutes = timeStringToMinutes(timeText) ?? 0
     onAdd({ personId, locationId, description: description.trim(), startTime: minutes })
     setDescription('')
     setTimeText(minutesToTimeString(minutes + TIME_INCREMENT))
@@ -62,8 +67,18 @@ export const QuickActInput: React.FC<QuickActInputProps> = ({
             <input
               aria-label="時刻"
               className={styles.timeInput}
+              placeholder="HH:MM"
               value={timeText}
-              onChange={event => setTimeText(event.target.value)}
+              onChange={event => {
+                setTimeText(event.target.value)
+                if (error) setError('')
+              }}
+              onKeyDown={event => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  submit()
+                }
+              }}
             />
           </div>
           <div className={styles.field}>
