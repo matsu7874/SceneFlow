@@ -66,9 +66,8 @@ export default defineConfig({
     minify: 'esbuild',
     target: 'es2020',
     rollupOptions: {
-      output: {
-        manualChunks: undefined,
-      },
+      // チャンク分割は App.tsx のルート単位 dynamic import に任せる
+      // （旧 manualChunks: undefined は単一バンドル化の意図ではなくデフォルト挙動と同義だった）
       treeshake: {
         moduleSideEffects: false,
         propertyReadSideEffects: false,
