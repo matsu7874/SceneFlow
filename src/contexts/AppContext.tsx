@@ -8,6 +8,7 @@ import React, {
   ReactNode,
 } from 'react'
 import { StoryData } from '../types/StoryData'
+import { normalizeStoryData } from '../utils/normalizeStoryData'
 import { loadStoredStory, saveStoredStory } from './storyPersistence'
 
 /** 自動保存の状態。idle=未保存データなし, saved=保存済み, error=書き込み失敗 */
@@ -52,13 +53,16 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }): React.Rea
   const [, setHistoryVersion] = useState(0)
 
   const setStoryData = useCallback((data: StoryData | null) => {
-    if (data !== currentRef.current) {
+    // どの経路から来ても正規化済みデータだけが状態に入ることを保証する。
+    // 格納済みと同一参照の再セットは正規化済みなのでそのまま（無変更セットの履歴汚染を防ぐ）。
+    const next = data === null || data === currentRef.current ? data : normalizeStoryData(data)
+    if (next !== currentRef.current) {
       undoStack.current.push(currentRef.current)
       if (undoStack.current.length > HISTORY_LIMIT) undoStack.current.shift()
       redoStack.current = []
     }
-    currentRef.current = data
-    setStoryDataRaw(data)
+    currentRef.current = next
+    setStoryDataRaw(next)
     setHistoryVersion(v => v + 1)
   }, [])
 

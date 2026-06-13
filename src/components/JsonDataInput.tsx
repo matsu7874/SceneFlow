@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { StoryData, createEmptyStoryData } from '../types/StoryData'
 import { validateStoryData } from '../utils/validation'
-import { normalizeStoryData } from '../utils/normalizeStoryData'
 import { useVisualFeedback } from '../contexts/VisualFeedbackContext'
 import { SAMPLES } from '../data/samples'
 import './JsonDataInput.css'
@@ -33,7 +32,7 @@ export const JsonDataInput: React.FC<JsonDataInputProps> = ({ onDataLoad, curren
 
       if (validationResult.isValid) {
         setError(null)
-        onDataLoad(normalizeStoryData(data))
+        onDataLoad(data)
         showNotification('データが正常にロードされました', { type: 'success' })
       } else {
         setError(validationResult.errors.join('\n'))
