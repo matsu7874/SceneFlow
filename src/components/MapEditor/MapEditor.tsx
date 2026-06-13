@@ -3,7 +3,7 @@ import styles from './MapEditor.module.css'
 import { useMapEditor } from './useMapEditor'
 import { AStar } from './pathfinding'
 import { getCanvasCoords } from './coords'
-import { Location, Connection, Point, MapData } from './types'
+import { Location, Connection, Point, MapData, MapEditorState, ViewState } from './types'
 import { useMapBackground } from '../../contexts/MapBackgroundContext'
 import { drawMapBackground } from '../MapBackground/drawMapBackground'
 
@@ -74,14 +74,15 @@ export const MapEditor: React.FC<MapEditorProps> = ({
       if (toolbarMessageTimer.current) clearTimeout(toolbarMessageTimer.current)
     }
   }, [])
-  const [contextMenu, setContextMenu] = useState<{
-    x: number
-    y: number
-    worldX: number
-    worldY: number
-    type: 'node' | 'connection' | 'canvas'
-    target?: any
-  } | null>(null)
+  // type で target の型が決まる判別共用体（node=Location, connection=Connection, canvas=なし）
+  const [contextMenu, setContextMenu] = useState<
+    | ({ x: number; y: number; worldX: number; worldY: number } & (
+        | { type: 'node'; target: Location }
+        | { type: 'connection'; target: Connection }
+        | { type: 'canvas'; target?: undefined }
+      ))
+    | null
+  >(null)
 
   // Initialize with provided data
   useEffect(() => {
@@ -367,17 +368,21 @@ export const MapEditor: React.FC<MapEditorProps> = ({
         }))
       } else if (editor.state.selection.rubberBand?.active) {
         // Update rubber band
-        editor.setState(prev => ({
-          ...prev,
-          selection: {
-            ...prev.selection,
-            rubberBand: {
-              ...prev.selection.rubberBand!,
-              endX: worldPos.x,
-              endY: worldPos.y,
-            },
-          },
-        }))
+        editor.setState(prev =>
+          prev.selection.rubberBand
+            ? {
+                ...prev,
+                selection: {
+                  ...prev.selection,
+                  rubberBand: {
+                    ...prev.selection.rubberBand,
+                    endX: worldPos.x,
+                    endY: worldPos.y,
+                  },
+                },
+              }
+            : prev,
+        )
       }
     },
     [editor, isPanning, panStart],
@@ -552,7 +557,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     width: number,
     height: number,
     gridSize: number,
-    viewState: any,
+    viewState: ViewState,
   ): void => {
     ctx.strokeStyle = '#e3e7ed'
     ctx.lineWidth = 0.5
@@ -580,7 +585,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
   const drawConnection = (
     ctx: CanvasRenderingContext2D,
     connection: Connection,
-    state: any,
+    state: MapEditorState,
   ): void => {
     const from = state.mapData.locations.find((loc: Location) => loc.id === connection.from)
     const to = state.mapData.locations.find((loc: Location) => loc.id === connection.to)
@@ -652,7 +657,11 @@ export const MapEditor: React.FC<MapEditorProps> = ({
     }
   }
 
-  const drawNode = (ctx: CanvasRenderingContext2D, location: Location, state: any): void => {
+  const drawNode = (
+    ctx: CanvasRenderingContext2D,
+    location: Location,
+    state: MapEditorState,
+  ): void => {
     const isSelected = state.selection.selectedNodes.has(location.id)
     const isStart = state.pathfinding.start === location.id
     const isEnd = state.pathfinding.end === location.id
@@ -727,7 +736,7 @@ export const MapEditor: React.FC<MapEditorProps> = ({
 
   const drawMinimap = (
     canvas: HTMLCanvasElement,
-    state: any,
+    state: MapEditorState,
     mainWidth: number,
     mainHeight: number,
   ): void => {

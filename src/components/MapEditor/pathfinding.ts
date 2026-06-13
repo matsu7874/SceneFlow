@@ -17,17 +17,18 @@ export class AStar {
     this.connections = new Map()
 
     // Build adjacency list
-    connections.forEach(conn => {
-      if (!this.connections.has(conn.from)) {
-        this.connections.set(conn.from, new Map())
+    const edgesFrom = (id: string): Map<string, number> => {
+      let edges = this.connections.get(id)
+      if (!edges) {
+        edges = new Map()
+        this.connections.set(id, edges)
       }
-      this.connections.get(conn.from)!.set(conn.to, conn.weight)
-
+      return edges
+    }
+    connections.forEach(conn => {
+      edgesFrom(conn.from).set(conn.to, conn.weight)
       if (conn.bidirectional) {
-        if (!this.connections.has(conn.to)) {
-          this.connections.set(conn.to, new Map())
-        }
-        this.connections.get(conn.to)!.set(conn.from, conn.weight)
+        edgesFrom(conn.to).set(conn.from, conn.weight)
       }
     })
   }
