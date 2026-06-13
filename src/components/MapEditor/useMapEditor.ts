@@ -179,7 +179,8 @@ export function useMapEditor() {
       if (prev.history.past.length === 0) return prev
 
       const newPast = [...prev.history.past]
-      const previousState = newPast.pop()!
+      const previousState = newPast.pop()
+      if (!previousState) return prev
 
       return {
         ...prev,
@@ -197,7 +198,8 @@ export function useMapEditor() {
       if (prev.history.future.length === 0) return prev
 
       const newFuture = [...prev.history.future]
-      const nextState = newFuture.shift()!
+      const nextState = newFuture.shift()
+      if (!nextState) return prev
 
       return {
         ...prev,

@@ -114,13 +114,19 @@ export const CausalityView: React.FC<CausalityViewProps> = ({ storyData, onStory
   const { outMap, inMap } = useMemo(() => {
     const out = new Map<string, string[]>()
     const inc = new Map<string, string[]>()
+    const listOf = (map: Map<string, string[]>, k: string): string[] => {
+      let list = map.get(k)
+      if (!list) {
+        list = []
+        map.set(k, list)
+      }
+      return list
+    }
     for (const e of report.edges) {
       const f = key(e.from)
       const t = key(e.to)
-      if (!out.has(f)) out.set(f, [])
-      out.get(f)!.push(t)
-      if (!inc.has(t)) inc.set(t, [])
-      inc.get(t)!.push(f)
+      listOf(out, f).push(t)
+      listOf(inc, t).push(f)
     }
     return { outMap: out, inMap: inc }
   }, [report])

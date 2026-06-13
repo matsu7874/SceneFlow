@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import { ExtendedEntity, EntityType, entityTypeLabel } from '../../types/extendedEntities'
 import { EntityEditor } from './EntityEditor'
+import type { EntityFormData, EntitySchema } from './formTypes'
 import { useVisualFeedback } from '../../contexts/VisualFeedbackContext'
 import { useAppContext } from '../../contexts/AppContext'
 import { generateEventsFromActs } from '../../utils/eventGeneration'
@@ -14,10 +15,10 @@ interface ExtendedEntityEditorProps {
 }
 
 // Entity schemas for different types
-const entitySchemas: Record<EntityType, any> = {
+const entitySchemas: Record<EntityType, EntitySchema> = {
   person: {
     fields: {
-      name: { type: 'string', label: '名前', validation: { required: true, minLength: 1 } },
+      name: { type: 'string', label: '名前', validation: { minLength: 1 } },
       color: { type: 'color', label: '色' },
       description: { type: 'string', label: '説明' },
       age: { type: 'number', label: '年齢', validation: { min: 0, max: 200 } },
@@ -49,7 +50,7 @@ const entitySchemas: Record<EntityType, any> = {
 
   location: {
     fields: {
-      name: { type: 'string', label: '名前', validation: { required: true, minLength: 1 } },
+      name: { type: 'string', label: '名前', validation: { minLength: 1 } },
       color: { type: 'color', label: '色' },
       description: { type: 'string', label: '説明' },
       // フィールド名は ExtendedEntity の判別子 type と衝突しないよう locationType とし、
@@ -92,7 +93,7 @@ const entitySchemas: Record<EntityType, any> = {
 
   prop: {
     fields: {
-      name: { type: 'string', label: '名前', validation: { required: true, minLength: 1 } },
+      name: { type: 'string', label: '名前', validation: { minLength: 1 } },
       description: { type: 'string', label: '説明' },
       category: {
         type: 'select',
@@ -124,7 +125,7 @@ const entitySchemas: Record<EntityType, any> = {
 
   information: {
     fields: {
-      name: { type: 'string', label: '名前', validation: { required: true, minLength: 1 } },
+      name: { type: 'string', label: '名前', validation: { minLength: 1 } },
       content: { type: 'string', label: '内容' },
       description: { type: 'string', label: '説明' },
       category: {
@@ -177,7 +178,7 @@ const entitySchemas: Record<EntityType, any> = {
 
   act: {
     fields: {
-      id: { type: 'string', label: 'ID', validation: { required: true } },
+      id: { type: 'string', label: 'ID' },
       // フィールド名は ExtendedEntity の判別子 type と衝突しないよう actType とし、
       // 保存時に Act.type へ書き戻す（actEditing の actToEntity/applyActUpdate で対応）。
       actType: { type: 'select', label: '行動種別', options: ACT_KINDS },
@@ -205,7 +206,7 @@ const entitySchemas: Record<EntityType, any> = {
 
   event: {
     fields: {
-      id: { type: 'string', label: 'ID', validation: { required: true } },
+      id: { type: 'string', label: 'ID' },
       name: { type: 'string', label: '名前' },
       description: { type: 'string', label: '説明' },
       trigger: {
@@ -290,12 +291,10 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
     return result
   }, [storyData])
 
-  const handleSave = (data: any): void => {
+  const handleSave = (data: EntityFormData): void => {
     // For location entities, ensure connectedTo is properly set
-    if (entity.type === 'location' && data.connectedTo) {
-      data.connections = data.connectedTo.map((id: string | number) =>
-        typeof id === 'string' ? parseInt(id) : id,
-      )
+    if (entity.type === 'location' && Array.isArray(data.connectedTo)) {
+      data.connections = data.connectedTo.map(id => (typeof id === 'string' ? parseInt(id) : id))
     }
 
     // 情報の構造化言明: subject は参照のため文字列で入る。矛盾検出は数値idで比較するため変換する。
@@ -309,16 +308,18 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
       if (!data.misinfoType) delete data.misinfoType
     }
 
-    const updatedEntity: ExtendedEntity = {
+    // 動的フォームの値の集合（EntityFormData）を静的なエンティティ型へ戻す境界。
+    // フィールド構成はスキーマで保証されるため、ここでのみ明示的に変換する。
+    const updatedEntity = {
       ...entity,
       ...data,
       updated_at: new Date().toISOString(),
-    }
+    } as ExtendedEntity
     onUpdate(updatedEntity)
     showNotification(`${entityTypeLabel(entity.type)}を保存しました`, { type: 'success' })
   }
 
-  const handleChange = (_data: any): void => {
+  const handleChange = (_data: EntityFormData): void => {
     // Real-time updates if needed
   }
 
@@ -346,7 +347,8 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
 
       <EntityEditor
         entityType={entity.type}
-        entityData={entity}
+        // 静的なエンティティ型を動的フォームの値の集合として渡す境界（handleSave で逆変換）
+        entityData={entity as unknown as EntityFormData}
         schema={schema}
         onChange={handleChange}
         onSave={handleSave}
