@@ -110,4 +110,30 @@ describe('normalizeStoryData', () => {
     normalizeStoryData(data)
     expect(data).toEqual(snapshot)
   })
+
+  it('冪等である（2回適用しても結果が変わらない）', () => {
+    // setStoryData で一元的に正規化するため、既に正規化済みのデータが
+    // 再度通っても内容が変わらないことが前提条件になる
+    const data = story({
+      persons: [
+        {
+          id: 1,
+          name: 'A',
+          color: '#000',
+          relationships: [
+            { targetId: 2 as unknown as string, type: '友人' },
+            { targetId: '999', type: '友人' },
+          ],
+        },
+        { id: 2, name: 'B', color: '#111' },
+      ],
+      locations: [
+        { id: 1, name: 'X', connections: ['2', 1, 99] as unknown as number[] },
+        { id: 2, name: 'Y', connections: [1, 1] },
+      ],
+    })
+    const once = normalizeStoryData(data)
+    const twice = normalizeStoryData(once)
+    expect(twice).toEqual(once)
+  })
 })

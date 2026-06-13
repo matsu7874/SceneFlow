@@ -4,7 +4,6 @@ import { NAV_SECTIONS } from './navConfig'
 import { useAppContext } from '../../contexts/AppContext'
 import { useVisualFeedback } from '../../contexts/VisualFeedbackContext'
 import { validateStoryData } from '../../utils/validation'
-import { normalizeStoryData } from '../../utils/normalizeStoryData'
 import type { StoryData } from '../../types/StoryData'
 import styles from './Navigation.module.css'
 
@@ -97,7 +96,7 @@ export const Navigation: React.FC = () => {
         })
         return
       }
-      setStoryData(normalizeStoryData(data))
+      setStoryData(data)
       showNotification(`「${file.name}」を読み込みました`, { type: 'success' })
     } catch {
       showNotification(
