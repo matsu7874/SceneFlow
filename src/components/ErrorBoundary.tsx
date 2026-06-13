@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { STORY_STORAGE_KEY } from '../contexts/storyPersistence'
 
 interface Props {
   children: ReactNode
@@ -30,6 +31,19 @@ export class ErrorBoundary extends Component<Props, State> {
     })
   }
 
+  // 壊れた保存データが原因のクラッシュは再読み込みだけではループするため、初期化の退避経路を用意する
+  private handleResetData = (): void => {
+    if (!window.confirm('保存されている物語データを削除して再読み込みします。よろしいですか？')) {
+      return
+    }
+    try {
+      window.localStorage.removeItem(STORY_STORAGE_KEY)
+    } catch {
+      // localStorage が使えない環境では削除できないが、再読み込み自体は試みる
+    }
+    window.location.reload()
+  }
+
   public render(): React.ReactNode {
     if (this.state.hasError && this.state.error) {
       if (this.props.fallback) {
@@ -46,6 +60,17 @@ export class ErrorBoundary extends Component<Props, State> {
           }}
         >
           <h2>エラーが発生しました</h2>
+          <p>
+            ページの表示中に問題が発生しました。再読み込みで直らない場合は、保存データの初期化を試してください。
+          </p>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+            <button type="button" onClick={() => window.location.reload()}>
+              再読み込み
+            </button>
+            <button type="button" onClick={this.handleResetData}>
+              データを初期化して再読み込み
+            </button>
+          </div>
           <details style={{ whiteSpace: 'pre-wrap' }}>
             <summary>エラー詳細</summary>
             {this.state.error.toString()}
