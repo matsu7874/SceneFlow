@@ -35,7 +35,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
   return (
     <div className="simulation-controls">
       <div className="simulation-controls-header">
-        <span className="simulation-controls-eyebrow">Transport</span>
+        <span className="simulation-controls-eyebrow">再生コントロール</span>
       </div>
       <div className="controls">
         <div className="control-group">
@@ -44,9 +44,9 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
             disabled={disabled}
             className="play-pause-button"
             data-playing={isPlaying ? 'true' : 'false'}
-            aria-label={isPlaying ? 'Pause' : 'Play'}
+            aria-label={isPlaying ? '一時停止' : '再生'}
           >
-            {isPlaying ? '⏸ Pause' : '▶ Play'}
+            {isPlaying ? '⏸ 一時停止' : '▶ 再生'}
           </button>
           <label htmlFor="speedControl" className="speed-label">
             速度:
