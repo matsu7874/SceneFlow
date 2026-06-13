@@ -126,8 +126,8 @@ test.describe('Scene Flow 基本機能確認', () => {
     await navTo(page, 'シミュレーション')
 
     // シミュレーション制御の確認
-    const playButton = page.getByRole('button', { name: /Play/i })
-    const pauseButton = page.getByRole('button', { name: /Pause/i })
+    const playButton = page.getByRole('button', { name: '再生' })
+    const pauseButton = page.getByRole('button', { name: '一時停止' })
 
     await expect(playButton).toBeVisible()
 

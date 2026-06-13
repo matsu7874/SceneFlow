@@ -24,7 +24,7 @@ describe('SimulationControls', () => {
   it('renders control buttons', () => {
     render(<SimulationControls {...mockProps} />)
 
-    expect(screen.getByText(/再生|Play/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '再生' })).toBeInTheDocument()
   })
 
   it('displays current time', () => {
@@ -43,7 +43,7 @@ describe('SimulationControls', () => {
   it('calls onPlayPause when play button is clicked', async () => {
     render(<SimulationControls {...mockProps} />)
 
-    const playButton = screen.getByText(/再生|Play/i)
+    const playButton = screen.getByRole('button', { name: '再生' })
     await user.click(playButton)
 
     expect(mockProps.onPlayPause).toHaveBeenCalled()
@@ -52,7 +52,7 @@ describe('SimulationControls', () => {
   it('shows pause text when playing', () => {
     render(<SimulationControls {...mockProps} isPlaying={true} />)
 
-    expect(screen.getByText(/一時停止|Pause/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '一時停止' })).toBeInTheDocument()
   })
 
   it('changes playback speed', async () => {
@@ -106,7 +106,7 @@ describe('SimulationControls', () => {
   it('disables controls when disabled prop is true', () => {
     render(<SimulationControls {...mockProps} disabled={true} />)
 
-    const playButton = screen.getByText(/再生|Play/i)
+    const playButton = screen.getByRole('button', { name: '再生' })
     const speedControl = screen.getByRole('combobox')
     const timeSlider = screen.getByRole('slider')
 
