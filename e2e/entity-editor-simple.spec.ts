@@ -26,9 +26,9 @@ test.describe('エンティティ編集の基本動作確認', () => {
     await expect(page.locator('h2')).toContainText('エンティティ管理')
 
     // データなしメッセージを確認
-    await expect(page.locator('text=データが読み込まれていません')).toBeVisible()
+    await expect(page.locator('text=物語データが読み込まれていません')).toBeVisible()
     await expect(
-      page.locator('text=データ入出力ページで物語データを読み込んでください'),
+      page.locator('text=人物・場所・道具・情報を編集するには、まず物語データが必要です。'),
     ).toBeVisible()
   })
 
