@@ -1,11 +1,18 @@
 import React, { useState } from 'react'
 import { ColorPicker } from '../ColorPicker'
 import styles from './EntityEditor.module.css'
+import {
+  asInputValue,
+  type EntityFormData,
+  type EntitySchema,
+  type FieldSchema,
+  type FieldValue,
+} from './formTypes'
 
 interface FieldProps {
   name: string
-  value: any
-  onChange: (name: string, value: any) => void
+  value: FieldValue
+  onChange: (name: string, value: FieldValue) => void
   error?: string
   required?: boolean
   disabled?: boolean
@@ -25,7 +32,7 @@ export const StringField: React.FC<FieldProps & { placeholder?: string }> = ({
     <div className={styles.field}>
       <input
         type="text"
-        value={value || ''}
+        value={asInputValue(value)}
         onChange={e => onChange(name, e.target.value)}
         placeholder={placeholder}
         required={required}
@@ -53,7 +60,7 @@ export const NumberField: React.FC<FieldProps & { min?: number; max?: number; st
     <div className={styles.field}>
       <input
         type="number"
-        value={value ?? ''}
+        value={typeof value === 'number' ? value : ''}
         onChange={e => onChange(name, e.target.value ? parseFloat(e.target.value) : null)}
         min={min}
         max={max}
@@ -81,7 +88,7 @@ export const BooleanField: React.FC<FieldProps & { label?: string }> = ({
       <label className={styles.checkboxLabel}>
         <input
           type="checkbox"
-          checked={value || false}
+          checked={Boolean(value)}
           onChange={e => onChange(name, e.target.checked)}
           disabled={disabled}
         />
@@ -111,7 +118,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   return (
     <div className={styles.field}>
       <select
-        value={value || (multiple ? [] : '')}
+        value={multiple ? (Array.isArray(value) ? value.map(String) : []) : asInputValue(value)}
         onChange={e => {
           if (multiple) {
             const selectedOptions = Array.from(e.target.selectedOptions, option => option.value)
@@ -140,11 +147,11 @@ export const SelectField: React.FC<SelectFieldProps> = ({
 // Array Field Component
 interface ArrayFieldProps extends FieldProps {
   itemType: string
-  itemSchema?: any
+  itemSchema?: FieldSchema
   renderItem: (
-    item: any,
+    item: FieldValue,
     index: number,
-    onChange: (value: any) => void,
+    onChange: (value: FieldValue) => void,
     onRemove: () => void,
   ) => React.ReactNode
 }
@@ -161,7 +168,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
   const items = Array.isArray(value) ? value : []
 
   const handleAdd = (): void => {
-    let newItem
+    let newItem: FieldValue
     if (itemType === 'string') {
       newItem = ''
     } else if (itemType === 'number') {
@@ -174,7 +181,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
     onChange(name, [...items, newItem])
   }
 
-  const handleItemChange = (index: number, newValue: any): void => {
+  const handleItemChange = (index: number, newValue: FieldValue): void => {
     const newItems = [...items]
     newItems[index] = newValue
     onChange(name, newItems)
@@ -226,7 +233,7 @@ export const ReferenceField: React.FC<ReferenceFieldProps> = ({
   return (
     <div className={styles.field}>
       <select
-        value={value || ''}
+        value={asInputValue(value)}
         onChange={e => onChange(name, e.target.value)}
         required={required}
         disabled={disabled}
@@ -246,8 +253,8 @@ export const ReferenceField: React.FC<ReferenceFieldProps> = ({
 
 // Object Field Component (for nested objects)
 interface ObjectFieldProps extends FieldProps {
-  schema: any
-  renderFields: (schema: any, data: any, path: string) => React.ReactNode
+  schema: EntitySchema | undefined
+  renderFields: (schema: EntitySchema, data: EntityFormData, path: string) => React.ReactNode
 }
 
 export const ObjectField: React.FC<ObjectFieldProps> = ({
@@ -258,7 +265,7 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
   renderFields,
 }) => {
   const [collapsed, setCollapsed] = useState(false)
-  const objectValue = value || {}
+  const objectValue = value && typeof value === 'object' && !Array.isArray(value) ? value : {}
 
   return (
     <div className={styles.objectField}>
@@ -266,7 +273,7 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
         <span className={styles.collapseIcon}>{collapsed ? '▶' : '▼'}</span>
         <span>{name}</span>
       </div>
-      {!collapsed && (
+      {!collapsed && schema && (
         <div className={styles.objectContent}>{renderFields(schema, objectValue, `${name}.`)}</div>
       )}
       {error && <span className={styles.errorMessage}>{error}</span>}
@@ -279,7 +286,7 @@ export const ColorField: React.FC<FieldProps> = ({ name, value, onChange, error,
   return (
     <div className={styles.field}>
       <ColorPicker
-        value={value || '#3B82F6'}
+        value={typeof value === 'string' && value ? value : '#3B82F6'}
         onChange={color => onChange(name, color)}
         disabled={disabled}
       />

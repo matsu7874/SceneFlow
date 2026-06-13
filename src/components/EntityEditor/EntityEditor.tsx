@@ -13,53 +13,38 @@ import {
 } from './FieldComponents'
 import styles from './EntityEditor.module.css'
 import { entityTypeLabel, type EntityType } from '../../types/extendedEntities'
+import {
+  asFormObject,
+  asInputValue,
+  type EntityFormData,
+  type EntitySchema,
+  type FieldSchema,
+  type FieldValue,
+} from './formTypes'
+
+export type { EntityFormData, EntitySchema, FieldSchema, FieldValue } from './formTypes'
 
 // Set a (possibly dot-delimited) nested path on an object, returning a new
 // object with each level along the path copied so nested edits aren't lost.
-function setNestedValue(obj: any, path: string, value: any): any {
+function setNestedValue(obj: EntityFormData, path: string, value: FieldValue): EntityFormData {
   const dot = path.indexOf('.')
   if (dot === -1) {
     return { ...obj, [path]: value }
   }
   const head = path.slice(0, dot)
   const rest = path.slice(dot + 1)
-  return { ...obj, [head]: setNestedValue(obj?.[head] ?? {}, rest, value) }
+  return { ...obj, [head]: setNestedValue(asFormObject(obj[head]), rest, value) }
 }
 
 export interface EntityEditorProps {
   entityType: string
-  entityData: any
+  entityData: EntityFormData
   schema: EntitySchema
-  onChange: (data: any) => void
-  onSave?: (data: any) => void
+  onChange: (data: EntityFormData) => void
+  onSave?: (data: EntityFormData) => void
   onCancel?: () => void
   readOnly?: boolean
   entities?: Record<string, Array<{ id: string; name: string }>>
-}
-
-interface EntitySchema {
-  fields: Record<string, FieldSchema>
-  groups?: Record<string, string[]>
-  required?: string[]
-}
-
-interface FieldSchema {
-  type: 'string' | 'number' | 'boolean' | 'select' | 'array' | 'reference' | 'object' | 'color'
-  label?: string
-  placeholder?: string
-  options?: Array<{ value: string | number; label: string }>
-  itemType?: string
-  itemSchema?: FieldSchema
-  entityType?: string
-  schema?: EntitySchema
-  validation?: {
-    min?: number
-    max?: number
-    minLength?: number
-    maxLength?: number
-    pattern?: string
-    custom?: (value: any) => string | null
-  }
 }
 
 export const EntityEditor: React.FC<EntityEditorProps> = ({
@@ -73,7 +58,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
   entities = {},
 }) => {
   const { showNotification } = useVisualFeedback()
-  const [data, setData] = useState(entityData || {})
+  const [data, setData] = useState<EntityFormData>(entityData || {})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
@@ -86,7 +71,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
 
   // Validate a single field
   const validateField = useCallback(
-    (name: string, value: any, fieldSchema: FieldSchema): string | null => {
+    (name: string, value: FieldValue, fieldSchema: FieldSchema): string | null => {
       // Required field validation
       if (schema.required?.includes(name) && !value) {
         return `${fieldSchema.label || name}は必須です`
@@ -96,7 +81,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
       if (fieldSchema.validation) {
         const { min, max, minLength, maxLength, pattern, custom } = fieldSchema.validation
 
-        if (fieldSchema.type === 'string' && value) {
+        if (fieldSchema.type === 'string' && typeof value === 'string' && value) {
           if (minLength && value.length < minLength) {
             return `${minLength}文字以上で入力してください`
           }
@@ -108,7 +93,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
           }
         }
 
-        if (fieldSchema.type === 'number' && value !== null && value !== undefined) {
+        if (fieldSchema.type === 'number' && typeof value === 'number') {
           if (min !== undefined && value < min) {
             return `${min}以上の値を入力してください`
           }
@@ -147,7 +132,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
 
   // Handle field change
   const handleFieldChange = useCallback(
-    (name: string, value: any) => {
+    (name: string, value: FieldValue) => {
       const newData = setNestedValue(data, name, value)
       setData(newData)
 
@@ -194,7 +179,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
   const renderField = (
     fieldName: string,
     fieldSchema: FieldSchema,
-    fieldData: any,
+    fieldData: FieldValue,
     path: string = '',
   ): React.ReactNode => {
     const fullPath = path + fieldName
@@ -204,7 +189,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
     const commonProps = {
       name: fieldName,
       value: fieldData,
-      onChange: (name: string, value: any) => handleFieldChange(fullPath, value),
+      onChange: (_name: string, value: FieldValue) => handleFieldChange(fullPath, value),
       error,
       required: isRequired,
       disabled: readOnly,
@@ -241,7 +226,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
                   <div className={styles.arrayItemContent}>
                     <input
                       type="text"
-                      value={item}
+                      value={asInputValue(item)}
                       onChange={e => onChange(e.target.value)}
                       disabled={readOnly}
                     />
@@ -259,7 +244,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
                 return (
                   <div className={styles.arrayItemContent}>
                     <select
-                      value={item || ''}
+                      value={asInputValue(item)}
                       onChange={e => onChange(e.target.value)}
                       disabled={readOnly}
                       className={styles.referenceSelect}
@@ -282,23 +267,24 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
                   </div>
                 )
               } else if (fieldSchema.itemType === 'object' && fieldSchema.itemSchema) {
+                const itemObj = asFormObject(item)
                 return (
                   <div className={styles.arrayItemContent}>
                     <div className={styles.objectInArray}>
                       {Object.entries(fieldSchema.itemSchema.schema?.fields || {}).map(
-                        ([subFieldName, subFieldSchema]: [string, any]) => (
+                        ([subFieldName, subFieldSchema]) => (
                           <div key={subFieldName} className={styles.inlineField}>
                             <label>{subFieldSchema.label || subFieldName}:</label>
                             {subFieldSchema.type === 'reference' ? (
                               <select
-                                value={item?.[subFieldName] || ''}
+                                value={asInputValue(itemObj[subFieldName])}
                                 onChange={e =>
-                                  onChange({ ...item, [subFieldName]: e.target.value })
+                                  onChange({ ...itemObj, [subFieldName]: e.target.value })
                                 }
                                 disabled={readOnly}
                               >
                                 <option value="">-- Select {subFieldSchema.entityType} --</option>
-                                {(entities[subFieldSchema.entityType] || []).map((entity: any) => (
+                                {(entities[subFieldSchema.entityType || ''] || []).map(entity => (
                                   <option key={entity.id} value={entity.id}>
                                     {entity.name}
                                   </option>
@@ -306,14 +292,14 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
                               </select>
                             ) : subFieldSchema.type === 'select' ? (
                               <select
-                                value={item?.[subFieldName] || ''}
+                                value={asInputValue(itemObj[subFieldName])}
                                 onChange={e =>
-                                  onChange({ ...item, [subFieldName]: e.target.value })
+                                  onChange({ ...itemObj, [subFieldName]: e.target.value })
                                 }
                                 disabled={readOnly}
                               >
                                 <option value="">-- Select --</option>
-                                {(subFieldSchema.options || []).map((option: any) => (
+                                {(subFieldSchema.options || []).map(option => (
                                   <option key={option.value} value={option.value}>
                                     {option.label}
                                   </option>
@@ -322,9 +308,9 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
                             ) : (
                               <input
                                 type="text"
-                                value={item?.[subFieldName] || ''}
+                                value={asInputValue(itemObj[subFieldName])}
                                 onChange={e =>
-                                  onChange({ ...item, [subFieldName]: e.target.value })
+                                  onChange({ ...itemObj, [subFieldName]: e.target.value })
                                 }
                                 disabled={readOnly}
                               />
@@ -374,7 +360,7 @@ export const EntityEditor: React.FC<EntityEditorProps> = ({
   // Render all fields
   const renderFields = (
     fieldsSchema: EntitySchema,
-    fieldsData: any,
+    fieldsData: EntityFormData,
     pathPrefix: string = '',
   ): React.ReactNode => {
     return Object.entries(fieldsSchema.fields).map(([fieldName, fieldSchema]) => (

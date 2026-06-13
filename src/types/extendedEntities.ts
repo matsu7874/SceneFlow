@@ -113,11 +113,12 @@ export interface ExtendedEntity {
   description: string
   created_at: string
   updated_at: string
-  attributes: Record<string, any>
+  // 変換元エンティティの生データ。読み出し用途はなく、型ごとに形が異なるため unknown
+  attributes: unknown
   relationships: Array<{
     type: string
     targetId: string
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   }>
   // Type-specific fields flattened onto the entity at runtime when form data is applied.
   color?: string
