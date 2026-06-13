@@ -1,7 +1,6 @@
 import React from 'react'
 import { CausalityView } from '../components/CausalityView'
 import { useAppContext } from '../contexts/AppContext'
-import { ErrorBoundary } from '../components/ErrorBoundary'
 import { PageHeader } from '../components/common/PageHeader'
 import { EmptyState } from '../components/common/EmptyState'
 import { NextSteps } from '../components/common/NextSteps'
@@ -38,9 +37,7 @@ export const CausalityPage: React.FC = () => {
     <div className="page causality-page">
       <PageHeader eyebrow="検証・分析" title="因果関係ビュー" hint={HINT} />
       <div className="page-content">
-        <ErrorBoundary>
-          <CausalityView storyData={storyData} onStoryDataChange={setStoryData} />
-        </ErrorBoundary>
+        <CausalityView storyData={storyData} onStoryDataChange={setStoryData} />
       </div>
       <NextSteps
         steps={[
