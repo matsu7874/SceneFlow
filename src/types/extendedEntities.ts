@@ -4,7 +4,8 @@
  * This module defines extended types for props (大道具・小道具) and information entities.
  */
 
-import type { EntityId } from './causality'
+/** エンティティ ID。数値 ID と文字列 ID の両方を受け付ける。 */
+export type EntityId = string | number
 
 /**
  * Entity types that can be managed in the Entity Editor
