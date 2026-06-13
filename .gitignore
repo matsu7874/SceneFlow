@@ -46,3 +46,8 @@ test-results/
 /screenshots/
 /debug-*.png
 /validation-*.png
+
+# レビュー・デバッグ用スクリーンショット成果物
+review-shots/
+app-launch.png
+.playwright-mcp/
