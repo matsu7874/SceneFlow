@@ -23,16 +23,21 @@ function spaFallback(): Plugin {
   }
 }
 
+// 本番（GH Pages）は /scene-flow/ 配下で配信される。vite preview ではプラグインの
+// ミドルウェアが Vite の base 除去より先に実行されるため、urlPath を base に
+// 追随させないと base 付き URL の辞書リクエストが素通りして二重 gzip 復活する。
+const base = process.env.NODE_ENV === 'production' ? '/scene-flow/' : '/'
+
 export default defineConfig({
   // root が 'src' のため、kuromoji-dict/ はプロジェクトルート直下にある前提で絶対パスを渡す
   // （既定の 'kuromoji-dict' は config.root 基準で解決され、src/kuromoji-dict を指してしまうため）。
   plugins: [
-    kuromojiDictPlugin({ dictDir: resolve(projectRoot, 'kuromoji-dict') }),
+    kuromojiDictPlugin({ dictDir: resolve(projectRoot, 'kuromoji-dict'), urlPath: `${base}dict/` }),
     spaFallback(),
     react(),
   ],
   root: 'src',
-  base: process.env.NODE_ENV === 'production' ? '/scene-flow/' : '/',
+  base,
   resolve: {
     alias: {
       // kuromoji の DictionaryLoader が Node の path に依存するため、ブラウザ向けにポリフィルを噛ませる。
