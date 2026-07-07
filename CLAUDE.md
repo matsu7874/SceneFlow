@@ -34,6 +34,8 @@ pnpm run build               # Production build
 pnpm run preview             # Preview production build
 ```
 
+`pnpm run dev` / `pnpm run build` automatically run `copy-dict` (copies the kuromoji dictionary into `public/`, via the `copy-kuromoji-dict` bin from `@matsu7874/kuromoji-web`) via pre-hooks.
+
 ## Architecture Overview
 
 ### Core Concepts
@@ -46,7 +48,7 @@ pnpm run preview             # Preview production build
 ### Key Directories
 
 - `src/types/`: Core type definitions (StoryData, extended entity types)
-- `src/modules/consistency/`: Story validation engine (checker, worldState, actKinds, contradiction)
+- `src/modules/consistency/`: Story validation engine (checker, worldState, actKinds, misinformation, opportunity)
 - `src/modules/nlp/`: Morphological analysis (kuromoji) for entity extraction from act descriptions
 - `src/components/`: React components for different views
 - `src/pages/`: Main application pages (9 pages, route-based code splitting in App.tsx)
@@ -109,6 +111,4 @@ pnpm run preview             # Preview production build
 
 ## Performance Considerations
 
-- Maximum 500 concurrent entities
-- 10MB data limit for import
 - Initial bundle is code-split per route; keep heavy deps (e.g., kuromoji) out of the entry chunk
