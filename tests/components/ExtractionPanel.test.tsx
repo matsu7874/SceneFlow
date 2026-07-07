@@ -36,9 +36,10 @@ const bandanaTokens: KuromojiToken[] = [
   { surface_form: 'た', pos: '助動詞', pos_detail_1: '*', pos_detail_2: '*', basic_form: 'た' },
 ]
 
-const tokenizeMock = vi.fn(async (_text?: string) => bandanaTokens)
-vi.mock('../../src/modules/nlp/tokenizer', () => ({
-  tokenize: (text: string) => tokenizeMock(text),
+// 実 API（KuromojiTokenizer#tokenize）は同期関数なのでモックも同期にする。
+const tokenizeMock = vi.fn((_text?: string) => bandanaTokens)
+vi.mock('@matsu7874/kuromoji-web', () => ({
+  loadTokenizer: async () => ({ tokenize: (text: string) => tokenizeMock(text) }),
 }))
 
 import { ExtractionPanel } from '../../src/components/EntityExtraction/ExtractionPanel'

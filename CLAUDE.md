@@ -10,28 +10,28 @@ SceneFlow is an immersive theater performance simulator that visualizes and simu
 
 ```bash
 # Start development server
-npm run dev
+pnpm run dev
 
 # Run tests
-npm test                    # Run all tests
-npm test <file-path>       # Run specific test file
-npm run test:ui            # Open Vitest UI
-npm run coverage           # Generate coverage report
+pnpm test                    # Run all tests
+pnpm test <file-path>        # Run specific test file
+pnpm run test:ui             # Open Vitest UI
+pnpm run coverage            # Generate coverage report
 
 # Playwright E2E tests
-npm run test:e2e           # Run E2E tests
-npm run test:e2e:ui        # Open Playwright UI
+pnpm run test:e2e            # Run E2E tests
+pnpm run test:e2e:ui         # Open Playwright UI
 
 # Code quality
-npm run lint               # Run ESLint
-npm run lint:fix           # Fix ESLint issues
-npm run typecheck          # Type check (tsc --noEmit)
-npm run format             # Format code with Prettier
-npm run format:check       # Check formatting
+pnpm run lint                # Run ESLint
+pnpm run lint:fix            # Fix ESLint issues
+pnpm run typecheck           # Type check (tsc --noEmit)
+pnpm run format              # Format code with Prettier
+pnpm run format:check        # Check formatting
 
 # Build
-npm run build              # Production build
-npm run preview           # Preview production build
+pnpm run build               # Production build
+pnpm run preview             # Preview production build
 ```
 
 ## Architecture Overview

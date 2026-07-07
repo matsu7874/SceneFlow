@@ -11,7 +11,7 @@ describe('sample-mansion-mystery（リファレンス・ストーリー）', () 
   const report = analyzeStory(mansionMystery as unknown as StoryData)
 
   it('UIロードの検証（validateStoryData）を通過する', () => {
-    const result = validateStoryData(mansionMystery as unknown as StoryData)
+    const result = validateStoryData(mansionMystery)
     expect(result.errors).toEqual([])
     expect(result.isValid).toBe(true)
   })

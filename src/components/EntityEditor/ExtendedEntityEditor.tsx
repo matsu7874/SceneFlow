@@ -310,6 +310,9 @@ export const ExtendedEntityEditor: React.FC<ExtendedEntityEditorProps> = ({
 
     // 動的フォームの値の集合（EntityFormData）を静的なエンティティ型へ戻す境界。
     // フィールド構成はスキーマで保証されるため、ここでのみ明示的に変換する。
+    // data（Record<string, FieldValue>）の type キーが entity.type（EntityType）を型上
+    // 上書きするためアサーションが必要（no-unnecessary-type-assertion の誤検知）。
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const updatedEntity = {
       ...entity,
       ...data,

@@ -1,0 +1,4 @@
+allowBuilds:
+  esbuild: true
+  # @matsu7874/kuromoji-web(petasos, git 依存) は prepare で tsup ビルドが必要なため許可する。
+  '@matsu7874/kuromoji-web@git+ssh://git@github.com/matsu7874/petasos.git#7194cc84011abd4b6172f4e97772d5f3e61fcabf&path:packages/kuromoji-web': true

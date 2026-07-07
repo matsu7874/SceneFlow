@@ -91,18 +91,26 @@ export function validateStoryData(data: unknown): ValidationResult {
     if (!locationIds.has(act.locationId)) {
       errors.push(`acts[${index}]: 存在しないlocationId: ${String(act.locationId)}`)
     }
-    if (act.propId && !propIds.has(act.propId)) {
-      errors.push(`acts[${index}]: 存在しないpropId: ${String(act.propId as string | number)}`)
+    // 真偽値ガードで unknown が `{}` へ narrow され、String() 呼び出しが
+    // no-base-to-string の誤検知を招く（[object Object] 判定）。
+    // 型注釈付きのローカル変数に束ねてスキーマ上の型（number）へ確定させてから文字列化する。
+    if (act.propId) {
+      const propId: number = act.propId as number
+      if (!propIds.has(propId)) {
+        errors.push(`acts[${index}]: 存在しないpropId: ${String(propId)}`)
+      }
     }
-    if (act.informationId && !infoIds.has(act.informationId)) {
-      errors.push(
-        `acts[${index}]: 存在しないinformationId: ${String(act.informationId as string | number)}`,
-      )
+    if (act.informationId) {
+      const informationId: number = act.informationId as number
+      if (!infoIds.has(informationId)) {
+        errors.push(`acts[${index}]: 存在しないinformationId: ${String(informationId)}`)
+      }
     }
-    if (act.interactedPersonId && !personIds.has(act.interactedPersonId)) {
-      errors.push(
-        `acts[${index}]: 存在しないinteractedPersonId: ${String(act.interactedPersonId as string | number)}`,
-      )
+    if (act.interactedPersonId) {
+      const interactedPersonId: number = act.interactedPersonId as number
+      if (!personIds.has(interactedPersonId)) {
+        errors.push(`acts[${index}]: 存在しないinteractedPersonId: ${String(interactedPersonId)}`)
+      }
     }
   })
 

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react'
 import styles from './ExtractionPanel.module.css'
 import type { StoryData } from '../../types/StoryData'
 import type { Candidate, EntityTypeGuess } from '../../modules/nlp/types'
-import { tokenize } from '../../modules/nlp/tokenizer'
+import { loadTokenizer } from '@matsu7874/kuromoji-web'
 import { extractCandidates } from '../../modules/nlp/extractCandidates'
 import { aggregateCandidates } from '../../modules/nlp/aggregateCandidates'
 import { reconcile } from '../../pages/entityExtraction/reconcile'
@@ -14,6 +14,10 @@ interface ExtractionPanelProps {
   onCommit: (next: StoryData) => void
   onNotify?: (message: string, type: NotifyType) => void
 }
+
+// @matsu7874/kuromoji-web の既定辞書パスは '/dict'（同 origin 絶対パス）だが、
+// SceneFlow は本番で base='/scene-flow/' を使うため、BASE_URL を前置して明示的に渡す。
+const DIC_PATH = `${import.meta.env.BASE_URL}dict`
 
 const TYPE_ORDER: EntityTypeGuess[] = ['person', 'location', 'prop', 'information']
 const TYPE_LABEL: Record<EntityTypeGuess, string> = {
@@ -65,11 +69,12 @@ export const ExtractionPanel: React.FC<ExtractionPanelProps> = ({
     setLoading(true)
     setError(null)
     try {
+      const tokenizer = await loadTokenizer(DIC_PATH)
       const raws = []
       for (const act of storyData.acts) {
         const text = act.description?.trim()
         if (!text) continue
-        const tokens = await tokenize(text)
+        const tokens = tokenizer.tokenize(text)
         raws.push(...extractCandidates(tokens, act.id))
       }
       setCandidates(aggregateCandidates(raws, storyData))

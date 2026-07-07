@@ -31,10 +31,10 @@ export const EntitiesPage: React.FC = () => {
     if (storyData) {
       // Convert story data entities to ExtendedEntity format
       const convertedEntities: ExtendedEntity[] = [
-        ...storyData.persons.map(person => ({
+        ...storyData.persons.map((person): ExtendedEntity => ({
           ...person,
           id: person.id.toString(),
-          type: 'person' as EntityType,
+          type: 'person',
           name: person.name,
           description: person.description || '',
           created_at: new Date().toISOString(),
@@ -43,10 +43,10 @@ export const EntitiesPage: React.FC = () => {
           relationships: person.relationships || [],
           color: person.color,
         })),
-        ...storyData.locations.map(location => ({
+        ...storyData.locations.map((location): ExtendedEntity => ({
           ...location,
           id: location.id.toString(),
-          type: 'location' as EntityType,
+          type: 'location',
           name: location.name,
           description: location.description || '',
           created_at: new Date().toISOString(),
@@ -58,10 +58,10 @@ export const EntitiesPage: React.FC = () => {
           locationType: location.type,
           connectedTo: location.connections?.map(conn => conn.toString()) || [],
         })),
-        ...storyData.props.map(prop => ({
+        ...storyData.props.map((prop): ExtendedEntity => ({
           ...prop,
           id: prop.id.toString(),
-          type: 'prop' as EntityType,
+          type: 'prop',
           name: prop.name,
           description: prop.description || '',
           created_at: new Date().toISOString(),
@@ -69,10 +69,10 @@ export const EntitiesPage: React.FC = () => {
           attributes: prop,
           relationships: [],
         })),
-        ...storyData.informations.map(info => ({
+        ...storyData.informations.map((info): ExtendedEntity => ({
           ...info,
           id: info.id.toString(),
-          type: 'information' as EntityType,
+          type: 'information',
           name:
             info.name || info.content.substring(0, 50) + (info.content.length > 50 ? '...' : ''),
           description: info.description || info.content,
@@ -84,10 +84,10 @@ export const EntitiesPage: React.FC = () => {
         // 変換は actEditing と共通化（actType の公開もここで一元化）。
         ...storyData.acts.map(act => actToEntity(act)),
         // Events are generated from acts
-        ...generateEventsFromActs(storyData.acts || []).map(event => ({
+        ...generateEventsFromActs(storyData.acts || []).map((event): ExtendedEntity => ({
           ...event,
           id: event.id.toString(),
-          type: 'event' as EntityType,
+          type: 'event',
           name: event.name || `イベント ${event.id}`,
           description: event.description || `${event.eventTime} - ${event.triggerType}`,
           created_at: new Date().toISOString(),

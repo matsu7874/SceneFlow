@@ -3,7 +3,7 @@
 // 実際の解析結果と一致していることを保証する回帰テスト。
 
 import { describe, it, expect, beforeAll } from 'vitest'
-import { loadTokenizer } from '../../src/modules/nlp/tokenizer'
+import { loadTokenizer } from '@matsu7874/kuromoji-web'
 import { extractCandidates } from '../../src/modules/nlp/extractCandidates'
 import type { KuromojiToken } from '../../src/modules/nlp/types'
 
@@ -14,7 +14,7 @@ let tokenize: (text: string) => KuromojiToken[]
 
 beforeAll(async () => {
   const tokenizer = await loadTokenizer(NODE_DIC_PATH)
-  tokenize = (text: string) => tokenizer.tokenize(text) as KuromojiToken[]
+  tokenize = (text: string) => tokenizer.tokenize(text)
 }, 30000)
 
 const firstTypes = (text: string) =>
